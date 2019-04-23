@@ -56,6 +56,106 @@
 
     
       
+        <article id="post-获匹匹配与非获取匹配" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 itemprop="name">
+      <a class="article-title" href="/2019/04/23/获匹匹配与非获取匹配/">获匹匹配与非获取匹配</a>
+    </h2>
+  
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/04/23/获匹匹配与非获取匹配/" class="article-date">
+  <time datetime="2019-04-23T09:16:41.000Z" itemprop="datePublished">2019-04-23</time>
+</a>
+        
+      </div>
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+      
+
+      
+        <p>在使用正则表达式的时候，我们经常会使用()把某个部分括起来，称为一个子模式。</p>
+<pre><code>子模式有Capturing和Non-Capturing两种情况。
+
+Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹配结果保存起来，供我们查找或者替换。如后向引用的使用；
+
+而Non-Capturing指**非获取匹配** ，这时系统并不会保存子模式的匹配结果，子模式的匹配更多的只是作为一种限制条件使用，如正向预查，反向预查，负正向预查，负反向预查等。
+</code></pre><p><strong>\
+</strong></p>
+<p><strong>后向引用</strong></p>
+<p><strong>使用”\数字”代表前面某个子模式的匹配内容</strong></p>
+<pre><code>我们使用正则表达式，在很多场景下的作用是为了查找和替换，大部分语言的正则表达式实现中，在查找时，使用后向引用来代表一个子模式，语法是&quot;\数字&quot;，而在替换中，语法是&quot;$数字&quot;。
+
+在正则表达式中，我们可以使用 &quot;\数字 &quot; 来进行后向引用，数字 表示这里引用的是前面的第几个子模式。如下：
+</code></pre><p><strong>Text</strong>\</p>
+<p></p><h1>This is a valid header</h1>\<p></p>
+<p></p><h2>This is not valid.\<br><strong>RegEx</strong>\<p></p>
+<p>&lt;h([1-6])&gt;.*?&lt;/h\1 &gt;\<br><strong>Result</strong>\</p>
+<p></p><h1>This is a valid header</h1>\<p></p>
+<p></p><h2>This is not valid.<p></p>
+<pre><code>上面示例中，\1代表前面的子模式([1-6])的匹配结果 1，所以不符合的匹配&lt;h2&gt;..&lt;/h3&gt;并没有被匹配。
+
+后向应用常见的应用常见是：
+</code></pre><ul>
+<li><p>匹配重复单词 (\w+) \1</p>
+</li>
+<li><p>匹配合法的html标记，如上例。</p>
+</li>
+</ul>
+<p><strong>非获取匹配</strong></p>
+<p><strong>在子模式内部前面添加”?:”</strong></p>
+<pre><code>非获取匹配表示这个子模式的匹配内容不会被保存，不能用于后向引用中。简单说，非获取匹配就是 只匹配，不保存。看个例子：
+</code></pre><p><strong>Text</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.\<br><strong>RegEx</strong>\<br>Windows (?:[\w]+\b)\<br><strong>Result</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.</p>
+<pre><code>在这个例子中，子模式(?:[\w]+\b)是一个非获取匹配，只匹配内容，单并未保存字匹配的结果。
+</code></pre><p><strong>正向预查</strong></p>
+<p><strong>在子模式的内部前面添加”?=”</strong></p>
+<pre><code>正向预查的意思是，子模式仅仅作为条件限制，并不作为匹配结果输出，子模式前面的。
+</code></pre><p><strong>Text</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.\<br><strong>RegEx</strong>\<br>Windows(?= [\d]+\b)\<br><strong>Result</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.</p>
+<pre><code>这个例子中，要获取所有后面带有数字的Windows字符串。子模式在这里仅仅作为一个限制条件使用，仅参与匹配过程，并不作为匹配结果输出。
+
+**负正向预查的作用正好与正向预查相反，语法为在子模式内部前面增加&quot;?!&quot;。**
+
+比如上面例子，如果RegEx为Windows(?! [\d]+\b)，则匹配的结果会是Windows Xp和Windows Vista中的windows。
+</code></pre><p><strong>反向预查</strong></p>
+<p><strong>在子模式的内部前面添加”?&lt;=”</strong></p>
+<pre><code>反向预查与正向预查很相似，子模式仅仅作为条件限制，不作为结果输出，唯一的不同是，正向预查匹配子模式前面的结果作为匹配结果，而反向预查匹配子模式后面的结果作为匹配结果。看个例子：
+</code></pre><p><strong>Text</strong>\<br>CNY:100.2\<br>USD:222.1\<br>USD:301.3\<br>HKD:122.1\<br>CNY:114.4\<br><strong> RegEx</strong>\<br>(?&lt;=CNY:)\d+.\d\<br><strong>Result</strong>\<br>CNY:100.2\<br>USD:222.1\<br>USD:301.3\<br>HKD:122.1\<br>CNY:114.4</p>
+<pre><code>这个例子里，要获取属于CNY的金额。子模式仅参与匹配过程，并不作为匹配结果输出。
+
+**负反向预查的作用正好与反向预查相反，语法为在子模式内部前面增加&quot;?&lt;!&quot;。**
+
+比如上面例子，如果RegEx为(?&lt;!CNY:)\b\d+\.\d，则会获取不属于CNY的金额.
+</code></pre></h2></h2>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/04/23/获匹匹配与非获取匹配/" data-id="cjutkw0d6000388w1t496kb5v" class="article-share-link">Share</a>
+      
+    </footer>
+
+  </div>
+
+  
+
+  
+
+</article>
+
+
+
+      
         <article id="post-Git心得" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
 
   <div class="article-inner">
@@ -115,7 +215,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/22/Git心得/" data-id="cjusd6iqb0004lgw1smkxfane" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/04/22/Git心得/" data-id="cjutkw0e3000688w12dfegg9y" class="article-share-link">Share</a>
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术/">技术</a></li></ul>
 
@@ -174,7 +274,7 @@
       
     </p></div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/21/伤心者/" data-id="cjusd6iqw0008lgw15jxcefr5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/04/21/伤心者/" data-id="cjutkw0em000988w1jkbkosss" class="article-share-link">Share</a>
       
     </footer>
 
@@ -231,7 +331,7 @@
       
     </p></div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/21/Hexo博客/" data-id="cjusd6iql0007lgw1173ehsf5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/04/21/Hexo博客/" data-id="cjutkw0dy000588w173a8ywla" class="article-share-link">Share</a>
       
     </footer>
 
@@ -283,7 +383,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/18/运动会/" data-id="cjusd6ipe0001lgw1g973wq4a" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/04/18/运动会/" data-id="cjutkw0d0000188w1wvtpr88n" class="article-share-link">Share</a>
       
     </footer>
 
@@ -333,7 +433,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/14/英语竞赛/" data-id="cjusd6ip40000lgw1zkwpn19c" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/04/14/英语竞赛/" data-id="cjutkw0cp000088w1n7k0pysx" class="article-share-link">Share</a>
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/日常/">日常</a></li></ul>
 
