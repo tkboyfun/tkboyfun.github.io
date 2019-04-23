@@ -66,12 +66,7 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 <pre><code>我们使用正则表达式，在很多场景下的作用是为了查找和替换，大部分语言的正则表达式实现中，在查找时，使用后向引用来代表一个子模式，语法是&quot;\数字&quot;，而在替换中，语法是&quot;$数字&quot;。
 
 在正则表达式中，我们可以使用 &quot;\数字 &quot; 来进行后向引用，数字 表示这里引用的是前面的第几个子模式。如下：
-</code></pre><p><strong>Text</strong>\</p>
-<p></p><h1>This is a valid header</h1>\<p></p>
-<p></p><h2>This is not valid.\<br><strong>RegEx</strong>\<p></p>
-<p>&lt;h([1-6])&gt;.*?&lt;/h\1 &gt;\<br><strong>Result</strong>\</p>
-<p></p><h1>This is a valid header</h1>\<p></p>
-<p></p><h2>This is not valid.<p></p>
+</code></pre><p><strong>Text</strong>\<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;h1&gt;This is a valid header&lt;/h1&gt;\</span><br><span class="line">&lt;h2&gt;This is not valid.&lt;/h3&gt;\</span><br><span class="line">**RegEx**\</span><br><span class="line">&lt;h([1-6])&gt;.*?&lt;/h\1 &gt;\</span><br><span class="line">**Result**\</span><br><span class="line">&lt;h1&gt;This is a valid header&lt;/h1&gt;\</span><br><span class="line">&lt;h2&gt;This is not valid.&lt;/h3&gt;</span><br></pre></td></tr></table></figure></p>
 <pre><code>上面示例中，\1代表前面的子模式([1-6])的匹配结果 1，所以不符合的匹配&lt;h2&gt;..&lt;/h3&gt;并没有被匹配。
 
 后向应用常见的应用常见是：
@@ -104,7 +99,7 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 **负反向预查的作用正好与反向预查相反，语法为在子模式内部前面增加&quot;?&lt;!&quot;。**
 
 比如上面例子，如果RegEx为(?&lt;!CNY:)\b\d+\.\d，则会获取不属于CNY的金额.
-</code></pre></h2></h2>
+</code></pre>
       
     </div>
     <footer class="article-footer">
