@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    安卓微信本地数据库解密与删除聊天记录恢复完全教程 |
+    
+    TK的个人小站</title>
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+  
+  <script src="/js/pace.min.js"></script>
+</head>
+</html>
+<body>
+<main class="content">
+  <section class="outer">
+  <article id="post-安卓微信本地数据库解密与删除聊天记录恢复完全教程" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      安卓微信本地数据库解密与删除聊天记录恢复完全教程
+    </h1>
+  
+
+      </header>
+    
+
+    
+      <div class="article-meta">
+        <a href="/2019/04/27/安卓微信本地数据库解密与删除聊天记录恢复完全教程/" class="article-date">
+  <time datetime="2019-04-27T07:04:00.000Z" itemprop="datePublished">2019-04-27</time>
+</a>
+        
+      </div>
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+      
+
+      
+        <p>【转载内容，欢迎转载，请注明出处】</p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>====</p>
+<p>在电子数据取证过程中，对微信本地数据库的解密、提取与恢复是非常重要的工作内容。本文以华为mate系列手机和最新版的微信（7.0.3）为例，通过总结互联网上已经发表的文章经验，主要针对<strong>华为手机备份软件升级、微信7.0以后索引库加密以及通过索引库恢复被删除聊天记录</strong>等内容予以补充。</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><p>====</p>
+<h2 id="经验回顾"><a href="#经验回顾" class="headerlink" title="经验回顾"></a>经验回顾</h2><hr>
+<p>网上有很多关于安卓微信本地数据库（7.0版本以前主要是EnMicroMsg.db）的解密教程，以及恢复已删除聊天记录的原理教程，由于微信的不断升级，很多教程的内容已经不符合实际需要了，通过验证，发现以下经验仍然可用：</p>
+<ol>
+<li><p><strong>EnMicroMsg.db密码算法</strong>没有变化 ，这个密码算法仍然是IMEI与uin拼接后计算32位MD5值，然后取前7位（如果uin是负值也不需要变化）；</p>
+</li>
+<li><p><strong>IMEI和最后一次登录的uin提取方法</strong>没有变化，IMEI在CompatibleInfo.cfg文件中，最后一次登录的uin在system_conf_prefs.xml文件中；</p>
+<p>3.微信用户数据存储目录名仍然是”mm+uin”顺序拼接的MD5值；</p>
+</li>
+</ol>
+<h2 id="新的问题"><a href="#新的问题" class="headerlink" title="新的问题"></a>新的问题</h2><hr>
+<a id="more"></a>
+<p>随着安卓操作系统的不断升级，安全性越来越高，想通过root等方式获取手机存储镜像然后再进行数据恢复的方式越来越难了，因此大多数电子数据取证的厂家是通过手机厂商官方备份文件对手机数据在本机存储中备份后，通过导出的备份文件来进行数据提取和恢复。</p>
+<p>问题一：华为手机的官方备份软件在8.0版本以后<strong>不再支持</strong>本机存储备份，需要通过OTG转接头在外部存储中备份。很多厂家采取的方法是对备份软件降级，然后仍然在本机存储备份后导出。另外8.0以前的备份是以sqlite数据库（.db）的形式存储的，而8.0以后的备份是以压缩文件（.tar）的形式存储的。对于手工分析来讲，新的备份机制更容易操作。但是如果是旧的备份方式，需要把存在数据库里的文件导出才能进行下一步工作。</p>
+<p>问题二：微信7.0以后，对几个以前没有加密的数据库文件（尤其是对恢复数据最重要的索引库）进行了加密，而且经测试，所使用的密码<strong>不是</strong>EnMicroMsg.db加密所使用的密码。</p>
+<p>问题三：网上很多文章对于通过索引库恢复被删除的聊天记录说明不够详细。</p>
+<h2 id="解决华为旧备份数据导出问题"><a href="#解决华为旧备份数据导出问题" class="headerlink" title="解决华为旧备份数据导出问题"></a>解决华为旧备份数据导出问题</h2><hr>
+<p>使用低版本华为备份软件得到的微信备份文件为一个com.tencent.mm.apk文件和一个com.tencent.mm.db文件。</p>
+<p>用sqlite数据库管理工具打开com.tencent.mm.db，发现只有三个表，其中apk_file_info表中储存了所有文件名和索引号，apk_file_data中则存储了文件数据。索引号为-1的是目录，索引号大于0的是有用的文件。</p>
+<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_UHEBU75TMQ92TYC.jpg" alt></p>
+<p>在apk_file_data中索引号相同的是同一个文件，每个文件被切成若干个8K以内的碎片进行存储，导出时需要拼接起来再导出。</p>
+<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_EUWUM9U4A44ZUDD.jpg" alt></p>
+<p>导出文件数据的python代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">import sqlite3</span><br><span class="line">import os</span><br><span class="line">conn = sqlite3.connect(&apos;com.tencent.mm.db&apos;)</span><br><span class="line">cursor = conn.cursor()</span><br><span class="line">cursor.execute(&quot;SELECT count(*) FROM apk_file_info&quot;)</span><br><span class="line">all = cursor.fetchone()[0]</span><br><span class="line">cursor.execute(&quot;SELECT file_path,file_index FROM apk_file_info&quot;)</span><br><span class="line">result = cursor.fetchall()</span><br><span class="line">count = 0</span><br><span class="line">while (count &lt; all):</span><br><span class="line">  if (result[count][1] &gt; 0):</span><br><span class="line">      fullname = result[count][0]</span><br><span class="line">      findex = result[count][1]</span><br><span class="line">      dirname,filename = os.path.split(fullname)</span><br><span class="line">      fpath=&quot;.&quot; + dirname</span><br><span class="line">      fname=&quot;.&quot; + fullname</span><br><span class="line">      isExists=os.path.exists(fpath)</span><br><span class="line">      if not isExists:</span><br><span class="line">          os.makedirs(fpath)</span><br><span class="line">      with open(fname, &quot;wb&quot;) as output_file:</span><br><span class="line">        cursor.execute(&quot;SELECT count(*) FROM apk_file_data WHERE file_index = &quot; + str(findex))</span><br><span class="line">        total = cursor.fetchone()[0]</span><br><span class="line">        cursor.execute(&quot;SELECT file_data FROM apk_file_data WHERE file_index = &quot; + str(findex))</span><br><span class="line">        acount=0</span><br><span class="line">        while (acount &lt; total):</span><br><span class="line">          ablob = cursor.fetchone()</span><br><span class="line">          output_file.write(ablob[0])</span><br><span class="line">          acount = acount+1</span><br><span class="line">  count = count + 1</span><br><span class="line">cursor.close()</span><br><span class="line">conn.close()</span><br></pre></td></tr></table></figure></p>
+<p>将代码保存为out.py后与com.tencent.mm.db文件放在同一目录下，python out.py运行即可在当前目录下导出所有文件。生成目录为data/data/com.tencent.mm。</p>
+<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_9B9TN2APDDZV2U2.jpg" alt></p>
+<p>比较懒，没有加注释和提示信息。实际使用时请自行添加提示信息和异常处理代码。如果导出文件数据较多程序效率比较低，可自行优化，代码仅供参考。</p>
+<h2 id="解密索引数据库"><a href="#解密索引数据库" class="headerlink" title="解密索引数据库"></a>解密索引数据库</h2><hr>
+<h3 id="先要解密微信消息库"><a href="#先要解密微信消息库" class="headerlink" title="### 先要解密微信消息库"></a>### 先要解密微信消息库</h3><p>首先需要解密EnMicroMsg.db，以便提取微信id。因为CompatibleInfo.cfg是通过java的HashMap编码的，因此从此文件中提取IMEI值需要解码。没找到python解码java HashMap的代码，所以就用java代码凑合一下。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">import java.io.FileInputStream;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.io.ObjectInputStream;</span><br><span class="line">import java.security.MessageDigest;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">public class GetDBKey &#123;</span><br><span class="line"> public static void main(String[] args) &#123;</span><br><span class="line">  try &#123;</span><br><span class="line">   ObjectInputStream in = new ObjectInputStream(new FileInputStream(&quot;CompatibleInfo.cfg&quot;));</span><br><span class="line">   Object DL = in.readObject();</span><br><span class="line">   HashMap hashWithOutFormat = (HashMap) DL;</span><br><span class="line">   String s = String.valueOf(hashWithOutFormat.get(Integer.valueOf(258))); // 取手机的IMEI</span><br><span class="line">   System.out.println(&quot;IMEI:&quot;+s);</span><br><span class="line">   ObjectInputStream in1 = new ObjectInputStream(new FileInputStream(&quot;systemInfo.cfg&quot;));</span><br><span class="line">   Object DJ = in1.readObject();</span><br><span class="line">   HashMap hashWithOutFormat1 = (HashMap) DJ;</span><br><span class="line">   String t = String.valueOf(hashWithOutFormat1.get(Integer.valueOf(1))); // 取微信的uin</span><br><span class="line">   System.out.println(&quot;uin:&quot;+t);</span><br><span class="line">   s = s + t; //合并到一个字符串</span><br><span class="line">   s = encode(s); // MD5</span><br><span class="line">   System.out.println(&quot;密码是 : &quot; + s.substring(0, 7));</span><br><span class="line">   in.close();</span><br><span class="line">   in1.close();</span><br><span class="line">  &#125; catch (Exception e) &#123;</span><br><span class="line">   e.printStackTrace();</span><br><span class="line">  &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> public static String encode(String content)</span><br><span class="line">  &#123;</span><br><span class="line">   try &#123;</span><br><span class="line">    MessageDigest digest = MessageDigest.getInstance(&quot;MD5&quot;);</span><br><span class="line">    digest.update(content.getBytes());</span><br><span class="line">    return getEncode32(digest);</span><br><span class="line">    &#125;</span><br><span class="line">   catch (Exception e)</span><br><span class="line">   &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">   &#125;</span><br><span class="line">   return null;</span><br><span class="line">  &#125;</span><br><span class="line">  private static String getEncode32(MessageDigest digest)</span><br><span class="line">  &#123;</span><br><span class="line">   StringBuilder builder = new StringBuilder();</span><br><span class="line">   for (byte b : digest.digest())</span><br><span class="line">   &#123;</span><br><span class="line">    builder.append(Integer.toHexString((b &gt;&gt; 4) &amp; 0xf));</span><br><span class="line">    builder.append(Integer.toHexString(b &amp; 0xf));</span><br><span class="line">   &#125;</span><br><span class="line">    return builder.toString();</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>把代码另存为GetDBKey.java，把CompatibleInfo.cfg和systemInfo.cfg（在com.tencent.mm/MicroMsg目录中）跟代码放在同一目录，编译运行后直接显示密码。如果需要看IMEI和uin，请自行添加输出代码。</p>
+<p>另外一种方法是通过DENGTA_META.xml中的IMEI_DENGTA值（有的手机备份没有）和system_conf_prefs.xml中的system_config_prefs来提取IMEI和uin。这两个是明文，直接看就可以了。如果登录过多个微信账号，所有的uin都在app_brand_global_sp.xml中。这三个xml文件都在com.tencent.mm/shared_prefs目录下。</p>
+<p>取得密码后，一种方法是使用sqlcipher2.1（CSDN有下载）GUI版直接打开。</p>
+<p>第二种方法是通过sqlcipher命令行解密。第三种方法是通过程序代码解密。</p>
+<p>python参考代码如下（需要先用pip install pysqlcipher3安装python的sqlcipher支持库才能引用）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">from pysqlcipher3 import dbapi2 as sqlite</span><br><span class="line">import hashlib</span><br><span class="line">def decrypt( key ):</span><br><span class="line">	conn = sqlite.connect( &quot;EnMicroMsg.db&quot; )</span><br><span class="line">	c = conn.cursor()		</span><br><span class="line">	c.execute( &quot;PRAGMA key = &apos;&quot; + key + &quot;&apos;;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA cipher_use_hmac = OFF;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA cipher_page_size = 1024;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA kdf_iter = 4000;&quot; )</span><br><span class="line">	c.execute( &quot;ATTACH DATABASE &apos;EnMicroMsg-decrypted.db&apos; AS wechatdecrypted KEY &apos;&apos;;&quot; )</span><br><span class="line">	c.execute( &quot;SELECT sqlcipher_export( &apos;wechatdecrypted&apos; );&quot; )</span><br><span class="line">	c.execute( &quot;DETACH DATABASE wechatdecrypted;&quot; )</span><br><span class="line">	c.close()</span><br><span class="line">def generate_key():</span><br><span class="line">	imei = &quot;866666666666666&quot;</span><br><span class="line">	uin = &quot;1919191919&quot;</span><br><span class="line">	key = hashlib.md5( str( imei ).encode(&quot;utf8&quot;) + str( uin ).encode(&quot;utf8&quot;)).hexdigest()[ 0:7 ]</span><br><span class="line">	return key</span><br><span class="line">def main():	</span><br><span class="line">	key = generate_key()</span><br><span class="line">	decrypt( key )</span><br><span class="line">main()</span><br></pre></td></tr></table></figure>
+<p>将代码中的imei值和uin值替换成刚才获得的值即可。将EnMicroMsg.db与python程序放在同一目录下运行即可解密，生成的文件名为EnMicroMsg-decrypted.db。</p>
+<h3 id="解密索引库"><a href="#解密索引库" class="headerlink" title="### 解密索引库"></a>### 解密索引库</h3><p>微信索引库FTS5IndexMsg.db之前是不加密的，但到了微信7.0以后，索引库就变成了FTS5IndexMsg_encrypt.db，明显加密了。使用EnMicroMsg.db的密码进行解密失败，通过与几个电子取证公司的技术人员交流，了解到密码算法确实变了，而且加密参数也有变化。大体的情况是变成IMEI、uin、微信id三者拼接后的32位MD5值取前7位作为密码。涉及到产品细节无法透露，因此具体算法还需要自行研究。</p>
+<p>先用sqlite管理工具将EnMicroMsg-decrypted.db打开，打开userinfo表，其中id为2对应的值为微信id。通常为wxid_xxxxxxxxxxxxxx格式。</p>
+<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_SSHKS9MCAPW9HGP.jpg" alt></p>
+<p>这样的话至少素材已经齐了，接下来就是研究具体的算法了。</p>
+<p>算法只能通过反编译apk文件来查找。</p>
+<p>先从官网下载最新版的jadx 0.9.0zip版（不要下载exe版，因为需要调整运行参数）</p>
+<p>将bin目录中的jadx-gui.bat的DEFAULT_JVM_OPTS参数里面Xms和Xmx分别调整到1024M和7G。参数调整后如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">@rem Add default JVM options here. You can also use JAVA_OPTS and JADX_GUI_OPTS to pass JVM options to this script.</span><br><span class="line">set DEFAULT_JVM_OPTS=&quot;-Xms1024M&quot; &quot;-Xmx7g&quot; &quot;-Dawt.useSystemAAFontSettings=lcd&quot; &quot;-Dswing.aatext=true&quot; &quot;-XX:+UseG1GC&quot;</span><br></pre></td></tr></table></figure></p>
+<p>如果Xmx值小于7G则在反编译比较大的软件时jadx会出现假死状态。</p>
+<p>不用开反混淆开关（其实无所谓，看个人习惯）进行反编译，然后全部保存。</p>
+<p>利用文本编辑器（我用的是NotePad++，开源还好用）对反编译的java代码进行文件内容搜索，查找加密算法位置。</p>
+<p>首先搜索”FTS5IndexMsg_encrypt.db”，发现com\tencent\mm\plugin\fts\d.java中有：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String absolutePath = new File(str, &quot;FTS5IndexMicroMsg_encrypt.db&quot;).getAbsolutePath();</span><br></pre></td></tr></table></figure></p>
+<p>往下看，发现有这么一句：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">this.lXS = SQLiteDatabase.openOrCreateDatabase(absolutePath, com.tencent.mm.a.g.u(stringBuilder.append(a.OZ()).append(q.Kc()).append(com.tencent.mm.model.q.Wt()).toString().getBytes()).substring(0, 7).getBytes(), null, null);</span><br></pre></td></tr></table></figure></p>
+<p>stringBuilder是一个字符串构造函数，连续拼接了三个字符串，经过一个运算后取了前7位，与了解到的情况相符。</p>
+<p>通过分析发现：</p>
+<p>com.tencent.mm.kernel.a.OZ()取uin；</p>
+<p>com.tencent.mm.compatible.e.q.Kc()取DeviceID（即IMEI）；</p>
+<p>com.tencent.mm.model.q.Wt()取userinfo（即微信id）；</p>
+<p>com.tencent.mm.a.g.u()是MD5算法。</p>
+<p>因此说明这个密码是将uin、IMEI、微信id连续拼接然后计算32位MD5值再取前7位作为密码。</p>
+<p>这里需要注意的是，uin如果是负值不能直接进行拼接，要把它加上4294967296（最大无符号数），得到的正数作为最终的uin进行拼接。</p>
+<p>另外，除了密码之外据说加密算法等参数也有变化，因此还需要继续搜索。</p>
+<p>这次搜索sqlcipher参数”PRAGMA”，发现最终调用的是com\tencent\wcdb\database\SQLiteCipherSpec.java中的几个参数（wcdb对应wcdb.so文件，其实是改了名的sqlcipher.so），对应值分别为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CIPHER_AES256CBC = &quot;aes-256-cbc&quot;;</span><br><span class="line">kdfIteration = 64000;</span><br><span class="line">hmacEnabled = true;</span><br></pre></td></tr></table></figure></p>
+<p>另外经与厂商技术人员沟通，发现还有个参数需要调整：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setPageSize=4096;</span><br></pre></td></tr></table></figure></p>
+<p>这几个参数分别对应如下sqlcipher参数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PRAGMA cipher = &apos;aes-256-cbc&apos;;</span><br><span class="line"></span><br><span class="line">PRAGMA cipher_use_hmac = ON;</span><br><span class="line"></span><br><span class="line">PRAGMA cipher_page_size = 4096;</span><br><span class="line"></span><br><span class="line">PRAGMA kdf_iter = 64000;</span><br></pre></td></tr></table></figure></p>
+<p>综上所述，一切解密需要的素材都齐了，相应的python代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">from os.path import isfile</span><br><span class="line"># 用pip install pysqlcipher3安装python的sqlcipher支持库再引用</span><br><span class="line">from pysqlcipher3 import dbapi2 as sqlite</span><br><span class="line">import hashlib</span><br><span class="line">import sys</span><br><span class="line">import time</span><br><span class="line">import logging</span><br><span class="line">import re</span><br><span class="line"></span><br><span class="line">logging.basicConfig(filename=&apos;FTS5IndexMicroMsg_decrypt.log&apos;, format=&quot;%(asctime)s %(levelname)s: %(message)s&quot;, datefmt=&quot;%d-%b-%Y %I:%M:%S %p&quot;, level=logging.DEBUG)</span><br><span class="line"></span><br><span class="line">def decrypt( key ):</span><br><span class="line">	logging.info( &quot;连接数据库...&quot; )</span><br><span class="line">	conn = sqlite.connect( &quot;FTS5IndexMicroMsg_encrypt.db&quot; )</span><br><span class="line">	c = conn.cursor()		</span><br><span class="line">	c.execute( &quot;PRAGMA key = &apos;&quot; + key + &quot;&apos;;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA cipher = &apos;aes-256-cbc&apos;;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA cipher_use_hmac = ON;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA cipher_page_size = 4096;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA kdf_iter = 64000;&quot; )</span><br><span class="line">	try:</span><br><span class="line">		logging.info( &quot;正在解密...&quot; )</span><br><span class="line">		c.execute( &quot;ATTACH DATABASE &apos;FTS5IndexMicroMsg_decrypt.db&apos; AS fts5indexdecrypt KEY &apos;&apos;;&quot; )</span><br><span class="line">		c.execute( &quot;SELECT sqlcipher_export( &apos;fts5indexdecrypt&apos; );&quot; )</span><br><span class="line">		c.execute( &quot;DETACH DATABASE fts5indexdecrypt;&quot; )</span><br><span class="line">		logging.info( &quot;正在分离数据库...&quot; )</span><br><span class="line">		c.close()</span><br><span class="line">		status = 1</span><br><span class="line">	except:</span><br><span class="line">		c.close()</span><br><span class="line">		status = 0</span><br><span class="line">	return status</span><br><span class="line"></span><br><span class="line">def generate_key():</span><br><span class="line">	imei = &quot;866666666666666&quot;</span><br><span class="line">	logging.info( &quot;IMEI: &quot; + str( imei ))</span><br><span class="line">	uin = &quot;2377777777&quot;</span><br><span class="line">	logging.info( &quot;UIN: &quot; + str( uin ))</span><br><span class="line">	account = &quot;wxid_1l8w9yqrxxxxxx&quot;</span><br><span class="line">	logging.info( &quot;account: &quot; + str( account ))</span><br><span class="line">	logging.info( &quot;正在生成密钥...&quot; )	</span><br><span class="line">	key = hashlib.md5( str( uin ).encode(&quot;utf8&quot;) + str( imei ).encode(&quot;utf8&quot;) + str( account ).encode(&quot;utf8&quot;)).hexdigest()[ 0:7 ]</span><br><span class="line">	logging.info( &quot;密钥: &quot; + key )</span><br><span class="line">	return key</span><br><span class="line"></span><br><span class="line">def db_hash():</span><br><span class="line">	f = open( &apos;FTS5IndexMicroMsg_decrypt.db&apos;, &apos;rb&apos; ).read()</span><br><span class="line">	logging.info( &quot;正在生成哈希值...&quot; )	</span><br><span class="line">	if len( f ) &gt; 0:</span><br><span class="line">		db_md5 = hashlib.md5( f ).hexdigest()</span><br><span class="line">		logging.info( &quot;FTS5IndexMicroMsg_decrypt.db MD5: &quot; + db_md5 )</span><br><span class="line">		db_sha1 = hashlib.sha1( f ).hexdigest()</span><br><span class="line">		logging.info( &quot;FTS5IndexMicroMsg_decrypt.db SHA1: &quot; + db_sha1 )</span><br><span class="line">		return</span><br><span class="line"></span><br><span class="line">def main():	</span><br><span class="line">	if not ( isfile( &quot;FTS5IndexMicroMsg_encrypt.db&quot; )):</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		print (&quot;&apos;FTS5IndexMicroMsg_encrypt.db&apos;不存在!&quot;)</span><br><span class="line">		print (&quot;正在退出脚本...&quot;)</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		sys.exit()</span><br><span class="line"></span><br><span class="line">	logging.info( &quot;脚本启动...&quot; )</span><br><span class="line">	key = generate_key()</span><br><span class="line">	status = decrypt( key )</span><br><span class="line">	if status == 1:</span><br><span class="line">		db_hash()</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		print (&quot;解密成功!&quot;)</span><br><span class="line">		print (&quot;解密文件: FTS5IndexMicroMsg_decrypt.db&quot;)</span><br><span class="line">		print (&quot;日志文件: FTS5IndexMicroMsg_decrypt.log&quot;)</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		logging.info( &quot;解密成功!&quot; )</span><br><span class="line">		logging.info( &quot;解密文件: FTS5IndexMicroMsg_decrypt.db&quot; )</span><br><span class="line">	else:</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		print (&quot;解密失败!&quot;)</span><br><span class="line">		print (&quot;日志文件: FTS5IndexMicroMsg_decrypt.log&quot;)</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		logging.info( &quot;解密失败!&quot; )</span><br><span class="line">	logging.info( &quot;正在退出脚本...&quot; )</span><br><span class="line"></span><br><span class="line">main()</span><br><span class="line">`</span><br></pre></td></tr></table></figure></p>
+<p>这次放了比较规范的代码，之前也是为了体现python的简洁，很多复杂功能没几行代码就搞定了。</p>
+<p>只要把IMEI、uin、微信id换成之前取出来的即可。把加密数据库和python代码放在同一个目录中运行就可以得到解密数据库。</p>
+<p>另外在搜索代码的过程中发现MicroMsgPriority.db也加密了，密码是uin、微信id、IMEI顺次拼接的32位MD5值取前7位。sqlcipher参数与索引库相同。可以简单修改以上代码就可以实现解密。</p>
+<h3 id="从索引库恢复被删除的消息"><a href="#从索引库恢复被删除的消息" class="headerlink" title="### 从索引库恢复被删除的消息"></a>### 从索引库恢复被删除的消息</h3><p>用winhex打开解密后的索引库：</p>
+<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_VMSZVAJTBZY66Y3.jpg" alt></p>
+<p>在右侧显示区上方点击”ANSI ASCII”，选择”Unicode UTF-8”，向下滚动就可看到连续的中文，这些就是索引后的消息。其中包括已删除和未删除的内容。</p>
+<p>经查阅资料并与厂商技术人员沟通，发现这些信息的存储格式开头如下：</p>
+<p>aa bb 03 00 cc 或 aa bb 04 00 cc dd</p>
+<p>如果一个区域里面aa的值一致，说明是正常未删除信息，如果aa值不一致，则说明是删除信息。bb是从7F到00顺序排列（偶尔有中断）相当于序号。如果是03则cc是后面正文长度，如果是04则cc dd是正文长度。</p>
+<p>cc或者cc dd是varint格式，需要进行一定的变换之后才能得出长度值。</p>
+<p>计算方法为：</p>
+<p>cc-&gt;16进制转10进制-&gt;减13-&gt;除以2，如果结果是3的倍数，说明是中文，再除以3，得到的数值就是正文长度。如果除以2以后不是3的倍数，说明是英文（半角），这个得数就是英文正文长度。</p>
+<p>例如：</p>
+<p>55-&gt;85-&gt;72-&gt;36-&gt;12个汉字</p>
+<p>19-&gt;25-&gt;12-&gt;6-&gt;2个汉字</p>
+<p>17-&gt;23-&gt;10-&gt;5个英文</p>
+<p>如果是cc dd要麻烦一些。先将cc dd都转成二进制，然后把cc的首位1和之后的所有0都去掉，把dd首位0去掉，然后拼到一起，再转成10进制-&gt;减13-&gt;除以2，如果结果是3的倍数，说明是中文，再除以3，得到的数值就是正文长度。如果除以2以后不是3的倍数，说明是英文（半角），这个得数就是英文正文长度。</p>
+<p>例如：</p>
+<p>81 23</p>
+<p>81-&gt; 10000001  23-&gt;00100011 合并为10100011，十进制是163；163-&gt;150-&gt;75-&gt;25个汉字</p>
+<p>81 11</p>
+<p>81-&gt;10000001 11-&gt;00010001 合并为10010001，十进制是145；145-&gt;132-&gt;66-&gt;22个汉字</p>
+<p>这样的话，就可以通过程序把符合规则的内容全部导出来，就是被删除的消息。如果想确定交互双方，还需要配合其他数据分析，在此先不讨论了。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>====</p>
+<p>综上所述，就是以华为手机为例的微信数据备份、导出、解密以及简要分析的过程，希望对研究电子数据取证的朋友们有所帮助。</p>
+<p>作者：newx</p>
+<p>QQ：2337242</p>
+<p>【原创内容，欢迎转载，请注明出处</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/04/27/安卓微信本地数据库解密与删除聊天记录恢复完全教程/" data-id="cjuz5wuyt0006gow13sdkzbiq" class="article-share-link">Share</a>
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术/">技术</a></li></ul>
+
+    </footer>
+
+  </div>
+
+  
+    
+  <nav class="article-nav">
+    
+    
+      <a href="/2019/04/23/获匹匹配与非获取匹配/" class="article-nav-link">
+        <strong class="article-nav-caption">Olde posts</strong>
+        <div class="article-nav-title">获匹匹配与非获取匹配</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+    
+  
+
+</article>
+
+
+
+</section>
+  <footer class="footer">
+  
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+    <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>&copy; 2019 TK的个人小站</li>
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+
+</main>
+<aside class="sidebar">
+  <button class="navbar-toggle"></button>
+
+<nav class="navbar">
+  
+    <div class="logo">
+      <a href="/"><img src="/images/hexo.svg" alt="TK的个人小站"></a>
+    </div>
+  
+  <ul class="nav nav-main">
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/archives">Archives</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/gallery">Gallery</a>
+      </li>
+    
+      <li class="nav-item">
+        <a class="nav-item-link" href="/about">About</a>
+      </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="Search">
+        <i class="fe fe-search"></i>
+        Search
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+      <li class="nav-item">
+          <div class="totop" id="totop">
+    <i class="fe fe-rocket"></i>
+</div>
+      </li>
+    <li class="nav-item">
+      
+        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+          <i class="fe fe-feed"></i>
+        </a>
+      
+    </li>
+  </ul>
+</nav>
+
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+</aside>
+<script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/lazyload.min.js"></script>
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  <script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+</html>
