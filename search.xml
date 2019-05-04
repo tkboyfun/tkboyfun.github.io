@@ -1,0 +1,958 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+    
+    <entry>
+      <title><![CDATA[安卓微信本地数据库解密与删除聊天记录恢复完全教程]]></title>
+      <url>/2019/04/27/%E5%AE%89%E5%8D%93%E5%BE%AE%E4%BF%A1%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E5%BA%93%E8%A7%A3%E5%AF%86%E4%B8%8E%E5%88%A0%E9%99%A4%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E6%81%A2%E5%A4%8D%E5%AE%8C%E5%85%A8%E6%95%99%E7%A8%8B/</url>
+      <content type="html"><![CDATA[<p>【转载内容，欢迎转载，请注明出处】</p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>====</p>
+<p>在电子数据取证过程中，对微信本地数据库的解密、提取与恢复是非常重要的工作内容。本文以华为mate系列手机和最新版的微信（7.0.3）为例，通过总结互联网上已经发表的文章经验，主要针对<strong>华为手机备份软件升级、微信7.0以后索引库加密以及通过索引库恢复被删除聊天记录</strong>等内容予以补充。</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><p>====</p>
+<h2 id="经验回顾"><a href="#经验回顾" class="headerlink" title="经验回顾"></a>经验回顾</h2><hr>
+<p>网上有很多关于安卓微信本地数据库（7.0版本以前主要是EnMicroMsg.db）的解密教程，以及恢复已删除聊天记录的原理教程，由于微信的不断升级，很多教程的内容已经不符合实际需要了，通过验证，发现以下经验仍然可用：</p>
+<ol>
+<li><p><strong>EnMicroMsg.db密码算法</strong>没有变化 ，这个密码算法仍然是IMEI与uin拼接后计算32位MD5值，然后取前7位（如果uin是负值也不需要变化）；</p>
+</li>
+<li><p><strong>IMEI和最后一次登录的uin提取方法</strong>没有变化，IMEI在CompatibleInfo.cfg文件中，最后一次登录的uin在system_conf_prefs.xml文件中；</p>
+<p>3.微信用户数据存储目录名仍然是”mm+uin”顺序拼接的MD5值；</p>
+</li>
+</ol>
+<h2 id="新的问题"><a href="#新的问题" class="headerlink" title="新的问题"></a>新的问题</h2><hr>
+<a id="more"></a>
+<p>随着安卓操作系统的不断升级，安全性越来越高，想通过root等方式获取手机存储镜像然后再进行数据恢复的方式越来越难了，因此大多数电子数据取证的厂家是通过手机厂商官方备份文件对手机数据在本机存储中备份后，通过导出的备份文件来进行数据提取和恢复。</p>
+<p>问题一：华为手机的官方备份软件在8.0版本以后<strong>不再支持</strong>本机存储备份，需要通过OTG转接头在外部存储中备份。很多厂家采取的方法是对备份软件降级，然后仍然在本机存储备份后导出。另外8.0以前的备份是以sqlite数据库（.db）的形式存储的，而8.0以后的备份是以压缩文件（.tar）的形式存储的。对于手工分析来讲，新的备份机制更容易操作。但是如果是旧的备份方式，需要把存在数据库里的文件导出才能进行下一步工作。</p>
+<p>问题二：微信7.0以后，对几个以前没有加密的数据库文件（尤其是对恢复数据最重要的索引库）进行了加密，而且经测试，所使用的密码<strong>不是</strong>EnMicroMsg.db加密所使用的密码。</p>
+<p>问题三：网上很多文章对于通过索引库恢复被删除的聊天记录说明不够详细。</p>
+<h2 id="解决华为旧备份数据导出问题"><a href="#解决华为旧备份数据导出问题" class="headerlink" title="解决华为旧备份数据导出问题"></a>解决华为旧备份数据导出问题</h2><hr>
+<p>使用低版本华为备份软件得到的微信备份文件为一个com.tencent.mm.apk文件和一个com.tencent.mm.db文件。</p>
+<p>用sqlite数据库管理工具打开com.tencent.mm.db，发现只有三个表，其中apk_file_info表中储存了所有文件名和索引号，apk_file_data中则存储了文件数据。索引号为-1的是目录，索引号大于0的是有用的文件。</p>
+<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_UHEBU75TMQ92TYC.jpg" alt></p>
+<p>在apk_file_data中索引号相同的是同一个文件，每个文件被切成若干个8K以内的碎片进行存储，导出时需要拼接起来再导出。</p>
+<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_EUWUM9U4A44ZUDD.jpg" alt></p>
+<p>导出文件数据的python代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">import sqlite3</span><br><span class="line">import os</span><br><span class="line">conn = sqlite3.connect(&apos;com.tencent.mm.db&apos;)</span><br><span class="line">cursor = conn.cursor()</span><br><span class="line">cursor.execute(&quot;SELECT count(*) FROM apk_file_info&quot;)</span><br><span class="line">all = cursor.fetchone()[0]</span><br><span class="line">cursor.execute(&quot;SELECT file_path,file_index FROM apk_file_info&quot;)</span><br><span class="line">result = cursor.fetchall()</span><br><span class="line">count = 0</span><br><span class="line">while (count &lt; all):</span><br><span class="line">  if (result[count][1] &gt; 0):</span><br><span class="line">      fullname = result[count][0]</span><br><span class="line">      findex = result[count][1]</span><br><span class="line">      dirname,filename = os.path.split(fullname)</span><br><span class="line">      fpath=&quot;.&quot; + dirname</span><br><span class="line">      fname=&quot;.&quot; + fullname</span><br><span class="line">      isExists=os.path.exists(fpath)</span><br><span class="line">      if not isExists:</span><br><span class="line">          os.makedirs(fpath)</span><br><span class="line">      with open(fname, &quot;wb&quot;) as output_file:</span><br><span class="line">        cursor.execute(&quot;SELECT count(*) FROM apk_file_data WHERE file_index = &quot; + str(findex))</span><br><span class="line">        total = cursor.fetchone()[0]</span><br><span class="line">        cursor.execute(&quot;SELECT file_data FROM apk_file_data WHERE file_index = &quot; + str(findex))</span><br><span class="line">        acount=0</span><br><span class="line">        while (acount &lt; total):</span><br><span class="line">          ablob = cursor.fetchone()</span><br><span class="line">          output_file.write(ablob[0])</span><br><span class="line">          acount = acount+1</span><br><span class="line">  count = count + 1</span><br><span class="line">cursor.close()</span><br><span class="line">conn.close()</span><br></pre></td></tr></table></figure></p>
+<p>将代码保存为out.py后与com.tencent.mm.db文件放在同一目录下，python out.py运行即可在当前目录下导出所有文件。生成目录为data/data/com.tencent.mm。</p>
+<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_9B9TN2APDDZV2U2.jpg" alt></p>
+<p>比较懒，没有加注释和提示信息。实际使用时请自行添加提示信息和异常处理代码。如果导出文件数据较多程序效率比较低，可自行优化，代码仅供参考。</p>
+<h2 id="解密索引数据库"><a href="#解密索引数据库" class="headerlink" title="解密索引数据库"></a>解密索引数据库</h2><hr>
+<h3 id="先要解密微信消息库"><a href="#先要解密微信消息库" class="headerlink" title="先要解密微信消息库"></a>先要解密微信消息库</h3><p>首先需要解密EnMicroMsg.db，以便提取微信id。因为CompatibleInfo.cfg是通过java的HashMap编码的，因此从此文件中提取IMEI值需要解码。没找到python解码java HashMap的代码，所以就用java代码凑合一下。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">import java.io.FileInputStream;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.io.ObjectInputStream;</span><br><span class="line">import java.security.MessageDigest;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">public class GetDBKey &#123;</span><br><span class="line"> public static void main(String[] args) &#123;</span><br><span class="line">  try &#123;</span><br><span class="line">   ObjectInputStream in = new ObjectInputStream(new FileInputStream(&quot;CompatibleInfo.cfg&quot;));</span><br><span class="line">   Object DL = in.readObject();</span><br><span class="line">   HashMap hashWithOutFormat = (HashMap) DL;</span><br><span class="line">   String s = String.valueOf(hashWithOutFormat.get(Integer.valueOf(258))); // 取手机的IMEI</span><br><span class="line">   System.out.println(&quot;IMEI:&quot;+s);</span><br><span class="line">   ObjectInputStream in1 = new ObjectInputStream(new FileInputStream(&quot;systemInfo.cfg&quot;));</span><br><span class="line">   Object DJ = in1.readObject();</span><br><span class="line">   HashMap hashWithOutFormat1 = (HashMap) DJ;</span><br><span class="line">   String t = String.valueOf(hashWithOutFormat1.get(Integer.valueOf(1))); // 取微信的uin</span><br><span class="line">   System.out.println(&quot;uin:&quot;+t);</span><br><span class="line">   s = s + t; //合并到一个字符串</span><br><span class="line">   s = encode(s); // MD5</span><br><span class="line">   System.out.println(&quot;密码是 : &quot; + s.substring(0, 7));</span><br><span class="line">   in.close();</span><br><span class="line">   in1.close();</span><br><span class="line">  &#125; catch (Exception e) &#123;</span><br><span class="line">   e.printStackTrace();</span><br><span class="line">  &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> public static String encode(String content)</span><br><span class="line">  &#123;</span><br><span class="line">   try &#123;</span><br><span class="line">    MessageDigest digest = MessageDigest.getInstance(&quot;MD5&quot;);</span><br><span class="line">    digest.update(content.getBytes());</span><br><span class="line">    return getEncode32(digest);</span><br><span class="line">    &#125;</span><br><span class="line">   catch (Exception e)</span><br><span class="line">   &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">   &#125;</span><br><span class="line">   return null;</span><br><span class="line">  &#125;</span><br><span class="line">  private static String getEncode32(MessageDigest digest)</span><br><span class="line">  &#123;</span><br><span class="line">   StringBuilder builder = new StringBuilder();</span><br><span class="line">   for (byte b : digest.digest())</span><br><span class="line">   &#123;</span><br><span class="line">    builder.append(Integer.toHexString((b &gt;&gt; 4) &amp; 0xf));</span><br><span class="line">    builder.append(Integer.toHexString(b &amp; 0xf));</span><br><span class="line">   &#125;</span><br><span class="line">    return builder.toString();</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>把代码另存为GetDBKey.java，把CompatibleInfo.cfg和systemInfo.cfg（在com.tencent.mm/MicroMsg目录中）跟代码放在同一目录，编译运行后直接显示密码。如果需要看IMEI和uin，请自行添加输出代码。</p>
+<p>另外一种方法是通过DENGTA_META.xml中的IMEI_DENGTA值（有的手机备份没有）和system_conf_prefs.xml中的system_config_prefs来提取IMEI和uin。这两个是明文，直接看就可以了。如果登录过多个微信账号，所有的uin都在app_brand_global_sp.xml中。这三个xml文件都在com.tencent.mm/shared_prefs目录下。</p>
+<p>取得密码后，一种方法是使用sqlcipher2.1（CSDN有下载）GUI版直接打开。</p>
+<p>第二种方法是通过sqlcipher命令行解密。第三种方法是通过程序代码解密。</p>
+<p>python参考代码如下（需要先用pip install pysqlcipher3安装python的sqlcipher支持库才能引用）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">from pysqlcipher3 import dbapi2 as sqlite</span><br><span class="line">import hashlib</span><br><span class="line">def decrypt( key ):</span><br><span class="line">	conn = sqlite.connect( &quot;EnMicroMsg.db&quot; )</span><br><span class="line">	c = conn.cursor()		</span><br><span class="line">	c.execute( &quot;PRAGMA key = &apos;&quot; + key + &quot;&apos;;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA cipher_use_hmac = OFF;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA cipher_page_size = 1024;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA kdf_iter = 4000;&quot; )</span><br><span class="line">	c.execute( &quot;ATTACH DATABASE &apos;EnMicroMsg-decrypted.db&apos; AS wechatdecrypted KEY &apos;&apos;;&quot; )</span><br><span class="line">	c.execute( &quot;SELECT sqlcipher_export( &apos;wechatdecrypted&apos; );&quot; )</span><br><span class="line">	c.execute( &quot;DETACH DATABASE wechatdecrypted;&quot; )</span><br><span class="line">	c.close()</span><br><span class="line">def generate_key():</span><br><span class="line">	imei = &quot;866666666666666&quot;</span><br><span class="line">	uin = &quot;1919191919&quot;</span><br><span class="line">	key = hashlib.md5( str( imei ).encode(&quot;utf8&quot;) + str( uin ).encode(&quot;utf8&quot;)).hexdigest()[ 0:7 ]</span><br><span class="line">	return key</span><br><span class="line">def main():	</span><br><span class="line">	key = generate_key()</span><br><span class="line">	decrypt( key )</span><br><span class="line">main()</span><br></pre></td></tr></table></figure>
+<p>将代码中的imei值和uin值替换成刚才获得的值即可。将EnMicroMsg.db与python程序放在同一目录下运行即可解密，生成的文件名为EnMicroMsg-decrypted.db。</p>
+<h3 id="解密索引库"><a href="#解密索引库" class="headerlink" title="解密索引库"></a>解密索引库</h3><p>微信索引库FTS5IndexMsg.db之前是不加密的，但到了微信7.0以后，索引库就变成了FTS5IndexMsg_encrypt.db，明显加密了。使用EnMicroMsg.db的密码进行解密失败，通过与几个电子取证公司的技术人员交流，了解到密码算法确实变了，而且加密参数也有变化。大体的情况是变成IMEI、uin、微信id三者拼接后的32位MD5值取前7位作为密码。涉及到产品细节无法透露，因此具体算法还需要自行研究。</p>
+<p>先用sqlite管理工具将EnMicroMsg-decrypted.db打开，打开userinfo表，其中id为2对应的值为微信id。通常为wxid_xxxxxxxxxxxxxx格式。</p>
+<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_SSHKS9MCAPW9HGP.jpg" alt></p>
+<p>这样的话至少素材已经齐了，接下来就是研究具体的算法了。</p>
+<p>算法只能通过反编译apk文件来查找。</p>
+<p>先从官网下载最新版的jadx 0.9.0zip版（不要下载exe版，因为需要调整运行参数）</p>
+<p>将bin目录中的jadx-gui.bat的DEFAULT_JVM_OPTS参数里面Xms和Xmx分别调整到1024M和7G。参数调整后如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">@rem Add default JVM options here. You can also use JAVA_OPTS and JADX_GUI_OPTS to pass JVM options to this script.</span><br><span class="line">set DEFAULT_JVM_OPTS=&quot;-Xms1024M&quot; &quot;-Xmx7g&quot; &quot;-Dawt.useSystemAAFontSettings=lcd&quot; &quot;-Dswing.aatext=true&quot; &quot;-XX:+UseG1GC&quot;</span><br></pre></td></tr></table></figure></p>
+<p>如果Xmx值小于7G则在反编译比较大的软件时jadx会出现假死状态。</p>
+<p>不用开反混淆开关（其实无所谓，看个人习惯）进行反编译，然后全部保存。</p>
+<p>利用文本编辑器（我用的是NotePad++，开源还好用）对反编译的java代码进行文件内容搜索，查找加密算法位置。</p>
+<p>首先搜索”FTS5IndexMsg_encrypt.db”，发现com\tencent\mm\plugin\fts\d.java中有：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String absolutePath = new File(str, &quot;FTS5IndexMicroMsg_encrypt.db&quot;).getAbsolutePath();</span><br></pre></td></tr></table></figure></p>
+<p>往下看，发现有这么一句：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">this.lXS = SQLiteDatabase.openOrCreateDatabase(absolutePath, com.tencent.mm.a.g.u(stringBuilder.append(a.OZ()).append(q.Kc()).append(com.tencent.mm.model.q.Wt()).toString().getBytes()).substring(0, 7).getBytes(), null, null);</span><br></pre></td></tr></table></figure></p>
+<p>stringBuilder是一个字符串构造函数，连续拼接了三个字符串，经过一个运算后取了前7位，与了解到的情况相符。</p>
+<p>通过分析发现：</p>
+<p>com.tencent.mm.kernel.a.OZ()取uin；</p>
+<p>com.tencent.mm.compatible.e.q.Kc()取DeviceID（即IMEI）；</p>
+<p>com.tencent.mm.model.q.Wt()取userinfo（即微信id）；</p>
+<p>com.tencent.mm.a.g.u()是MD5算法。</p>
+<p>因此说明这个密码是将uin、IMEI、微信id连续拼接然后计算32位MD5值再取前7位作为密码。</p>
+<p>这里需要注意的是，uin如果是负值不能直接进行拼接，要把它加上4294967296（最大无符号数），得到的正数作为最终的uin进行拼接。</p>
+<p>另外，除了密码之外据说加密算法等参数也有变化，因此还需要继续搜索。</p>
+<p>这次搜索sqlcipher参数”PRAGMA”，发现最终调用的是com\tencent\wcdb\database\SQLiteCipherSpec.java中的几个参数（wcdb对应wcdb.so文件，其实是改了名的sqlcipher.so），对应值分别为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CIPHER_AES256CBC = &quot;aes-256-cbc&quot;;</span><br><span class="line">kdfIteration = 64000;</span><br><span class="line">hmacEnabled = true;</span><br></pre></td></tr></table></figure></p>
+<p>另外经与厂商技术人员沟通，发现还有个参数需要调整：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setPageSize=4096;</span><br></pre></td></tr></table></figure></p>
+<p>这几个参数分别对应如下sqlcipher参数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PRAGMA cipher = &apos;aes-256-cbc&apos;;</span><br><span class="line"></span><br><span class="line">PRAGMA cipher_use_hmac = ON;</span><br><span class="line"></span><br><span class="line">PRAGMA cipher_page_size = 4096;</span><br><span class="line"></span><br><span class="line">PRAGMA kdf_iter = 64000;</span><br></pre></td></tr></table></figure></p>
+<p>综上所述，一切解密需要的素材都齐了，相应的python代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">from os.path import isfile</span><br><span class="line"># 用pip install pysqlcipher3安装python的sqlcipher支持库再引用</span><br><span class="line">from pysqlcipher3 import dbapi2 as sqlite</span><br><span class="line">import hashlib</span><br><span class="line">import sys</span><br><span class="line">import time</span><br><span class="line">import logging</span><br><span class="line">import re</span><br><span class="line"></span><br><span class="line">logging.basicConfig(filename=&apos;FTS5IndexMicroMsg_decrypt.log&apos;, format=&quot;%(asctime)s %(levelname)s: %(message)s&quot;, datefmt=&quot;%d-%b-%Y %I:%M:%S %p&quot;, level=logging.DEBUG)</span><br><span class="line"></span><br><span class="line">def decrypt( key ):</span><br><span class="line">	logging.info( &quot;连接数据库...&quot; )</span><br><span class="line">	conn = sqlite.connect( &quot;FTS5IndexMicroMsg_encrypt.db&quot; )</span><br><span class="line">	c = conn.cursor()		</span><br><span class="line">	c.execute( &quot;PRAGMA key = &apos;&quot; + key + &quot;&apos;;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA cipher = &apos;aes-256-cbc&apos;;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA cipher_use_hmac = ON;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA cipher_page_size = 4096;&quot; )</span><br><span class="line">	c.execute( &quot;PRAGMA kdf_iter = 64000;&quot; )</span><br><span class="line">	try:</span><br><span class="line">		logging.info( &quot;正在解密...&quot; )</span><br><span class="line">		c.execute( &quot;ATTACH DATABASE &apos;FTS5IndexMicroMsg_decrypt.db&apos; AS fts5indexdecrypt KEY &apos;&apos;;&quot; )</span><br><span class="line">		c.execute( &quot;SELECT sqlcipher_export( &apos;fts5indexdecrypt&apos; );&quot; )</span><br><span class="line">		c.execute( &quot;DETACH DATABASE fts5indexdecrypt;&quot; )</span><br><span class="line">		logging.info( &quot;正在分离数据库...&quot; )</span><br><span class="line">		c.close()</span><br><span class="line">		status = 1</span><br><span class="line">	except:</span><br><span class="line">		c.close()</span><br><span class="line">		status = 0</span><br><span class="line">	return status</span><br><span class="line"></span><br><span class="line">def generate_key():</span><br><span class="line">	imei = &quot;866666666666666&quot;</span><br><span class="line">	logging.info( &quot;IMEI: &quot; + str( imei ))</span><br><span class="line">	uin = &quot;2377777777&quot;</span><br><span class="line">	logging.info( &quot;UIN: &quot; + str( uin ))</span><br><span class="line">	account = &quot;wxid_1l8w9yqrxxxxxx&quot;</span><br><span class="line">	logging.info( &quot;account: &quot; + str( account ))</span><br><span class="line">	logging.info( &quot;正在生成密钥...&quot; )	</span><br><span class="line">	key = hashlib.md5( str( uin ).encode(&quot;utf8&quot;) + str( imei ).encode(&quot;utf8&quot;) + str( account ).encode(&quot;utf8&quot;)).hexdigest()[ 0:7 ]</span><br><span class="line">	logging.info( &quot;密钥: &quot; + key )</span><br><span class="line">	return key</span><br><span class="line"></span><br><span class="line">def db_hash():</span><br><span class="line">	f = open( &apos;FTS5IndexMicroMsg_decrypt.db&apos;, &apos;rb&apos; ).read()</span><br><span class="line">	logging.info( &quot;正在生成哈希值...&quot; )	</span><br><span class="line">	if len( f ) &gt; 0:</span><br><span class="line">		db_md5 = hashlib.md5( f ).hexdigest()</span><br><span class="line">		logging.info( &quot;FTS5IndexMicroMsg_decrypt.db MD5: &quot; + db_md5 )</span><br><span class="line">		db_sha1 = hashlib.sha1( f ).hexdigest()</span><br><span class="line">		logging.info( &quot;FTS5IndexMicroMsg_decrypt.db SHA1: &quot; + db_sha1 )</span><br><span class="line">		return</span><br><span class="line"></span><br><span class="line">def main():	</span><br><span class="line">	if not ( isfile( &quot;FTS5IndexMicroMsg_encrypt.db&quot; )):</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		print (&quot;&apos;FTS5IndexMicroMsg_encrypt.db&apos;不存在!&quot;)</span><br><span class="line">		print (&quot;正在退出脚本...&quot;)</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		sys.exit()</span><br><span class="line"></span><br><span class="line">	logging.info( &quot;脚本启动...&quot; )</span><br><span class="line">	key = generate_key()</span><br><span class="line">	status = decrypt( key )</span><br><span class="line">	if status == 1:</span><br><span class="line">		db_hash()</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		print (&quot;解密成功!&quot;)</span><br><span class="line">		print (&quot;解密文件: FTS5IndexMicroMsg_decrypt.db&quot;)</span><br><span class="line">		print (&quot;日志文件: FTS5IndexMicroMsg_decrypt.log&quot;)</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		logging.info( &quot;解密成功!&quot; )</span><br><span class="line">		logging.info( &quot;解密文件: FTS5IndexMicroMsg_decrypt.db&quot; )</span><br><span class="line">	else:</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		print (&quot;解密失败!&quot;)</span><br><span class="line">		print (&quot;日志文件: FTS5IndexMicroMsg_decrypt.log&quot;)</span><br><span class="line">		print (&quot;##########&quot;)</span><br><span class="line">		logging.info( &quot;解密失败!&quot; )</span><br><span class="line">	logging.info( &quot;正在退出脚本...&quot; )</span><br><span class="line"></span><br><span class="line">main()</span><br><span class="line">`</span><br></pre></td></tr></table></figure></p>
+<p>这次放了比较规范的代码，之前也是为了体现python的简洁，很多复杂功能没几行代码就搞定了。</p>
+<p>只要把IMEI、uin、微信id换成之前取出来的即可。把加密数据库和python代码放在同一个目录中运行就可以得到解密数据库。</p>
+<p>另外在搜索代码的过程中发现MicroMsgPriority.db也加密了，密码是uin、微信id、IMEI顺次拼接的32位MD5值取前7位。sqlcipher参数与索引库相同。可以简单修改以上代码就可以实现解密。</p>
+<h3 id="从索引库恢复被删除的消息"><a href="#从索引库恢复被删除的消息" class="headerlink" title="### 从索引库恢复被删除的消息"></a>### 从索引库恢复被删除的消息</h3><p>用winhex打开解密后的索引库：</p>
+<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_VMSZVAJTBZY66Y3.jpg" alt></p>
+<p>在右侧显示区上方点击”ANSI ASCII”，选择”Unicode UTF-8”，向下滚动就可看到连续的中文，这些就是索引后的消息。其中包括已删除和未删除的内容。</p>
+<p>经查阅资料并与厂商技术人员沟通，发现这些信息的存储格式开头如下：</p>
+<p>aa bb 03 00 cc 或 aa bb 04 00 cc dd</p>
+<p>如果一个区域里面aa的值一致，说明是正常未删除信息，如果aa值不一致，则说明是删除信息。bb是从7F到00顺序排列（偶尔有中断）相当于序号。如果是03则cc是后面正文长度，如果是04则cc dd是正文长度。</p>
+<p>cc或者cc dd是varint格式，需要进行一定的变换之后才能得出长度值。</p>
+<p>计算方法为：</p>
+<p>cc-&gt;16进制转10进制-&gt;减13-&gt;除以2，如果结果是3的倍数，说明是中文，再除以3，得到的数值就是正文长度。如果除以2以后不是3的倍数，说明是英文（半角），这个得数就是英文正文长度。</p>
+<p>例如：</p>
+<p>55-&gt;85-&gt;72-&gt;36-&gt;12个汉字</p>
+<p>19-&gt;25-&gt;12-&gt;6-&gt;2个汉字</p>
+<p>17-&gt;23-&gt;10-&gt;5个英文</p>
+<p>如果是cc dd要麻烦一些。先将cc dd都转成二进制，然后把cc的首位1和之后的所有0都去掉，把dd首位0去掉，然后拼到一起，再转成10进制-&gt;减13-&gt;除以2，如果结果是3的倍数，说明是中文，再除以3，得到的数值就是正文长度。如果除以2以后不是3的倍数，说明是英文（半角），这个得数就是英文正文长度。</p>
+<p>例如：</p>
+<p>81 23</p>
+<p>81-&gt; 10000001  23-&gt;00100011 合并为10100011，十进制是163；163-&gt;150-&gt;75-&gt;25个汉字</p>
+<p>81 11</p>
+<p>81-&gt;10000001 11-&gt;00010001 合并为10010001，十进制是145；145-&gt;132-&gt;66-&gt;22个汉字</p>
+<p>这样的话，就可以通过程序把符合规则的内容全部导出来，就是被删除的消息。如果想确定交互双方，还需要配合其他数据分析，在此先不讨论了。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>====</p>
+<p>综上所述，就是以华为手机为例的微信数据备份、导出、解密以及简要分析的过程，希望对研究电子数据取证的朋友们有所帮助。</p>
+<p>作者：newx</p>
+<p>QQ：2337242</p>
+<p>【原创内容，欢迎转载，请注明出处</p>
+]]></content>
+      
+        
+        <tags>
+            
+            <tag> 技术 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[获匹匹配与非获取匹配]]></title>
+      <url>/2019/04/23/%E8%8E%B7%E5%8C%B9%E5%8C%B9%E9%85%8D%E4%B8%8E%E9%9D%9E%E8%8E%B7%E5%8F%96%E5%8C%B9%E9%85%8D/</url>
+      <content type="html"><![CDATA[<p>在使用正则表达式的时候，我们经常会使用()把某个部分括起来，称为一个子模式。</p>
+<pre><code>子模式有Capturing和Non-Capturing两种情况。
+
+Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹配结果保存起来，供我们查找或者替换。如后向引用的使用；
+
+而Non-Capturing指**非获取匹配** ，这时系统并不会保存子模式的匹配结果，子模式的匹配更多的只是作为一种限制条件使用，如正向预查，反向预查，负正向预查，负反向预查等。
+</code></pre><p><strong>\
+</strong></p>
+<p><strong>后向引用</strong></p>
+<p><strong>使用”\数字”代表前面某个子模式的匹配内容</strong></p>
+<pre><code>我们使用正则表达式，在很多场景下的作用是为了查找和替换，大部分语言的正则表达式实现中，在查找时，使用后向引用来代表一个子模式，语法是&quot;\数字&quot;，而在替换中，语法是&quot;$数字&quot;。
+
+在正则表达式中，我们可以使用 &quot;\数字 &quot; 来进行后向引用，数字 表示这里引用的是前面的第几个子模式。如下：
+</code></pre><p><strong>Text</strong>\<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;h1&gt;This is a valid header&lt;/h1&gt;\</span><br><span class="line">&lt;h2&gt;This is not valid.&lt;/h3&gt;\</span><br><span class="line">**RegEx**\</span><br><span class="line">&lt;h([1-6])&gt;.*?&lt;/h\1 &gt;\</span><br><span class="line">**Result**\</span><br><span class="line">&lt;h1&gt;This is a valid header&lt;/h1&gt;\</span><br><span class="line">&lt;h2&gt;This is not valid.&lt;/h3&gt;</span><br></pre></td></tr></table></figure></p>
+<pre><code>上面示例中，\1代表前面的子模式([1-6])的匹配结果 1，所以不符合的匹配&lt;h2&gt;..&lt;/h3&gt;并没有被匹配。
+
+后向应用常见的应用常见是：
+</code></pre><ul>
+<li><p>匹配重复单词 (\w+) \1</p>
+</li>
+<li><p>匹配合法的html标记，如上例。</p>
+</li>
+</ul>
+<p><strong>非获取匹配</strong></p>
+<p><strong>在子模式内部前面添加”?:”</strong></p>
+<pre><code>非获取匹配表示这个子模式的匹配内容不会被保存，不能用于后向引用中。简单说，非获取匹配就是 只匹配，不保存。看个例子：
+</code></pre><p><strong>Text</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.\<br><strong>RegEx</strong>\<br>Windows (?:[\w]+\b)\<br><strong>Result</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.</p>
+<pre><code>在这个例子中，子模式(?:[\w]+\b)是一个非获取匹配，只匹配内容，单并未保存字匹配的结果。
+</code></pre><p><strong>正向预查</strong></p>
+<p><strong>在子模式的内部前面添加”?=”</strong></p>
+<pre><code>正向预查的意思是，子模式仅仅作为条件限制，并不作为匹配结果输出，子模式前面的。
+</code></pre><p><strong>Text</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.\<br><strong>RegEx</strong>\<br>Windows(?= [\d]+\b)\<br><strong>Result</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.</p>
+<pre><code>这个例子中，要获取所有后面带有数字的Windows字符串。子模式在这里仅仅作为一个限制条件使用，仅参与匹配过程，并不作为匹配结果输出。
+
+**负正向预查的作用正好与正向预查相反，语法为在子模式内部前面增加&quot;?!&quot;。**
+
+比如上面例子，如果RegEx为Windows(?! [\d]+\b)，则匹配的结果会是Windows Xp和Windows Vista中的windows。
+</code></pre><p><strong>反向预查</strong></p>
+<p><strong>在子模式的内部前面添加”?&lt;=”</strong></p>
+<pre><code>反向预查与正向预查很相似，子模式仅仅作为条件限制，不作为结果输出，唯一的不同是，正向预查匹配子模式前面的结果作为匹配结果，而反向预查匹配子模式后面的结果作为匹配结果。看个例子：
+</code></pre><p><strong>Text</strong>\<br>CNY:100.2\<br>USD:222.1\<br>USD:301.3\<br>HKD:122.1\<br>CNY:114.4\<br><strong> RegEx</strong>\<br>(?&lt;=CNY:)\d+.\d\<br><strong>Result</strong>\<br>CNY:100.2\<br>USD:222.1\<br>USD:301.3\<br>HKD:122.1\<br>CNY:114.4</p>
+<pre><code>这个例子里，要获取属于CNY的金额。子模式仅参与匹配过程，并不作为匹配结果输出。
+
+**负反向预查的作用正好与反向预查相反，语法为在子模式内部前面增加&quot;?&lt;!&quot;。**
+
+比如上面例子，如果RegEx为(?&lt;!CNY:)\b\d+\.\d，则会获取不属于CNY的金额.
+</code></pre>]]></content>
+      
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Git心得]]></title>
+      <url>/2019/04/22/Git%E5%BF%83%E5%BE%97/</url>
+      <content type="html"><![CDATA[<h1 id="Git和Github简单教程"><a href="#Git和Github简单教程" class="headerlink" title="Git和Github简单教程"></a><a href="https://www.cnblogs.com/schaepher/p/5561193.html" target="_blank" rel="noopener">Git和Github简单教程</a></h1><p>==================================================================</p>
+<p>原文链接：<a href="http://www.cnblogs.com/schaepher/p/5561193.html" target="_blank" rel="noopener">Git和Github简单教程</a></p>
+<hr>
+<p>网络上关于Git和GitHub的教程不少，但是这些教程有的命令太少不够用，有的命令太多，使得初期学习的时候需要额外花不少时间在一些当前用不到的命令上。\<br>这篇文章主要的目标是用较少的时间学习Git和GitHub的基本使用。在足够一般使用的前提下，尽量减少命令。\<br>如果需要其他命令，到时候再去其他地方了解就行了。</p>
+<hr>
+<p>目录：</p>
+<ul>
+<li><p><a href="http://www.cnblogs.com/schaepher/p/5561193.html#what" target="_blank" rel="noopener">零、Git是什么</a></p>
+</li>
+<li><p><a href="http://www.cnblogs.com/schaepher/p/5561193.html#function" target="_blank" rel="noopener">一、Git的主要功能：版本控制</a></p>
+</li>
+<li><p><a href="http://www.cnblogs.com/schaepher/p/5561193.html#overview" target="_blank" rel="noopener">二、概览</a></p>
+</li>
+<li><p><a href="http://www.cnblogs.com/schaepher/p/5561193.html#msysgit" target="_blank" rel="noopener">三、Git for Windows软件安装</a></p>
+</li>
+<li><p><a href="http://www.cnblogs.com/schaepher/p/5561193.html#local" target="_blank" rel="noopener">四、本地Git的使用</a></p>
+</li>
+<li><a href="http://www.cnblogs.com/schaepher/p/5561193.html#github" target="_blank" rel="noopener">五、Github与Git的关联</a></li>
+<li><a href="http://www.cnblogs.com/schaepher/p/5561193.html#team" target="_blank" rel="noopener">六、团队合作开发</a></li>
+<li><a href="http://www.cnblogs.com/schaepher/p/5561193.html#others" target="_blank" rel="noopener">七、Github的其他介绍</a></li>
+<li><a href="http://www.cnblogs.com/schaepher/p/5561193.html#problem" target="_blank" rel="noopener">八、一些可能碰到的问题</a></li>
+</ul>
+<hr>
+<a id="more"></a>
+<h2 id="零、Git是什么"><a href="#零、Git是什么" class="headerlink" title="零、Git是什么"></a>零、Git是什么</h2><p>我才不告诉你嘞</p>
+<hr>
+<h2 id="一、Git的主要功能：版本控制"><a href="#一、Git的主要功能：版本控制" class="headerlink" title="一、Git的主要功能：版本控制"></a>一、Git的主要功能：版本控制</h2><ol>
+<li><p>版本：\<br>想想你平时用的软件，在软件升级之后，你用的就是新版本的软件。你应该见过这样的版本号：<code>v2.0</code> 或者 <code>1511</code>（表示发布时为15年11月），如下图：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213745539-478220006.png" alt>\<br>那么如果你修改并保存了一个文件，从版本管理的角度来说，你得到的是这个文件的新版本。\<br>可是很多情况下，这种修改是不可逆的。你修改完之后，无法回到你修改前的样子。为了避免这种情况，有的人会把新版本的内容保存到一个新的文件里面。\<br>由于 Git 更多地用于代码管理，举个程序员的例子。比如以下是计算机专业学生的作业：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213816196-183384611.png" alt>\<br>这样存储多个文件夹，可能会造成混乱。你可能想保存以前写的代码，因为它们可能在以后会用到。但是更多的时候是，你不知道各个文件夹都做了什么修改。\<br>这时候你需要一款软件帮你管理版本，它就是Git。</p>
+</li>
+<li><p>控制：\<br>你可以用Git来对这些不同的版本进行控制。还可以很方便地查看两个不同版本之间的不同之处。\<br>——使用Git，你只保存最新的一份文件就可以了。\<br>——那我以前的文件怎么办？\<br>——可以用Git的 reset 帮你把文件回退到你想要的版本。\<br>——如果回去了，那我的最新版本呢？\<br>——还可以用 reflog 和 reset 的组合来还原。</p>
+</li>
+</ol>
+<hr>
+<h2 id="二、概览"><a href="#二、概览" class="headerlink" title="二、概览"></a>二、概览</h2><p>所有命令前都要加 <code>git</code>，如表中的<code>init</code>是指 <code>git init</code>。\<br>点击命令可直接跳转至本文第一次使用的地方。\<br>以下命令都在命令行里执行。</p>
+<h3 id="1-个人本地使用"><a href="#1-个人本地使用" class="headerlink" title="1.个人本地使用"></a>1.个人本地使用</h3><table>
+<thead>
+<tr>
+<th>行为</th>
+<th>命令</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>初始化</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#init" target="_blank" rel="noopener">init</a></td>
+<td>在本地的当前目录里初始化git仓库</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#clone" target="_blank" rel="noopener">clone 地址</a></td>
+<td>从网络上某个地址拷贝仓库(repository)到本地</td>
+</tr>
+<tr>
+<td>查看当前状态</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#status" target="_blank" rel="noopener">status</a></td>
+<td>查看当前仓库的状态。碰到问题不知道怎么办的时候，可以通过看它给出的提示来解决问题。这个命令执行的频率应该是其他命令的几倍，特别是新手</td>
+</tr>
+<tr>
+<td>查看不同</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#diff" target="_blank" rel="noopener">diff</a></td>
+<td>查看当前状态和最新的commit之间不同的地方</td>
+</tr>
+<tr>
+<td></td>
+<td>diff 版本号1 版本号2</td>
+<td>查看两个指定的版本之间不同的地方。这里的版本号指的是commit的hash值</td>
+</tr>
+<tr>
+<td>添加文件</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#add" target="_blank" rel="noopener">add -A</a></td>
+<td>这算是相当通用的了。在commit之前要先add</td>
+</tr>
+<tr>
+<td>撤回修改的且还未stage的内容</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#checkout" target="_blank" rel="noopener">checkout – .</a></td>
+<td>这里用小数点表示撤回所有修改，在<code>--</code>的前后都有空格</td>
+</tr>
+<tr>
+<td>提交</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#commit" target="_blank" rel="noopener">commit -m “提交信息”</a></td>
+<td>提交信息最好能体现更改了什么</td>
+</tr>
+<tr>
+<td>删除未tracked</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#clean" target="_blank" rel="noopener">clean -xf</a></td>
+<td>删除当前目录下所有没有track过的文件。不管它是否是.gitignore文件里面指定的文件夹和文件</td>
+</tr>
+<tr>
+<td>查看提交记录</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#log" target="_blank" rel="noopener">log</a></td>
+<td>查看当前版本及之前的commit记录</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#reflog" target="_blank" rel="noopener">reflog</a></td>
+<td>HEAD的变更记录</td>
+</tr>
+<tr>
+<td>版本回退</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#reset" target="_blank" rel="noopener">reset –hard 版本号</a></td>
+<td>回退到指定版本号的版本，该版本之后的修改都被删除。同时也是通过这个命令回到最新版本。需要reflog配合</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-个人使用远程仓库"><a href="#2-个人使用远程仓库" class="headerlink" title="2.个人使用远程仓库"></a>2.个人使用远程仓库</h3><table>
+<thead>
+<tr>
+<th>行为</th>
+<th>命令</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>设置用户名</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#config_user" target="_blank" rel="noopener">config –global user.name “你的用户名”</a></td>
+<td></td>
+</tr>
+<tr>
+<td>设置邮箱</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#config_email" target="_blank" rel="noopener">config –global user.email “你的邮箱”</a></td>
+<td></td>
+</tr>
+<tr>
+<td>生成ssh key</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#ssh_key" target="_blank" rel="noopener">ssh-keygen -t rsa -C “你的邮箱”</a></td>
+<td>这条命令前面不用加git</td>
+</tr>
+<tr>
+<td>添加远程仓库</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#remote_add" target="_blank" rel="noopener">remote add origin 你复制的地址</a></td>
+<td>设置origin</td>
+</tr>
+<tr>
+<td>上传并指定默认</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#push_origin" target="_blank" rel="noopener">push -u origin master</a></td>
+<td>指定origin为默认主机，以后push默认上传到origin上</td>
+</tr>
+<tr>
+<td>提交到远程仓库</td>
+<td><a href="http://www.cnblogs.com/schaepher/p/5561193.html#push" target="_blank" rel="noopener">push</a></td>
+<td>将当前分支增加的commit提交到远程仓库</td>
+</tr>
+<tr>
+<td>从远程仓库同步</td>
+<td>pull</td>
+<td>在本地版本低于远程仓库版本的时候，获取远程仓库的commit</td>
+</tr>
+</tbody>
+</table>
+<p>可以用一张图直观地看出以上主要的命令对仓库的影响。\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213832164-1203726937.png" alt>\<br>图片引用自：<a href="http://blog.podrezo.com/git-introduction-for-cvssvntfs-users/" target="_blank" rel="noopener">Git introduction for CVS/SVN/TFS users</a></p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213850274-1309981476.jpg" alt>\<br>图片引用自：<a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/0013745374151782eb658c5a5ca454eaa451661275886c6000" target="_blank" rel="noopener">工作区和暂存区 - 廖雪峰的官方网站</a> （做了点修改）</p>
+<p>对照查看两张图：</p>
+<ul>
+<li><p>workspace 即工作区，逻辑上是本地计算机，还没添加到repository的状态；</p>
+</li>
+<li><p>staging 即版本库中的stage，是暂存区。修改已经添加进repository，但还没有作为commit提交，类似于缓存；</p>
+</li>
+<li><p>Local repository 即版本库中master那个地方。到这一步才算是成功生成一个新版本；</p>
+</li>
+<li><p>Remote repository 则是远程仓库。用来将本地仓库上传到网络，可以用于备份、共享、合作。本文将使用Github作为远程仓库的例子。</p>
+</li>
+</ul>
+<hr>
+<h2 id="三、Git-for-Windows软件安装"><a href="#三、Git-for-Windows软件安装" class="headerlink" title="三、Git for Windows软件安装"></a>三、Git for Windows软件安装</h2><p><img src="https://images2015.cnblogs.com/blog/809218/201612/809218-20161203000226318-877439216.png" alt>\<br>Git for Windows（又msysgit）</p>
+<ul>
+<li><p>安装包可以到官方网站^<a href="https://git-for-windows.github.io/" target="_blank" rel="noopener"><code>[1]</code></a>^下载，或者在github^<a href="https://github.com/git-for-windows/git/releases" target="_blank" rel="noopener"><code>[2]</code></a>^下载。如果下载不下来，可以把链接复制下来用迅雷下载。如果用迅雷下载不放心，在下载完后去在github下载的那个地方查看SHA-256值，并和下载的文件对比，如果值一样就可以放心使用。</p>
+</li>
+<li><p>安装的时候一路点击<code>Next</code>就行了。</p>
+</li>
+<li><p>刚安装完打开后，窗口比较小。如果不太习惯，可以把它改大一些。</p>
+<ol>
+<li>首先移到窗口右下角边缘，出现箭头后把窗口拉大。</li>
+<li>点击窗口顶部左边的图标 -&gt; Options… -&gt; Window -&gt; Current size -&gt; OK\<br>这样以后打开窗口都会是调整后的大小。</li>
+</ol>
+</li>
+</ul>
+<blockquote>
+<p>Git for Windows从2.8.0版本^<a href="https://github.com/git-for-windows/git/releases/tag/v2.8.0.windows.1" title="查看2.8.0版本的Release Note" target="_blank" rel="noopener"><code>[3]</code></a>^开始，默认添加环境变量，所以环境变量部分就不用再手动配置了。（这句可以无视）</p>
+</blockquote>
+<hr>
+<h2 id="四、本地Git的使用"><a href="#四、本地Git的使用" class="headerlink" title="四、本地Git的使用"></a>四、本地Git的使用</h2><blockquote>
+<p>这里先不引入Github，而是在本地计算机上的操作。</p>
+</blockquote>
+<p>打开命令行（cmd）或者在想要创建repository的地方右键鼠标并点击 <code>Git Bash Here</code> 打开窗口。</p>
+<h3 id="1-新的仓库-》初始化"><a href="#1-新的仓库-》初始化" class="headerlink" title="1.新的仓库-》初始化"></a>1.新的仓库-》初始化</h3><p>运行 <code>git init</code> 来初始化仓库，如下图：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213940508-828815164.png" alt></p>
+<p>它会创建一个隐藏的文件夹 <code>.git</code> 这里不去管它是用来干嘛的。关闭windows的<code>显示隐藏的项目</code>吧。</p>
+<hr>
+<h3 id="2-文件的添加和提交"><a href="#2-文件的添加和提交" class="headerlink" title="2.文件的添加和提交"></a>2.文件的添加和提交</h3><p>我在这个文件夹里面创建了一个 <code>today.txt</code> 的文件。并且不要脸地祝自己儿童节快乐：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213956149-723619418.png" alt></p>
+<p>这时我使用 <code>git status</code> 来查看有什么变化：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214005055-1866468380.png" alt></p>
+<p>它告诉我有一个还未追踪的文件，并提示我可以使用 <code>git add &lt;file&gt;...</code> 把它加进去。</p>
+<p>但是我并不打算把所有命令都介绍一遍，所以我选择使用上面概览时所提到的 <code>git add -A</code> 命令。</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214016508-253679176.png" alt></p>
+<p>嗯，什么提示都没有。没关系，我们再次使用 <code>git status</code> ：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214024992-260849170.png" alt></p>
+<p>状态变了！说明add成功。再看看它的提示 <code>Changes to be committed</code> ，也就是说现在可以执行commit了。下面一行则告诉你如何将文件从stage里移出，这里不管。\<br>执行 <code>git commit -m &quot;提交信息&quot;</code> 将文件提交到repository里。提交信息用英文的双引号括起来。</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214038492-1522093568.png" alt></p>
+<p>这时运行 <code>git log</code> 就可以看到提交的记录了：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214048071-1516052651.png" alt></p>
+<p>这样第一步就完成了。</p>
+<blockquote>
+<p>也许你会奇怪：为什么要有一个add，直接commit不就行了？这是因为stage有很多用处，具体可以去查找相关资料。这里就算不了解问题也不大。</p>
+</blockquote>
+<h3 id="3-文件的修改"><a href="#3-文件的修改" class="headerlink" title="3.文件的修改"></a>3.文件的修改</h3><p>接着我修改文件内容。改成祝大家儿童节快乐好了 (～￣▽￣)～</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214108227-292232158.png" alt></p>
+<p>我们用 <code>git status</code> 看看有什么变化：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214116571-1026727305.png" alt></p>
+<p>这和之前的提示不一样了。之前是这个：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214132992-1418825706.png" alt></p>
+<p>比较一下就会看到，之前的是添加新文件，当时文件还没被追踪（untracked），而这次是更改已经追踪（tracked）的文件。</p>
+<p>现在我们通过git看看文件做了哪些变化，执行 <code>git diff</code> ：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214145649-1116632145.png" alt></p>
+<p>它默认跟最新的一个commit进行比较。\<br>红色（前面有减号<code>-</code>）表示删除，绿色（前面有加号<code>+</code>）表示添加。\<br>因此，在git看来，我们是删除了原来那一行，并添加了新的两行。这在文件内容特别多的时候效果比较明显。\<br>这个命令在以下情况可以使用：</p>
+<ul>
+<li>你忘记改了什么，又想知道</li>
+<li>别人发给你新版本，你想知道更改了什么</li>
+</ul>
+<p>注：如果你用 windows 创建 txt 文件，并用自带文本编辑器来编辑文本，得到的编码是 GBK 。而 Git 读取文件时，使用 UTF-8 无 ROM 编码。因此会出现中文无法正常显示的情况。</p>
+<p>假如我现在想撤销这些更改，执行 <code>git checkout -- .</code> 就行了：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214206821-1921800298.png" alt></p>
+<p>恩，仍然没有任何提示。执行 <code>git status</code> 看看：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214215774-1596938603.png" alt></p>
+<p>上一个status的提示已经不见咯。再来看看文件：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214227930-813645920.png" alt></p>
+<p>果然复原了！那么再次进行修改：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214241102-284859029.png" alt></p>
+<p>接着：\<br><code>git add -A</code>\<br><code>git commit -m &quot;将[自己]改为[米娜桑]&quot;</code></p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214257633-193132615.png" alt></p>
+<p>用 <code>git log</code> 看看提交（commit）记录：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt></p>
+<p>嗯。现在有两个提交了。</p>
+<h3 id="4-版本回退！"><a href="#4-版本回退！" class="headerlink" title="4.版本回退！"></a>4.版本回退！</h3><p>如果我写的是一篇很长的文章，并且在之前的版本基础上修改了一部分内容，生成一个新的commit，现在我发现我在修改的时候删掉了一部分内容，而这部分内容是我现在需要用到的，怎么办？版本回退！</p>
+<p>还是以刚才的文件为例，现在我试着将文件回退到第一个commit时的状态。但在这之前，我们看看这个文件夹里面的东西：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214321555-282676581.png" alt></p>
+<p><code>.git</code> 文件夹因为本来就是隐藏的，我在关了 <code>显示隐藏的项目</code> 的选项后，它就不显示了。\<br>现在看到的是只有一个文件，而且是最新的一个版本。</p>
+<blockquote>
+<p>文件的修改日期为 <code>2016\6\1 21:52</code></p>
+</blockquote>
+<p>从刚才的 <code>git log</code> ：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt></p>
+<p>我们看到两行黄色部分是以 <code>commit</code> 开头的，后面接着一串字符。这一串字符是16进制的数，是一串哈希值。我们叫它版本号就行了。</p>
+<p>开始回退，执行 <code>git reset --hard 1df0573</code> （取版本号前7位就可以了）：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604215412196-1252165674.png" alt></p>
+<p>这里提示HEAD已经更改指向至1df0573了。此时文件：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214419821-1776623416.png" alt></p>
+<p>其内容：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214429133-794948365.png" alt></p>
+<p>已经回到我的第一个版本的状态。</p>
+<blockquote>
+<p>这里文件的修改日期被更改为我现在的时间 <code>2016\6\2 19:29</code>\<br>这是由于文件的修改日期是由windows修改的，因为它检测到这个文件被修改了。而我们刚才从最新版本回退到现在这个版本，就像是我们手动修改了文件内容一样，事实上是由git来完成的。\<br>其实可以不管上面这一段</p>
+</blockquote>
+<p>现在再执行 <code>git log</code> ：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214442242-370029640.png" alt></p>
+<p>新版本的commit记录不见了！这就是 reset –hard 的力量，很好很强硬！</p>
+<p>现在已经看到了之前版本的内容，那么如何回到最新版呢？\<br>先执行 <code>git reflog</code> ：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214451727-1120509429.png" alt></p>
+<p>可以看到HEAD的变化情况。\<br>第一行表示当前HEAD所在的版本号是 <code>1df0573</code> ，而之所以在这个版本号，是由于我们执行了reset命令。\<br>看第二行，它告诉我们，这个HEAD所在的版本号是 <code>ad93b89</code> ，这个版本号是在执行commit之后形成的。</p>
+<p>此时我再用一次reset，将HEAD指向 <code>ad93b89</code> ， 同时查看log ：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard ad93b89</span><br><span class="line">git log</span><br></pre></td></tr></table></figure>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214514571-1686368650.png" alt></p>
+<p>回到第一次reset前的状态了！</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214526321-588410549.png" alt></p>
+<h3 id="5-清除未追踪的文件"><a href="#5-清除未追踪的文件" class="headerlink" title="5.清除未追踪的文件"></a>5.清除未追踪的文件</h3><p>通常在reset或者pull（后面会讲）之前要做两件事：</p>
+<ul>
+<li><p>将新添加且为追踪的文件删除掉（比如编译程序后所产生的文件）</p>
+</li>
+<li><p>已追踪的文件已有修改，但又不需要这些修改，则将它们还原</p>
+</li>
+</ul>
+<p>还原已做修改的tracked文件，上面已经讲过。\<br>现在看看如何用命令删除新加的文件。</p>
+<p>首先我手动创建个文件，用来演示：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214540008-1448402387.png" alt></p>
+<p>用checkout是没办法删除掉它的，使用 <code>git clean -xf</code> ：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214601305-1764138916.png" alt></p>
+<p>这个命令的杀伤力比较大，它删除当前目录下所有没有track过的文件。不管它是否是.gitignore文件里面指定的文件夹和文件。当然，也有杀伤力比较小的，但这里就不介绍了。</p>
+<h3 id="6-关于git-status中文乱码问题"><a href="#6-关于git-status中文乱码问题" class="headerlink" title="6.关于git status中文乱码问题"></a>6.关于git status中文乱码问题</h3><p>如果你的文件名是中文的，在使用<code>git status</code>时会乱码。如下图所示：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144122025-2131985383.png" alt></p>
+<p>如果要使它显示为中文，在命令行里执行：<code>git config --global core.quotepath false</code>。\<br>再使用 <code>git status</code>：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144614463-158907487.png" alt></p>
+<p>如果 <code>git log</code> 也会乱码，执行以下命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git config --global i18n.commitencoding utf-8</span><br><span class="line">git config --global i18n.logoutputencoding utf-8</span><br></pre></td></tr></table></figure>
+<p>请根据需要将后面的 utf-8 替换成你想要的编码。如果是团队项目，请确保所有成员的设置都一致。</p>
+<hr>
+<h2 id="五、Github与Git的关联"><a href="#五、Github与Git的关联" class="headerlink" title="五、Github与Git的关联"></a>五、Github与Git的关联</h2><p>上面的操作都是在本地计算机上产生影响的，一般也够用了。\<br>如果你是程序员，想和其他人分享你的代码，或者合作开发，可以用Github。</p>
+<h3 id="1）本地Git和Github的连接"><a href="#1）本地Git和Github的连接" class="headerlink" title="1）本地Git和Github的连接"></a>1）本地Git和Github的连接</h3><ol>
+<li><p>到Github^<a href="https://github.com/join?source=header" target="_blank" rel="noopener"><code>[4]</code></a>^注册账号。</p>
+</li>
+<li><p>本地配置用户名和邮箱（如果已经设置好，跳过该步）：</p>
+<ul>
+<li><p><code>git config --global user.name &quot;你的用户名&quot;</code>\<br><code>git config --global user.email &quot;你的邮箱&quot;</code>\<br>如图所示：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214615274-442852618.png" alt></p>
+</li>
+<li><p>或者你直接在config文件里改，位置在 <code>C:\Users\你的用户名\.gitconfig</code> 。如下图所示，添加相应信息：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214628289-1147405553.png" alt></p>
+</li>
+</ul>
+</li>
+<li><p>生成ssh key\<br>运行 <code>ssh-keygen -t rsa -C &quot;你的邮箱&quot;</code> ，它会有三次等待你输入，直接回车即可。\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214640930-1505693290.png" alt>\<br>将生成的ssh key复制到剪贴板，执行 <code>clip &lt; ~/.ssh/id_rsa.pub</code> （或者到上图提示的路径里去打开文件并复制）：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214651414-743953505.png" alt></p>
+</li>
+<li><p>打开Github，进入Settings：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214703352-921010313.png" alt>\<br>点击左边的 <code>SSH and GPG keys</code> ，将ssh key粘贴到右边的Key里面。Title随便命名即可。\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214714492-1086473957.png" alt>\<br>点击下面的 <code>Add SSH key</code> 就添加成功了。\<br>测试一下吧，执行 <code>ssh -T git@github.com</code> ：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214732274-152795627.png" alt>\<br>嗯，这样就成功了！</p>
+<p>注：</p>
+<ul>
+<li><p>对于 oschina 的 “码云” ，执行 <code>ssh -T git@git.oschina.net</code></p>
+</li>
+<li><p>对于 coding 的 “码市” ，执行 <code>ssh -T git@git.coding.net</code></p>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="2）创建远程仓库并与本地关联"><a href="#2）创建远程仓库并与本地关联" class="headerlink" title="2）创建远程仓库并与本地关联"></a>2）创建远程仓库并与本地关联</h3><ol>
+<li><p>创建远程仓库\<br>首先是在右上角点击进入创建界面：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214751961-141228472.png" alt></p>
+<p>接着输入远程仓库名：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214801899-1730149221.png" alt></p>
+<p>点击 <code>Create repository</code> 就创建好了。其他选项可以暂时不管。</p>
+</li>
+<li><p>将远程仓库和本地仓库关联起来</p>
+<p>先到Github上复制远程仓库的SSH地址：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214816680-697003144.png" alt></p>
+<p>有两种方式可以关联，一种是SSH，一种是HTTPS。由于<strong>HTTPS比较慢</strong>，所以推荐使用SSH。\<br>注意SSH的地址格式是这样开头的： <a href="mailto:`git@github.com" target="_blank" rel="noopener">`git@github.com</a>`</p>
+<p>运行 <code>git remote add origin 你复制的地址</code> ：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214829571-1197635501.png" alt></p>
+<p>如果你在创建 repository 的时候，加入了 README.md 或者 LICENSE ，那么 github 会拒绝你的 push 。你需要先执行 <code>git pull origin master</code>。</p>
+<p>执行 <code>git push -u origin master</code> 将本地仓库上传至Github的仓库并进行关联：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214838133-1236297143.png" alt></p>
+</li>
+</ol>
+<p>关联已经完成！</p>
+<p>以后想在commit后同步到Github上，只要直接执行 <code>git push</code> 就行啦：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214848133-733016980.png" alt></p>
+<p>可以在Github上看到修改：</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214855602-1059095970.png" alt></p>
+<hr>
+<h2 id="六、团队合作开发"><a href="#六、团队合作开发" class="headerlink" title="六、团队合作开发"></a>六、团队合作开发</h2><p>关于团队合作开发，我在之前已经专门用一篇文章来说明了。\<br>原文链接： <a href="http://www.cnblogs.com/schaepher/p/4933873.html" target="_blank" rel="noopener">GitHub团队项目合作流程</a></p>
+<p>上文的目录：</p>
+<ul>
+<li><p><a href="http://www.cnblogs.com/schaepher/p/4933873.html#first" target="_blank" rel="noopener">零、前期准备</a></p>
+</li>
+<li><p><a href="http://www.cnblogs.com/schaepher/p/4933873.html#second" target="_blank" rel="noopener">一、创建开发分支</a></p>
+</li>
+<li><p><a href="http://www.cnblogs.com/schaepher/p/4933873.html#third" target="_blank" rel="noopener">二、Fork项目到个人的仓库</a></p>
+</li>
+<li><p><a href="http://www.cnblogs.com/schaepher/p/4933873.html#four" target="_blank" rel="noopener">三、Clone项目到本地</a></p>
+</li>
+<li><p><a href="http://www.cnblogs.com/schaepher/p/4933873.html#five" target="_blank" rel="noopener">四、和团队项目保持同步</a></p>
+</li>
+<li><a href="http://www.cnblogs.com/schaepher/p/4933873.html#six" target="_blank" rel="noopener">五、push修改到自己的项目上</a></li>
+<li><a href="http://www.cnblogs.com/schaepher/p/4933873.html#seven" target="_blank" rel="noopener">六、请求合并到团队项目上</a></li>
+<li><a href="http://www.cnblogs.com/schaepher/p/4933873.html#eight" target="_blank" rel="noopener">七、团队项目负责人审核及同意合并请求</a></li>
+</ul>
+<p>其中 <code>零、一、七</code> 是由团队项目负责人来完成的。</p>
+<hr>
+<h2 id="七、Github的其他介绍"><a href="#七、Github的其他介绍" class="headerlink" title="七、Github的其他介绍"></a>七、Github的其他介绍</h2><h3 id="1）获取其他人的远程仓库"><a href="#1）获取其他人的远程仓库" class="headerlink" title="1）获取其他人的远程仓库"></a>1）获取其他人的远程仓库</h3><p>看到别人的代码，想要获取到本地计算机慢慢研究或者修改，可以用Git将其下载下来。\<br>以我和一位同学合作的仓库为例，链接：<a href="https://github.com/schaepher/blogsbackup" target="_blank" rel="noopener">schaepher/blogsbackup</a></p>
+<blockquote>
+<p>这是我们用来备份博客园博客的一个小程序，主要用于助教备份学生的博客。</p>
+</blockquote>
+<ol>
+<li><p>复制别人远程仓库的SSH。方法和上面关联git一样，进入仓库页面后，就能找到SSH地址。</p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214904539-240211117.png" alt></p>
+</li>
+<li><p>执行 <code>git clone 复制的SSH地址</code></p>
+<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214911899-487998689.png" alt></p>
+<p>整个项目42M，花了点时间才clone下来。</p>
+</li>
+</ol>
+<p>有一点要注意：这样直接clone别人的仓库后，不能push上自己的修改。</p>
+<h3 id="2）另一种关联远程空仓库的方法"><a href="#2）另一种关联远程空仓库的方法" class="headerlink" title="2）另一种关联远程空仓库的方法"></a>2）另一种关联远程空仓库的方法</h3><p>在知道了clone之后，你就可以更简单的创建并关联一个空仓库了。</p>
+<ol>
+<li>在Github上创建仓库，上面有提到，这里不多讲</li>
+<li>复制刚才创建的仓库的SSH</li>
+<li>clone到本地</li>
+</ol>
+<p>这样可以不用再做关联了。省去了上面的 <code>init</code> 和 <code>git remote add origin</code> 以及 <code>git push -u origin master</code> 。</p>
+<h3 id="3）使用GitHub的好处"><a href="#3）使用GitHub的好处" class="headerlink" title="3）使用GitHub的好处"></a>3）使用GitHub的好处</h3><ul>
+<li><p>全球最大的同♂性交友网站（逃</p>
+</li>
+<li><p>（严肃脸）很多牛逼程序员和牛逼公司的开源项目都放在这上面，有丰富的资源可以学习</p>
+</li>
+<li>别人（如HR）可以通过你的Github大致了解你的水平。《<a href="http://mindhacks.cn/2011/11/04/how-to-interview-a-person-for-two-years/" target="_blank" rel="noopener">怎样花两年时间去面试一个人</a>》 这篇文章的后面部分讲到了Github</li>
+</ul>
+<hr>
+<h2 id="八、一些可能碰到的问题"><a href="#八、一些可能碰到的问题" class="headerlink" title="八、一些可能碰到的问题"></a>八、一些可能碰到的问题</h2><p>这篇文章基本只介绍主线操作，而在操作过程中，可能有误操作或者其他问题。我把这些问题集中放在另一篇博客里面（这里列出目录）。这样这篇文章不会显得太长。</p>
+<ul>
+<li><a href="http://www.cnblogs.com/schaepher/p/4970291.html#conflict" target="_blank" rel="noopener">一、 解决merge时出现的冲突</a></li>
+<li><a href="http://www.cnblogs.com/schaepher/p/4970291.html#back" target="_blank" rel="noopener">二、 回退一个merge</a></li>
+<li><a href="http://www.cnblogs.com/schaepher/p/4970291.html#pick" target="_blank" rel="noopener">三、 获取某一commit的修改</a></li>
+<li><a href="http://www.cnblogs.com/schaepher/p/4970291.html#push_force" target="_blank" rel="noopener">四、 将低版本push到Github（删掉高版本Commit）</a></li>
+</ul>
+<h1 id="使用hexo时deploy部署网站到github或gitcafe的gitpages时重复输入用户名密码的解决办法"><a href="#使用hexo时deploy部署网站到github或gitcafe的gitpages时重复输入用户名密码的解决办法" class="headerlink" title="使用hexo时deploy部署网站到github或gitcafe的gitpages时重复输入用户名密码的解决办法"></a>使用hexo时deploy部署网站到github或gitcafe的gitpages时重复输入用户名密码的解决办法</h1><p>========================================================</p>
+<p>2015年11月24日 18:37:01 <a href="https://me.csdn.net/yongf2014" target="_blank" rel="noopener">yongf2014</a> 阅读数：1690</p>
+<p>版权声明：欢迎转载，欢迎扩散，但是转载时请在显眼位置标明作者以及原文出处，谢谢合作！ <a href="https://blog.csdn.net/yongf2014/article/details/50016841" target="_blank" rel="noopener">https://blog.csdn.net/yongf2014/article/details/50016841</a></p>
+<p>前言<br>–\<br>在Windows上使用git来deploy到gitcafe服务器上的时候，每次都要填写用户名/邮箱、密码，灰常烦人有木有。关键是我的电脑上已经设置了SSH了。</p>
+<p>使用SSH<br>—–\<br>后面发现，是hexo中配置文件中deploy部分设置的问题，将deploy部分设置成下面的样式就行了（注意替换）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">deploy</span><br><span class="line">    type: git</span><br><span class="line">    repository: git@gitcafe.com:your_username/your_username.git</span><br><span class="line">    branch: gitcafe-pages</span><br><span class="line">    message: update</span><br><span class="line">```\</span><br><span class="line">注意替换！注意替换！注意替换！重要的事情说三遍。\</span><br><span class="line">但是，设置为上述的之后，每次`hexo deploy`的时候，不用输入用户名了，不过还是要输入密码（passphrase），还是不完美\</span><br><span class="line">目前，还没找到更好的使用SSH的方法。如果你有更好的方法，望留言共享</span><br><span class="line"></span><br><span class="line">使用HTTTPS</span><br><span class="line">--------\</span><br><span class="line">之后，经过查证，也可以使用HTTPS，而且，经过[Zipperary大神](http://zipperary.com/2013/05/26/ssh-errors-with-github/ &quot;关于解决这个问题的博文&quot;)的博文，解决了这个问题。\</span><br><span class="line">要使用这种方法，请确保你的deploy设置为如下格式：</span><br></pre></td></tr></table></figure>
+<p>deploy<br>    type: git<br>    repository: <a href="https://gitcafe.com/your_username/your_name.git" target="_blank" rel="noopener">https://gitcafe.com/your_username/your_name.git</a><br>    branch: gitcafe-pages<br>    message: update</p>
+<pre><code>
+</code></pre><h1 id="将Cmder添加到系统右键菜单中"><a href="#将Cmder添加到系统右键菜单中" class="headerlink" title="将Cmder添加到系统右键菜单中"></a>将Cmder添加到系统右键菜单中</h1><p>===========================</p>
+<p>2017年03月22日 09:15:34 <a href="https://me.csdn.net/hicoldcat" target="_blank" rel="noopener">李留白</a> 阅读数：24385更多</p>
+<p>个人分类： <a href="https://blog.csdn.net/hicoldcat/article/category/6462769" target="_blank" rel="noopener">开发工具</a></p>
+<p>版权声明：本文为博主原创文章，未经博主允许不得转载。 <a href="https://blog.csdn.net/hicoldcat/article/details/64904652" target="_blank" rel="noopener">https://blog.csdn.net/hicoldcat/article/details/64904652</a></p>
+<p>每次用camder手动一层一层的进入目标文件夹，是一件很麻烦的事儿。所以，将camder添加到系统右键菜单是个很好地解决方法。</p>
+<p>1、把 Cmder 加到环境变量\<br>把Cmder.exe存放的目录添加到系统环境变量；\<br>加完之后,Win+r一下输入cmder,即可。</p>
+<p>2、添加 cmder 到右键菜单：环境变量添加后，在任意文件夹中即可打开Cmder，上一步的把 Cmder 加到环境变量就是为此服务的, 在管理员权限的终端输入以下语句即可:\<br><code>Cmder.exe /REGISTER ALL</code></p>
+<p>3、为Cmder.exe创建快捷方式，右击Cmder.exe选择”创建快捷方式”点击即可，以后打开Cmder.exe只要点击桌面对应的快捷方式即可</p>
+]]></content>
+      
+        
+        <tags>
+            
+            <tag> 技术 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[伤心者]]></title>
+      <url>/2019/04/21/%E4%BC%A4%E5%BF%83%E8%80%85/</url>
+      <content type="html"><![CDATA[<p>　　</p>
+<h1 id="《伤心者》"><a href="#《伤心者》" class="headerlink" title="《伤心者》"></a>《伤心者》</h1><p><img src="/2019/04/21/伤心者/images/伤心者.jpg" alt="伤心者"><br>　　（2003年银河奖特等奖）</p>
+<p>　　上午的菜场正是最繁忙的时候，我看着夏群芳穿过拥护的人群-她的背影很臃肿。隔着两三米的距离我看不清她买了些什么菜，不过她跟小贩们的讨价还价声倒是以听得很清楚。从这两天的经历我知道小贩们对夏群芳说话是不太客气的，有时候甚至于就是直接的奚落。不过我从未见过夏群芳为此而表现出生气什么的，她似乎只关心最后的结果，也就是说菜要买得合算，至于另的事情至少从表面上看去她是不计较的。现在她已经买完菜准备离开，我知道她要去哪儿。</p>
+<p>　　这座城市的四月是最漂亮的时候，各个角落里都盛开着各种各样的花。气候不冷也不太热，老年人皮帽还没取小姑娘们就钻空在天气晴朗的时候迫不及待地穿起了短裙，这本来就是乱穿衣的时候呢。“乱花渐欲迷人眼”在这样的季节里成了不折不扣的双关说话。</p>
+<p>　　夏群芳对街景显然并没有欣赏的打算，她只是低着头很费劲地朝公共汽车站的方向走，装满蔬菜的篮子不时和她短胖的小腿撞在一起，使得她每走几步就会有些滑稽地打个趔趄。道路两旁的行道树都是清一色的塔松，在这座温带城市里这种树比原产地要长得快，但木质也相对要差一些。夏群芳今天走的路线与平时稍有不同，因为今天是星期天，她总是在这个时候到C大去看她的儿子何夕。</p>
+<p>　　由于历史的原因，C大的校园网被一条街道分成了两个部分，在这条街上还开着一路公共汽车。夏群芳下车后进入校园的东区，现在是上午十点，她直接朝着图书馆的方向走去，她知道这个时候何夕肯定在那里。同样由于历史的原因，C大的图书馆有两个，分别位于东西两个区。实际上C大的东西两区曾经是两所独立的高校，用校方的语言来说这两所学校是合并，但现在的校名沿用了东区的，所以当年从西区那所学校毕业的不少学生常常戏称自己是亡校奴并只对西区的那所学校寄予母校的情怀。何夕严格来讲也该算是亡校奴，不过何夕是在合并后才开始攻读C大的硕士学位，所以在何夕心中母校就是东区和西区的整体。<br><a id="more"></a><br>　　何夕坐在东区图书馆底楼的一个角落里悄悄地注视着他，窗外的人就是何夕的母亲夏群芳，她饶有兴趣看着聚精会神的何夕，汗津津的脸上荡漾着止不住的笑意。我看得出她有几次都想拍打窗户打个招呼，但她伸出手却最终犹豫了。</p>
+<p>　　倒是临近窗户坐着的两个漂亮女生发现了窗外的夏群芳，她们有些讨嫌地白了她几眼。</p>
+<p>　　夏群芳看懂了她们的这种眼神，不过好心情好不和她们计较，她有个读硕士的儿子呢，夏群芳在单位里可风光了。想到单位，夏群芳的心情变得有些差，她已经四个月没有从那个单位拿到钱了。当然她四个月并没有去上班，她下岗了，现在摆着个杂货铺，按照夏群芳一向认为合理的按劳取酬的原则，她觉得这也是很自然的事情。夏群芳在窗外按惯例站了二十来分钟，她的表情显得心满意足。我算了一下，为了这一语不发的二十分钟夏群芳提着十来斤东西多绕了五公里路，这种举动虽然不是经济学家的合理行为，但是却是夏群芳的合理行为。</p>
+<p>　　其实今天夏群芳是最没有理由来看何夕的，因为今天是星期天，何夕虽然住校但是星期天总是会回家一趟。不过他不会在家里住，吃过晚饭又不会回学校。何夕知道在何夕的心里学校比家好，不过对于这一点夏群芳并不在意，只是儿子觉得高兴她也就高兴。夏群芳永远都不会知道此刻摊放在何夕面前的那部大部头里有什么吸引人的东西，但很肯定的是每当夏群芳看到儿子聚精会神地沉浸在书中的时候她的心里就一种没来由的欣慰感。这种感觉差不多在何夕刚小学的时候就成型了。她以前就从探究何夕读的是本什么书，更不用说现在何夕读的那些英文原著。从小到大何夕在学业上的事情都是自己做入，甚至包括考大学填志愿选专业，以及当后来大学毕业时由于就业形势不好又转回去读硕士时等等都是如此。想起儿子前年毕业时四处奔波求职时的情形，夏群芳就感到这个世界变化得实在太快，她从没有想到过大学生也有难找工作的一天，在夏群芳的心里这简直无异于天方夜谭。有个同事对夏群芳说这算啥，人家发达国家早就有这种事情了，说话的时候那人脸上有幸灾乐祸的神情。不过事实却肯定地告诉夏群芳的确没有一个好单位肯要她心中无比优秀的儿子何夕，她隐约地听说这似乎和何夕的专业不好有关。不过在夏群芳看来何夕的专业蛮好的，好象叫做什么什么数学。在夏群芳看来这个专业是挺有用的，哪个地方都少不了要写写算算，写写算算可不就是什么什么数学嘛。夏群芳有一次忍不住把自己的想法讲给何夕听，但何夕只是淡淡地笑了一下。夏群芳的心中早就有了主见，自己的儿子可没有什么不好，儿子的专业也是顶好，那些不会用人的单位是有眼无珠，迟早要后悔死的。夏群芳有时候没事就在相有一天等何夕读完硕士后找个好工作一定要气气当初那些不识好歹的人，想到得意处便笑出声来。夏群芳有些不舍地又回头看了眼专心看书的儿子，然后才满怀踏实地欣欣然离去了。</p>
+<p>　　何夕抬起头来，向着我站的方向看过来。我愣了一下，立刻醒悔到他是在看夏群芳的背影。这里坐在窗边的那两个女生开始议论说刚才那个在外边傻乎乎看了半天的人不知是谁，何夕有些恼怒地瞪了她们一眼。他其实很早就知道母亲站在窗户外注视着自己，在他的记忆里母亲几乎每个星期天的上午都会到学校的图书馆来看自己看读书。何夕知道母亲之所以选在这一天来纯粹是前几年的习惯所致，实际上母亲现在的每一天都可以说是假日，因为她下岗了。何夕看着母亲远去的背影叹了口气，他觉得自己的情形也差不了多少。有时候何夕的心里会隐隐地升起一股对母亲埋怨，他觉得母亲实在太将就自己了。从小到大的许多事情她几乎都由何夕自己做主，如果当初母亲能够在选择专业上不要过分顺从自己就好了。何夕摇摇头，觉得自己不该这样埋怨母亲，他其实知道母亲并不是不想帮自己，而是实在没有这方面的见识。</p>
+<p>　　何夕看了下表，急促地向窗外扫视了一下。按理说江雪应该来了，他们说好上午十一点在图书馆里碰面的。何夕简单收拾了一下朝外面走去，刚到门口里就看到了江雪。</p>
+<p>　　和何夕比起来江雪应该算是现代青年了，单从衣着上讲江雪就比何夕领先了五年。这样讲好象不太准确，应该说是何夕落后了五年，因为江雪的打扮正是眼下最时兴的。发型是一种精心雕琢出来的叫做“随意”的新样式，脑后用丝质手绢绾了个小巧的结，衬出她粉白的面庞益发地清丽动人。看着那条手绢何夕心里感到一阵温暖，那是他送给江雪的第一件礼物。手绢上是一条清澈的江河，天空中飘着洁白的雪花，他觉得这条手娟简直就是为江雪定做的一样。看到他们俩人走在校园里的背影很多人都会以为是一个学生在向老教授请教问题，不过江雪并不觉得这样有什么不妥，尽管要好的几个女生提到何夕时总是开玩笑地问“你的老教授呢”。小时她和大她两岁的何夕是邻居。有过一些想起来很温謦的儿时回忆。后来由于母亲的工作变动而分开了，但却很巧地在十多年后的C大又遇上了。当时江雪碰到了迎面而来的何夕，两人不约而同地喊道”哎，你不就是……哎…</p>
+<p>　　“…那个……哎吗”，等到想起对方名字后两人都大笑起来，所以后来两人还常常大声地称呼对方为“那个哎”。江雪觉得何夕和自己挺合得来，别人的看法她并不看重，她知道几个计算机系还有高分子材料系的男生在背地里说他们是鲜花和牛粪。在江雪看来何夕并不像外界所认为的那样是一个迂腐的书呆子，恰恰相反，江雪觉得何夕身上充满了灵气。给江雪印象最深的是何夕的眼睛，在此之前她从未见过谁拥有这样一双睿智的眼睛，看到这双眼睛的时候江雪总止不住地想有着这样一双眼睛的人一定是不平凡的。</p>
+<p>　　每当看到江雪的时候何夕的心情就变得好，实际上也只有这时候他才有如释重负的感觉。何夕很小就知道自己的性格缺陷。当他手里边有事情没有完成的时候总是放不下，无论做别的什么事情总还惦记着先前的那件事。他本以为自己这辈子都是这种性格了，但江雪的出现改变了一切。和江雪在一起时他也不知道为什么自己就像换了一个人，那些不高兴的事，那些未完成的事都可以抛在脑后，甚至包括“微连续”。一想到“微连续”何夕不禁有些分神，脑子里开始出现一些很奇特的符号。但也立刻收回了思想，实际上只有在江雪到来时才收回了思想，实际上只有江雪到来时他才会这样做，同时也只有在江雪到来时他才做得到这一点。江雪注意到何夕一刹那的走神，在她的记忆里这是常有的事。有时大家玩得正开心的时候何夕却很奇怪地变得无声无息，眼睛也很飘渺地盯住虚空中的不知什么东西。这种情形一般不会持续很长，过了一会儿何夕会自己“醒”过来，就像从睡梦中醒来一样。这样的情况多了大家也就尖意了，只把这理解成每个人都可能有的怪僻之一。</p>
+<p>　　“先到我家午饭，我爸说要亲自做拿手菜。”江雪兴致很高地提议，“下午我们去滑旱冰，老麦才教了我几个新动作。”何夕没有马上表态，眼前浮现出的是老麦风流倜傥的样子来。老麦是计算机系的硕士研究生，也算是系里的几个大才子之一，当初同位居几大佳人这列的江雪本来就开始有了那么一点意思，但是何夕出现了。用老麦的话来说就是“自己想都想不到会输给了江雪的儿时回忆”。渤老麦却是一个洒脱之人，几天过后便又大大咧咧地开始约江雪玩，当然每次都很君子地邀请何夕一同前往。从这一点讲何夕对老麦是好感多于提防，不过有时候连何夕自己也不得不承认老麦和江雪站一起的时候显得那样协调，无论是身材相貌还是别的，这个发现常常令何夕一连几天都心情黯然。但是江雪的态度却是极其鲜明，她毫不掩饰自己对何夕的感情。有一次老麦有点不屑地说“小孩子的感情靠不住”，结果江雪出人意料地激动了，她非要老麦为这句话道歉，否则就和他绝交，结果老麦只得从命。</p>
+<p>　　当时老麦的脸上虽然仍旧挂着笑，但何夕看得出老麦差点儿就扛不住了。在这件事情之后老麦便再也没有作任何形式的“反扑”-如果那算是一次反扑的话。</p>
+<p>　　何夕在犹豫要不要答应江雪，他每个星期天都答应母亲回家吃晚饭的，如果去滑旱冰晚上就赶不到回去吃饭的时间了。但是江雪显然对下午的活动兴致很高，何夕还在考虑的时候江雪已经快乐地接着他朝她家跑去，那是位于学校附近的一套商品房。路上江雪银玲一样美妙的笔声驱跑了何夕心中最后的一丝犹豫。</p>
+<p>　　江北园解下围裙走出厨房，饶有兴致地看着江雪很难称得上娴淑的吃相。退休之后他简直可称为神速地练就了一手烹调手艺，高兴得江雪每次大快朵颐之后都要大放厥词称他本来就不该是计算机系的教授而应当是一名厨师。也许正是江雪的称赞使他终于拒绝了学校的聘请。何夕有些局促地坐在江雪的身旁，半天也难得动一下筷子。江家布置得相当有品味，如果稍作夸张的话可称得上一般性的豪华。以江北园的的眼光来看何夕比以前常来玩的那个叫什么老麦的小伙子要害羞得多，不知道性格活泼的江雪怎么会做出这样的选择。不过江北园知道世上有些事情是不能够讲道理的，女儿已经长大了，家里人已经不能像以前那样代她去作判断了。</p>
+<p>　　“听小雪说你是数学系的硕士研究生。”江北园问道。</p>
+<p>　　何夕点点头：“我的导师是L.”“L.”江北园念叨着这个名字，过了一会有些不自然地笑笑说，“退休后我的记忆不如以前了。”何夕有脸微微发红：“我们系的老师都不太有名，不像别的系。以前我们出去时提起他们的名字很多人都不熟悉，所以后来我们都不提了。”江北园点点关，何夕说的是实情。现在C大最有名的教授都是诸如计算机系外语系电力系的，不仅是本校，就连外校和外单位的人都知道他们的大名-有些是读他们的编写的书，有的是使用他们开发的应用系统。不久前C大出了件闹得沸沸扬扬的事情，一位学生发明的皮革鞣制专利技术被一家企业以七百万花买走，而后皮革系的教授们也荣升这一行列。</p>
+<p>　　“你什么时候毕业。”江北园问得很仔细。</p>
+<p>　　“明年春季。”何夕慢吞吞地挟了一口菜，感觉并不像江雪说的那样好吃。</p>
+<p>　　“联系到工作没有。”江北园没有理会江雪不满的目光，“已经没有多少时间了。”何夕的额头渗出了细小的汗珠，他觉得嘴里的饭菜都味同嚼腊。“现在还没有。我正在找，有两家研究所同我谈过。另外刘教授也问过我愿不愿意留校。”江北园沉吟了半晌，老实说何夕的回答只是让他放心但并没有让他欢心。他转头看着笑咪咪的女儿，她正一眼不眨地盯着何夕看，仿佛在做研究。</p>
+<p>　　“你有没有选修其它系的课程？”江北园接着问。</p>
+<p>　　“老爸，”江雪生气地大叫，“你要查户口吗？又不是你同何夕谈恋爱，问那么多干嘛？”</p>
+<p>　　江北园立时打住，过了一会儿说：“我去烧汤。”汤端来了，冒着热氯。没有人说话，包括我。</p>
+<p>　　老麦姿态优美地滑过一圈弧线，劝作如行云流水般酣畅。何夕有些无奈地看着自己脚下凭空多出来的几只轮子，心知自己决不是这块料。江雪本来一手牵着何夕一手牵着老麦，但几步下来便不得不放开了何夕的手-除非她愿意陪着何夕练摔筋斗的技巧。</p>
+<p>　　这是一家校外叫做“尖叫”的旱冰场，以前是当地科协的讲演厅，现今承包给个人改装成了娱乐场。条件比在学校里的要好许多，当然价格是与条件成正比的。由于跌得有些怕了，何夕便没有上场，而是斜靠着圈栏很有闲情般地注视着场内嬉戏的人群。当然，他目光的焦点是江雪。老麦正在和江雪练习一个有点难度的新动作，他们在场里穿梭往来的时候就像是两条在水中翩游弋的鱼。这个联想让何夕有些不快。</p>
+<p>　　江雪可能玩得累了，她边招手边朝何夕滑过来，到眼前时却又突然打了一个三百六十度的急旋方才稳稳停住。老麦也跟着过来，同时举手向着场边的小摊贩很潇洒地打着响指。于是那个矮个子服务生忙不迭地递过来几听饮料，老麦看着牌子满意地笑着说你小子还算有点记性。</p>
+<p>　　江雪一边擦汗一边啜着饮料，不时仰起神采飞扬地同老麦扯几句溜冰时的趣事。你撞着那边穿绿衣服的女孩好几次，江雪指着老麦的鼻尖大声地笑着说，别不承认，你肯定是有意的。老麦满脸无辜地摇头，一副打死也不招的招势，同时求救地望着何夕。何夕觉得自己在这个问题上帮不了老麦，只好装糊涂地看着一边。算啦，江雪笑嘻嘻地摆摆手，我们放过你也行，不过今天你得买单。老麦如释重负地抹抹汗说，好啦，算我蚀财免灾。何夕有点尴尬地看着老麦从兜里掏出钱来，虽然大家是朋友，但他无法从江雪那种女孩子的角度反这看作一件理所当然的事，至少有一点，他觉得他总是由老麦做东是一件令他难以释怀的事。但想归想，何夕也知道自己是无力负担这笔开支的。老麦家里其实也没有给他多少生活费，但是他的导师总能揽到不少活，有些是学校的课题，但更多的是帮外面的单位做系统。比方说一些小型的自动控制，或是一些有关模式识别方面的东西，以及帮人做网页，甚至有些根本就是组一个简单的计算机局域网，虽然名称叫做什么综合布线。这所名校的声誉给他们招来了众多客户，在老麦看来他们都是些对高校充满盲目迷恋的外行。很多时候老麦要同时开几处工，虽然他所得的只是导师的零头，但是已足够让他的经济水准在学生中居于上层了，不仅超过何夕，而且肯定也超过了何夕的导师刘青。在何夕的记忆里除了学校组织的课题之外他从未接到过别的工作，何夕有一次闲来无事的时候把自己几年参与课题所得加总在一起之后发现居然还差一块钱才到一千元。接下来的几小时里何夕简直动破了脑筋想要找出自己可能忽略了收以便能凑个整数，但直到他启用了当代数学最前沿的算法也没能再找出哪怕是一分钱。</p>
+<p>　　“今天玩得真高兴。”江雪意犹未尽地擦拭着额上的汗水。老麦正在远处收费处结帐，不时和人争论几句。何夕默不作声地脱着脚上的旱冰鞋，他这才感到这双脚现在又重新属于自己了。</p>
+<p>　　“四点半不到，时间还早呢。”江雪看表，“要不我们到’金道’保龄球馆去。”何夕迟疑了片刻：“我看还是在学校里找个地方玩吧。”江雪摆头，乌黑的长发掀起了起伏的波浪：“学校里没有什么好玩的，都是些老花样。还是出去好，反正有老麦开钱。”何夕的脸突然涨红了：“我觉得老让别人付钱不好。”江雪诧异地盯着何夕看：“什么别人别人的，老麦又不是外人。他从来不计较这些的。”</p>
+<p>　　“他不计较可我计较。”何夕突然提高了声音。</p>
+<p>　　江雪一怔，仿佛明白了何夕的心思。她咬住嘴唇，有些不知所措地看着四周。这时老麦兴冲冲地跑回来，眼前的场面让他有些出乎意料。“怎么啦？”老麦笑嘻嘻地问“你们俩在生谁的气？”他看看表，“现在回去太早啦，我们到’金道’去打保龄球怎么样？”何夕悚然一惊，老麦无意中的这句话让他心里发冷。又是“金道”，怎么会这么巧，简直就像是-心有灵犀。他看着江雪不想正与她的目光撞个正着，对方显然明白了他的内心所想-她真是太了解他了，江雪若有所诉的眼光像是在告白。</p>
+<p>　　“算了。”何夕叹了口气，“我今天很累了，你们去吧。”说完他转身朝室外走去。</p>
+<p>　　江雪倔强地站在原地不动，眼里滚动着泪水。</p>
+<p>　　“我去叫他回来。”老麦说着话转身欲走。</p>
+<p>　　“不用了。”江雪大声说，“我们去’金道’。”我正意识地挡在何夕的面前，但是他笔直地朝我压过来并毫无阻碍地穿过了我的身躯。</p>
+<p>　　十八英寸电视里正放着夏群芳一直看着的一部电视连续剧，但是她除了感到那些小人儿晃来晃去之外看不出别的。桌上的饭菜已经热了两次，只有粉丝汤还在冒着微弱的热气。夏群芳忍不住又朝黑漆漆的窗外张望了一下。</p>
+<p>　　有电话就好了，夏群芳想，她不无紧张地盘算着。现在安电话是便宜多了，但还是要几百块钱初装费，如果不收这个费就好了。夏群芳想不出何夕为什么这么晚没有回来吃饭，在印象中这是从来没有的事情。何夕只要答应她的事情从来都是作数的，哪怕只是像回家吃饭这样的小事，这是他们母子多年来的默契。夏群芳又看了眼桌上的饭菜，她没有一点食欲，但是靠近心口的地方却隐隐地有些痛起来。夏群芳撑起身，拿瓢舀了点粉丝汤，而就在这个时候门锁突然响了。</p>
+<p>　　“妈。”何夕推着门就先叫了声，其实这时他的视线还被门挡着，这只是许多年的老习惯。</p>
+<p>　　夏群芳从凳子上站起来，由于动作太急凳子被碰翻在地。“怎么这么晚才回来？”虽然是责备的意思但是她的语气却只有欣喜了，“饿了吧，我给你盛饭。”何夕摆摆手：“我在街上吃过了，有同学请。”夏群芳不高兴了，“叫你少在街上乱吃东西的，现在流行病很多，还是学校里的干净。你看对门家的老二就是在外不注意染上肝炎的……”夏群芳自顾自地念叨着，她没有注意到何夕有些心不在焉。</p>
+<p>　　“我知道啦。”何夕打断她的话，“我回来拿衣服，还要回学校去。”夏群芳这才注意到何夕的脸有些发红，像是喝了点酒，她有些不放心地问：“今天就不回学校了吧？都八点钟了。”何夕环视着这套陈设简陋的两居室，有好一会儿都没有出声。“晚上刘教授找我有事。”他低声说，你帮我拿衣服吧。“夏群芳不再有话，她转身进了里屋，过了几分钟拿着一个撑得鼓鼓的尼龙包出来。何夕检视了一下，朝外拎出几件厚毛衣：”都什么时候了还穿得住这些。“夏群芳大急，又一件件朝口袋里塞：”带上带上，怕有倒春寒呢。“何夕不依地又朝外拎，他有些不耐烦：”带多了我没地方放。“夏群芳万分紧张地看着何夕把毛衣统统扔了出来，她拿起其中一件最厚的说：”带一件吧，就带一件。”何夕无奈地放开口袋，夏群芳立刻手脚麻利地朝里面塞进那件毛衣，同时还做贼般地往里面多加了一件稍薄的。</p>
+<p>　　“怎么没把脏衣服拿回来。”夏群芳突然想起何夕是空手回来的。</p>
+<p>　　“我自己洗了。”何夕转身欲走。</p>
+<p>　　“你洗不干净的。”夏群芳嘱咐道，“下次你还是拿回来洗，你读书已经够累了。再说你干不来这些事情的。”“噢。”何夕边走边懒懒地答应着。</p>
+<p>　　“别忙，”夏群芳突然有大发现似地叫了声，“你喝口汤再走。喝了酒之后是该喝点热汤的。”她用手试了一下温度，“已经有点冷了，你等几分钟我去热一下。”说完她端起碗朝厨房走去。等她重新端着碗出来时却发现屋子里已经空了。</p>
+<p>　　“何夕。”她低声唤了声，然后目光便急速地搜寻着屋子，她没有见到那两件已经塞进包里的毛衣，这个发现令她略感放心。这里一阵突如其来的灼痛从手上传来，装着粉丝的碗掉落在地上发出了清脆的响声。</p>
+<p>　　夏群芳吹着手，露出痛楚的表情，这使得她眼角的皱纹显得更深。然后她进厨房里拿拖把。</p>
+<p>　　我站在饭桌旁，看着地上四处横流的粉丝汤，心里在想这个汤肯定好喝至极，胜过世上所有的美味珍稀。</p>
+<p>　　刘青关上门，象征性地隔绝了小客厅里的嘈杂，在这种老式单元房里的声音是可以四处周游的。学校的教师宿舍就这个条件，尤其是数学系，不过还算过得去吧。</p>
+<p>　　何夕坐在书桌前，刚才刘青的一番话让他有些茫然。书桌上放着一叠足有五十厘米高的手稿，何夕不时伸出手去翻几页，但看得出他根本心不在焉。</p>
+<p>　　“我已经尽力了。”刘青坐下来说，他无不爱怜地看着自己最得意的学生。</p>
+<p>　　“我为了证明它花费了十年时间。”何夕注视着手稿，封面上是几个大字-微连续原本，“所有最细小的地方我都考虑到了，整个理论现在都是自治的，没有任何矛盾的地方。”何夕咽了口唾沫，喉结滚动了一下，“它是正确的，我保证，每一个定理我都反复推敲过多次，它是正确的。现在只差最后的一个定理还有些意义不明确，我正试图用别的已经证明过的定理来代替它。”刘青微微叹口气，看着已经有些神思恍惚的何夕：“听老师的话，把它放一放吧。”“它是正确的。”何夕神经质地重复着。</p>
+<p>　　“我知道这一点。刘青说，”你提出的微连续理论及大概的证明我都看过了，以我的水平还没有发现有矛盾的地方，证明的过程也相当出色，充满智慧。说实话，我感到佩服。</p>
+<p>　　“刘青回想着手搞里的精彩之处，神情不禁有些飞扬-无论如何这是出自他的学生之手，有一句话刘青没有说出来，那就是他并没有完全看懂手搞。许多地方作的变换式令他迷惑，还有不少新的要领的东西也让他接受起来相当困难。换言之，何夕提出的微连续理论似乎是一套全新的东西，它不能归入以往的任何一个体系里去。</p>
+<p>　　“问题是，”刘青小心地开口，他注视着何夕的反应，“我不知道它能用来干什么。”何夕的脸上立刻变得发白，他像是被什么重物击中了一般，整个人都蔫了一头。过了半晌他才回过神来强调说：“它是正确的，我保证。”他仿佛只会说这一句话了。</p>
+<p>　　“我们的研究终究要获得应用才是有意义的，否则只能误入为数学而数学的歧途。”“可它看起来是那样的和谐。”何夕争辩道，“充满了既简单又优美的感觉。老师，我记得你说过的，形式上的完美往往意味着理论上的正确。”刘青一怔，他知道自己说过这段话，也知道这段话其实是科学巨匠爱因斯坦的经验之谈。他不否认微连续理论符合这一点，当他浏览着手稿的时候内心的确有种说不出的充满和谐的感受，就像是在听一场完全由天籁之声组成的音乐会。</p>
+<p>　　但问题的症结在于他实在看不出来这套理论会有什么用。自从两个月前何夕第一次向他展示了微连续理论的部分内容后他一直关心这个问题，这段时间他经常从各种途径查找这套理论可能获得应用的范畴，但是他失败了。微连续理论似乎跟所有领域的应用都沾不上边，而且还同主流的数学研究方向背道而驰。刘青承认这或许是一套正确的理论，但却是一套无用的正确理论。就好比对圆周率的研究一样，现在据称已经推算到小数点后几亿位了，而且肯定是正确的，但是这也肯定是无意义的。</p>
+<p>　　“想想中国古代的数学家祖冲之，他只是把圆周率推算到小数点后几位，但他对数学的贡献无疑要比现在那些还在为小数点后几亿位努力的人大得多。”刘青幽幽地说，“因为他做的才是有意义的工作，而不是纯粹的数学游戏。”何夕有些发怔，他听得出刘青话中的意思。“我不同意。”何夕说，“老师，你知不知道，许多年前的某个清晨我突然想到了微连续，它就像是一只无中生有的虫子般钻进了我的脑子。那里它只是一个朦朦胧胧的影子，这么多年来我为了证明它费尽心力。现在我就要完成了，只差最后一点点。”何夕的眼神变得飘渺起来，“也许再有一个月……”刘青在心里轻叹一所，他看得出何夕已经执迷太深。何夕是他所见过的最聪明的数学奇才，按刘青私下的想法，何夕的水平其实可以给这所名校所有的数学教授当老师，他深信只要假以时日何夕必定会是将来数学领域内的一朵奇葩。而现在何夕却误入歧途，陷在了一个总是里，这个情形是刘青忍不住回想起很多年前的自己，那时他也常常因为一些磨人但却无用的数学谜题而废寝忘食形销骨立。但是何夕没有看到问题的关键，刘青知道自己作为师长有义务提醒这一点，尽管这显得很残酷。</p>
+<p>　　“你想过微连续理论可能应用在什么领域吗？我是说，即使作最大胆的想像。”刘青尽量合自己的声音柔和些，虽然他知道这并没有什么用。</p>
+<p>　　何夕全身一震，脸色变得一片苍白。“我不知道。”他说，然后抱住了头。</p>
+<p>　　我看到何夕脚下铺着劣质瓷砖的地面上涸出了一滴水渍。</p>
+<p>　　“这两天我没和江雪在一起。”老麦低声说，坐在桌子对面的他的目光有些躲闪。</p>
+<p>　　何夕有点愤怒地盯着老麦：“你这算是什么意思。江雪和我吵架只是我们两个人的事，你这样做是趁人之危。”老麦啜口茶，眼里升起无奈的神色：“我的确没和江雪在一起。不过我猜想她可能是和老康在一起。”“谁是老康？”何夕问，他在脑子里搜索着。</p>
+<p>　　“老康是一家规模不小的计算机公司的老板，那天你和江雪闹别扭之后我们在保龄球馆碰上的。大家是校友，自然谈得多一样。”老麦不无称羡地说，“听说……”他突然打住，目光看向窗外。</p>
+<p>　　何夕回头，江雪从一辆漂亮的宝蓝色小车上下来，她身边一位胖乎乎的年轻人正在锁车。何夕还没想好该怎么办的时候江雪已经很高兴地叫起来：“真巧啊，你们两个也在这儿。”江雪兴奋得满脸发红，她拉着身边的那个人进屋来，对何夕说：“这是康-”她突然一滞，有些发窘地问道，“你叫康什么来着？算啦，我还是叫你老康吧。”然后她指着何夕说，“这是何夕，我的男朋友-”她似乎觉得不够，又补上一句说，“数学系的高材生。”“数学系-”老康上下打量着看上去有些猥琐的何夕，伸出手说，“常听小雪提起你。”小雪？何夕心里咯噔了一下，他看了眼江雪，她却是若无其事的样子。“怎么不回我的传呼？”何夕带点气地说。</p>
+<p>　　“让你也急一下。”江雪的表情有些调皮，“谁叫你净气我。好啦，现在让你急了两天，我们俩算是扯平了。今天大家新认识，应该找个地方大吃一顿作为庆祝。我看看，”她煞有介事的盯着三个男人看，然后指着老康说，“我们几个数你最肥，你顿肯定你请啦。”老麦不依地说：“以前请客都是我的专利，这次还是我吧。”老康的表情有些奇怪，他死盯着何夕的脸，仿佛在作某种研究。江雪碰碰他的胳膊：“你干嘛，老盯着何夕看。”“我同何夕做不了朋友啦。”老康突然说，语气很是无奈，“我们是情敌，注定要一决高下。”“你说什么？”江雪吃了一惊，她的脸立时红了，“何夕是我的男朋友，你不该这样想。”</p>
+<p>　　“我怎么想只有我自己能够决定。”老康咧嘴一笑，目光死死地看着江雪，直到她低下头去。他转头看着何夕说：“我喜欢江雪。”何夕觉得自己的头有点晕，眼前这个胖乎乎的人让他乱了分寸。情敌？这么说他们之间是敌人了，至少人家已经宣战了。何夕感到自己背上已经沁出了汗水，他不知道下一步该做什么，末了他采取了一个也许是最蠢的办法。何夕转头对江雪说：“我该怎么办？”</p>
+<p>　　江雪镇定了些，她正色道：“何夕是我男朋友，我喜欢他。”老康看上去并不意外：“如果你是那种轻易移情别恋的女孩的话我也不会像现在这样喜欢你了。”他举起一只手，服务生跑过来问有什么事。“去替我买九十九朵玫瑰，要最好的。”老康拿出钱。</p>
+<p>　　何夕剧烈地喘着气，他从严没有遇到过这样的事情，这简直就像是戏剧里的情节。“那好吧。”何夕吐出口气，“既然你要和我一决高下的话我一定奉陪。”何夕突然觉得这样的话说起来也是很顺口的，仿佛天生他就最擅长这个。</p>
+<p>　　“我不想待下去了。”江雪说，他的脸依然很红，“我们还是走吧。别人都在看我们。”服务生新送来两杯茶。老康吹了一声短促的口哨，站起身说：“今天的茶我来请。”出乎他的意料的是何夕突然粗暴地将他的手挡开，并且拿出钱说：“谁也不要争，我来。”</p>
+<p>　　何夕默不作声地看着夏群芳忙碌地收拾着饭桌，他不知道自己该怎么开口。</p>
+<p>　　“妈，你能不能帮我借点钱。”何夕突然说，“我要出书。”夏群芳的轻快的动作立时停下来。“借钱？出书？”她缓缓坐到凳子上，过了半晌才问，“你要借多少？”“出版社说至少要好几万。”何夕的语气很低，“不过是暂时的，书销出去就能还债的。”</p>
+<p>　　夏群芳沉默地坐着，双手拽着油腻的围裙边用力绞结。过了半晌她走进里屋，一阵“悉悉卒卒”的响动之后她拿着一本存折出来说：“这是厂里买断工龄的钱，说了很久了，半个月前才发下来。一年九百四，我二十七年的工龄就是这个折子。你拿去办事吧。”她想说什么但没有出声，过了一会儿还是忍不住低声补充说，“给人家说说看能不能迟几个月交钱，现在取算活期，可惜了。”何夕接过折子，看了眼金额便朝外走：“人家要先见钱。”“等等-”夏群芳突然喊了声。</p>
+<p>　　何夕奇怪地回头问：“什么事？”夏群芳眼巴巴地看着何夕手里那本红皮折子，双手继续绞着围裙的边：“我想再看看总数是多少。”“25380，自己做个乘法就行了嘛。”何夕没好气地说，他急着要走。“我晓得了，你走吧。”夏群芳有点不好意思地说，她也觉得自己太罗嗦了。”……</p>
+<p>　　刘青有点忙乱地将桌面上的资料朝旁边抹去，但是何夕还是看到了几个字：研究生入学指南。何夕的眼神让刘青有些讪讪然，他轻声说：“是帮朋友的忙。你先坐吧。”何夕没有落座的意思。“老师。”他低声开口说，“你能不能借点钱给我，我想自己出书。”刘青没有显得意外，似乎早知道会有这事。过了几分钟他走回桌前整理着先前弄乱的资料，脸上露出自嘲的神情：“其实我两年前就在帮人编这种书了。编一章两千块，都署别人的名字。并不是人家不让我署这个名，是我自己不同意，我一直不愿意让你们知道我在做这事。”何夕一声不吭地站着，看不出他在想什么。刘青叹口气说：“我知道你想把微连续理论出书，但是，”他稍顿一下，“没有人会感兴趣的。你收不回一分钱。”“那你不打算借钱给我了？”何夕语气平静地问。</p>
+<p>　　刘青摇摇头：“我不愿意眼睁睁地看着你失败。到时候你会莫名奇妙地背上一身债务，再也无法解脱。你还这么年轻，不要为了一件事就把自己陷死在里面。我以前……”门铃突然响了，刘青走出去开门。让何夕想不到的是进门的人他居然认得，那是老康。</p>
+<p>　　老康提着一个漂亮的盒子，看来他是来探访刘青的。刘青正想作介绍，而何夕和老康已经面色凝重地握手了。“原来你们认识。”刘青高兴地搓着手，“这可好。我早有安排你们结识的想法了，在我的学生里你们俩可是最让我得意的。”何夕一怔，他记得老康是计算机公司的老板。老康理解地笑了笑说：“我是数学系毕业的，想不到会这么巧，这么说我算起来还是你的同门师兄。”他促狭地眨眨眼，“怎么样，知道孔融让梨的故事吧。”刘青自然不明白其中的曲折，他兴奋得仿佛年轻了几岁，四下里找杯子泡茶。老康拦住他说不用了，都不是外人。何夕在一旁默默地看着这一切，他看得出这个老康当年必定是刘青深爱的弟子。</p>
+<p>　　“老师。”何夕说，“你有客人来我就不耽搁了。我借钱的事……”刘青脸上的笑容不见了，他盯着何夕的脸，目光里充满惋惜：“你还是听我的话，放弃那些不切实际的想法吧。借钱出这样的理论专著是没有出路的。”他转头对老康解释道：“何夕提出一套新颖的数学理论，他想出书。”老康眼里闪过一个亮点，他插话道：“能不能让我看看，一点点就行。”何夕想了一下，然后从包里拿出几页纸递给老康。老康的目光飞快地在纸页上滑动着，口里念念有词。他的眉头时而紧蹙时而舒展，整个人仿佛沉浸到了那几页纸里。过了半天他才抬起头来，目光有些发呆地看着何夕：“证明很精彩，简直是音乐。”何夕淡淡地笑了，他喜欢老康这样的比喻。其实正是这种仿佛离题万里的比喻才恰恰表明老康是个内行。</p>
+<p>　　“我借钱给你。”老康很干脆地说，“我觉得它是正确的，虽然我并没有看得懂多少。”刘青哑然失笑：“谁也没说它是错的。问题在于这套理论有什么用，你能看出来吗？”老康找头，然后龇了龇嘴，“暂时没看出来。”他紧跟上一句，“但是它看上去很美。”老康突然笑了，因为他无意中说了王朔的小说名，眼下正浒。”不过我说借钱是算数的。</p>
+<p>　　“刘青突然说：”这样，如果你要借钱给何夕必须答应我一条，不准写借据。”何夕惊诧地看着刘青，印象中的老师从来都是温文有礼并且拘泥小节的，不知道这种赖皮话何以从他的口中冒出来。</p>
+<p>　　“那不行。”何夕首先反对。</p>
+<p>　　“非要写的话就把借方写成我的名字，我来签字。如果你们不照着我的话做的话就不要叫我老师了。”刘青的话已经没有了商量的作地。</p>
+<p>　　在场的人只有我不吃尺，因为我知道会发生什么样的事情。</p>
+<p>　　江雪默不吭声地盯着脚底的碎石路面，她不知道何夕会作出什么样的反应。从内讲如果何夕发一通脾气的话她倒还好受一些，但她最怕的是何夕像现在这样一言不发。</p>
+<p>　　“你说话呀，”江雪忍不住说，“如果你真的反对的话我就不出去了。很多人没有出去也干出了事业。”何夕幽幽地开口：“老康又出钱又给你找担保人，他为你好，我又怎能不为你着想。”“钱算是我借他的，以后我们一起还。”江雪坚决地说，“我只当他是普通朋友。”“我知道你的心意。”何夕爱怜地抚着江雪的脸。</p>
+<p>　　“等我出去站稳了脚你就来找我。”江雪憧憬地笑，“你知不知道，你是我见过的最聪明透顶的人。如果你是学我们这种专业的话早就成功立业了。我说是的真的。”江雪孩子式地强调，“你有这个实力。我觉得你比老康强得多。”何夕心里滑过一丝柔情：“问题是我喜欢我的专业。在我看来那些符号都是我的朋友，是那种仿佛已经认识了几辈子的感觉。只有见到它们我的心里才感到踏实，尽管它们不能带给我什么，甚至还让我吃苦头，但是我内心里有一个声音告诉我，这就是我降临到世上应该做的事情。”江雪调皮地刮脸：“好大的口气，你是不是还想说天将降大任于斯人也……”何夕叹口气：“我的意思是……”他甩甩头，“我入迷了，完全陷进去了。现在我只想着微连续，只想着出书的事。为了它我什么都顾不上了。就这个意思。”江雪不笑了，她有些不安地看着何夕的眼睛：“别这么说，我有些害怕。”何夕的眼睛在月光下闪过莹莹的亮点：“说实话我也害怕。我不知道明天究竟会怎样，不知道微连续会带给我什么样的命运。不过，我已经顾不上考虑这些了。”江雪全身一颤：“你不要用这种口气对我说话好吗，这让我觉得失去了依靠。”失去依靠？何夕有些分神，他有不好的预感。“别这样。”他揽住江雪的肩，“我们现在不是还好好的嘛。无论如何，”他深深地凝视着江雪姣好的面宠，“我永远都喜欢你。”江雪感受到了何夕温热的气息扑面而来，月色之中她柔软的唇像河蚌一样的微微翕开，漫天谜一样的星光下她的眼睛里充满泪水。</p>
+<p>　　这是个错误。我轻声说，但是热吻中的人儿听不到我的话。</p>
+<p>　　“我说服不了他们。”刘青不无歉疚地看着何夕失望的眼睛，“校方不同意将微连续理论列为攻关课题，原因是-”他犹豫地开口，“没有人认为这是有用的东西。你知道的，学校的经费很紧张，所以出书的事……”何夕没有出声，刘青的话他多少有所预料。现在他最后的一点期望已经没有了，剩下的只有自费出书这一条路了。何夕下意识地摸了一下口袋里的存折，那里母亲二十七年的工龄，从青春到白发，母亲连问都没有问一句就给他了。何夕突然有点犹豫，他不知道自己究竟有什么权力来支配母亲二十七年的年华-虽然他当初是毫不在乎地从母亲手里接过了它。</p>
+<p>　　“听老师的话。”刘青补上一句，“放弃这个无用的想法吧。还有很多有意义的事情值得去做，以你的资质一定大有作为的。”出乎刘青意料的是何夕突然失去了控制，他大笑起来，笑出了眼泪。“大有作为……难道你也打算让我编写什么研究生入学考试指南吗？那可是最有用的东西，一本书随便印上几万本，可以让我出名，可以让我赚大笔钱。”何夕逼视着刘青，他的目光里充满无奈，“也许你愿意这样可我没法让自己去做这样的事情。我不管您会怎么想，可我要说的是，我不屑于做那种事。”何夕的眼神变得有些狂妄，”微连续耗费了我十年的时光，我一定要完成它。是的，我现在很穷，我的女朋友出国深造的钱居然用的是另一个男人的钱。</p>
+<p>　　“何夕脸上的泪水滴到了稿纸上，”可我要说的是，没有什么力量能够阻止我。我只知道一点，微连续理论必须由我来完成，它是正确的，这是我的心血。“他有些放肆地盯着刘青，”我只知道这才是我要做的事情。“刘青没有说话，表情有些GANGA，何夕的讽刺让他没法再谈下去。”好吧。“刘青无奈地说，”你有你的选择，我无法强求你，不过我只想说一句-人是必须面对现实的。“何夕突然笑了，竟然有决绝的意味。”还记得当年你第一次给我们讲课时说的第一句话吗？“何夕的眼神变得有些飘渺，”当时你说探索意味着寂寞。那是差不多七年前的事情了，这么多年来我一直都记着这句话。“刘青费力地回想着，他不记得自己说过这话了，有很多话只是在某个场合随便说说罢了。但是他知道自己一定是说过这句话的，因为他深知何夕的记忆力非凡。七年，不算短的时间，难道自己真的已经改变？”“问题在于-”刘青试图作最后的努力，“微连续不是一个有用的成果，它只是一个纯粹的数学游戏。”“我知道这一点。是的，我承认它的的确确没有任何用处，老实说我比任何人都清楚这一点。”何夕平静但是悲怆地说，这是他第一次这样直接说出这句话。何夕没想到自己能够这样平静地表述这层意思，他以为根本是做不到的事情。一时间他感到心里似乎有什么东西在一点一点地破碎掉，碎成碴子，碎成灰尘。但他的脸上依然如水一样的平静。</p>
+<p>　　“可我必须完成它。”何夕最后说了一句，“这是我的宿命。”</p>
+<p>　　这段时间何夕一直过着一种挥金如土的日子。他的身上从来没有像现在这般阔气，往往随手一摸就是厚厚的一叠钞票。尽管从衣着上他还和以前一样寒酸，加上满脸的胡须，看上去显得老了一头。何夕每日里都匆匆地赶着路，神情焦灼而迫切，整个人都像是被某种预期的幸福包裹着。如果留意他的眼神的话会发现不少有意思的东西，他仿佛变了一个人。如果要给这种眼神找一个准确的描述是相当难的，不过要近似地描述一下还是可以办到的-见过赌徒在走向牌桌时的眼神吗？就是那样，而且还是一个兜里每一分钱都是借来的那种赌徒。</p>
+<p>　　何夕正和一个胖敦敦的眼镜大声争吵，他的脸涨得通红。“凭什么要我交这么多。”何夕不依地问，“我知道行情。”他笨拙地抽烟，尽量显出深于世故的样子。</p>
+<p>　　胖眼镜倒是不紧不忙，这种事他有经验：”你的书的稿里有很多自创的符号，我们必须专门处理，这自然要加大出版成本。要不你就换成常用的。</p>
+<p>　　“那不成。”何夕往皱巴巴的西服袖子上擦着汗，但是他已经没法像刚才那样大声了，“这些符号都是有特殊意义的，是我专门设计的，一个也不能换。微连续是新理论，等到它获得承认之后那些符号就会成为标准化的东西。”胖眼镜稍稍地撇了下嘴，脸上仍然是职业化的笑容。“你说得很对。问题是咱们不赶在标准的前面了嘛，那些符号增大了我们的成本。”他收住笑容，拿出一页纸来，“就这个数，少一分也不行。你同意就签字。”何夕怔怔地看着那张纸，那个数字后面长串的零就像是一张张大嘴，它们扭曲着向何夕扑过来，不断变化着形状，一会儿像是江雪的漂亮的眼睛，一会儿像是刘青无奈的目光。更多的时候就像是老康白白胖胖的笑脸。何夕已经记不清自己向K开了几次口了，每当胖眼镜找出理由抬价的时候他只能去找老康。老康是爽快而大方的，但他白胖的笑脸每次都让何夕有种如芒在背般的感觉受。老康总是一边掏钱一边很豪放的说有什么困难只管开口，你是小雪的朋友嘛。小雪每次来信都叫我帮你，小雪安排的事情要是办不好，等我以后到了那边可怎么交待哟。</p>
+<p>　　何夕面色灰白地掏出笔，他仿佛听到有个细弱的声音在阻止他下步的行动，听上去有些像是江雪。但是他终究在那张纸上签了名，也就在这个时候他内心的那个小声音突然消失了，再也听不见了。</p>
+<p>　　胖眼镜一等到何夕的背影转过楼梯口便露出了得意的笑容，他小心翼翼地收好有何夕答名的那张约会。“雏儿。”胖眼镜不屑地转身，随手将另几页纸扔进了垃圾桶。</p>
+<p>　　我看着那几页纸，它们同何夕签字的那张纸的内容完全一样，只是在填写金额的地方填着另外的数字。那些金额都更小。</p>
+<p>　　“……六月的大湖区就像是天堂。绿得发亮的是草地上是自在的人们。狗和小孩嬉戏着，空气清新得像是能刺透你的费。这里的风景越好越让我想起你。亲爱的，你什么时候来到我身边。我想你。”</p>
+<p>　　“……老康昨天才走，他出来参加一个秋季产品展示会。难为他从西岸赶到东岸来看我。在这里能够见到老朋友真是愉快的事，尤其是能新耳从朋友口里听到关于你的事情。我让老康多帮帮你，你也不要见外，朋友间相互帮忙是常有的。其实老康人挺不错的，就是说话比较直一点。”“……今天这里下了冬天的第一场雪，我特意和几个朋友赶到了郊外照相。大雪覆盖下的原野变得和故乡没有什么不同，于是我们几个都哭了。亲爱的夕，你真的沉迷在那个问题里了吗？难道你忘了还有一个我吗？老康说你整日只想着看书，什么也不管了。他劝你也不听。你知道吗，其实是我求老康多劝劝你的。听我的话，忘掉那个古怪的问题吧，以你的才智完全还有另外一条铺着鲜花的坦途可走，而我就在坦途的这头等你。听我的话，多为我们考虑一下吧。让我来安排一切。”“亲爱的夕，有人说在月色下女人的心思会变得难以捉摸。我觉得这这人说得真好。今夜正好有很好的月光，而我就站在月光下的小花园里。老康在屋里和几个朋友听音乐（他又出来参加什么展示会了），我不知道是不是他有意选择了这首曲子，真是像极了我现在的心情。那些缠绵，带着无法摆脱的忧伤，还有孤独。是的，孤独，此时此刻我真想有人陪着我，听我说话，注视着我，也让我能够注视他。亲爱的夕，我不知道你为什么拒绝我为你安排的一切，难道那个问题真的比我更重要吗？拿出我的像片来看看，看着我的眼睛，它会使你改变的，相信我……老康在叫我了，他总是很仔细，不放心我一个人出来。”“<br>……今天和室友吵了一驾，我真是没用，哭得惨兮兮的。也许是一个人在外久了我变得很脆弱，一点小事就想不开。我真想有个坚强的臂膀能够依靠。你离得那么远，就像是在天边。老康下午突然来了（他现在成了展示会专业户了），见我一直哭他就编笑话给我听，全是我以前听过的，要是在以前我早就要奚落他几句了，可这次不知怎么却笑得像个傻孩子。老康也陪着我笑，样子更傻……”“……回想当日的一切就像是在做梦，我们有过那么多欢乐的时光。我真的不知道自己究竟应该怎么做。我不是善变的人，直到今天我还这么想。我曾经深信真爱无敌，可我现在才知道这个世界真正无敌的东西只有一样，那就是时间。痛苦也好喜悦也好，爱也好恨也好，在时间面前它们都有是可以被战胜的，即使当初你以为它们将一生难忘。在时间面前没有什么敢称永恒。当我写下这段文字的时候我的泪水止不住地往下流，但这并非因为对你的爱，而是我在恨自己为何改变了对你的爱-我要以为那是不可能的事。老康已经办妥了手续，他放弃了国内的事业。他要来陪着我。就让我相信这是时间的力量吧，这会让我平静。”</p>
+<p>　　夏群芳擦着汗，不时回头看一眼车后满满当当的几十捆书。每本书都比砖头还厚，而且每册书还分上中下三卷，敦敦实实让她生出了满腔的敬畏来。这使得夏群芳想起了四十多年前自己刚发蒙时面对课本时的感觉，当时她小小的心里对于编写出课本的人简直敬若天人。想想看，那么多人都看同一本书，老师也凭着这个来考试号卷打分。书就是标准就是世上最了不得的东西，而写书的人当然就更了不得了，而现在这些书全是她的儿子写出来的。</p>
+<p>　　在印刷厂装车的时候夏群芳抽出一本书来看，结果她发现自己每一页都只认得不到百分之一的东西。除了少数汉字以外全是夏群芳见所未见的符号，就像是迷信人家在门上贴的桃符。当然夏群芳只是在心里这样想，可没敢说出来。这可是家里最有学问的人花了多少力气才写出来的，哪能是桃符可以比的。让夏群芳感到高兴的是有一页她居然全部看得懂，那就是封面。微连续原本，何夕蓍。深红的底子上配着这么几个字简直好看死了，尤其是自己儿子的名字，原来何夕两个字烫上金这么好看，又气派又显眼。</p>
+<p>　　夏群芳想着便有些得意，这个名字可是她起的。当初和何夕的死鬼老爸为起这名字的事还没有少争过，要是死鬼看到这个烫金的气派名字不服气才怪。</p>
+<p>　　车到了楼下夏群芳变得少有的咋咋呼呼，一会儿提醒司机按喇叭以疏通道路，一会儿亲自探出头去吆喝前边不听喇叭的小孩。好事的邻居全围拢来，不知道发生了什么事。</p>
+<p>　　“买啥好东西了？”有人问。</p>
+<p>　　夏群芳说到了，叫司机停车，下来打开后盖。“我家小夕出的书。”夏群芳像是宣言般地说，她指着一捆捆的敦煌巨蓍，心里简直满得不行，有生以来似乎以今日最为舒心得意。</p>
+<p>　　“哟！”有好事者拿起一本看看封底发出惊叹，“四百块钱一套。十套就是几千一百套就是几万。你家以后怕不是要晒票子了。夏群芳阿姨你可要请客哟。”夏群芳觉得自己简直要晕过去了，她的脸发烫，浑身充满了力气。她几乎是凭一个人的力气便把几十捆书搬上了楼，什么肩周炎腰肌劳损之类的病仿佛全好了。这么多收进了屋立刻便显得屋子太小，夏群芳便孜孜不倦地调整着家具的位置，最后把书垒成了方方正正的一座书山，书脊一律朝外，每个人一进门便能看到书名和何夕的烫金名字。夏群芳接下来开始收拾那一堆包装材料，她不时停焉得虎子，偏着头打量那座书山，乐呵呵地笑上一回。</p>
+<p>　　老康站住了，他身后上方是“国际航班通道”的指示牌，身前是大群送行的亲友。何夕和老老麦AI同他道别之后便走到不远之外的一个僻静角落里，与人们拉开了距离。</p>
+<p>　　“我不认为他适合江雪。”老麦小声地说了句，他看着何夕，“我觉得你应该坚持。她是个好女孩。”何夕又灌了口啤酒，他的脸上冒着热气。因为酒精的作用他的眼睛有些发红。</p>
+<p>　　“他是我的同行。”老麦仿佛在自言自语，“我也准备开家电脑公司，过几年我肯定能做到和他一样好。我们这一行是出神话的行业。别以为我是在说梦话，我是认真的。不过有件事我想跟你说说，”老麦声音大了点，“几个月前我认识了一个老外，也是我的同行，很有钱。知道他怎么说吗。他对我说你们太”上面“了。我不清楚他是不是因为中文不好才用了这么一个词，不过我最终听明白了他的意思。他说他并不因为世界首富出在他的国家就感到很得意，实际上他觉得那个人不能代表他的国家。在他的眼里那个人和让他们在全世界大赚其钱的好莱坞以及电脑游戏等产业没有什么本质差别。他说他的国家强大不是在这些方面，这些只是好看的叶子和花，真正让他们强大的是不起眼的树根。可现在的情况是几乎所有的人只盯着那棵巨树上的叶子和花，并徒劳地想长出更漂亮的叶子和花来超过它。这种例子太多了。”何夕带点困惑地看着老麦，他不知道大大咧咧的老麦在说些什么。他想要说几句，但脑子昏昏沉沉的。这些日子以来他时时有这种感觉，他知道面前有人在同自己讲话，但是集中不起精神来听。他转头去看老康，从个子上他并不比老康矮，但是他看着老康的时候感觉自己就像是一个侏儒，须得仰视才行。欠老康多少钱，何夕回想着自己记的帐，但是他根本算不清。老康遵照着刘青的意思不要借据，但何夕却没法不把帐记着。你拿去用。老康胖乎乎的笑脸晃动着，是小雪的意思。小雪求我的事我还能不办啊，啊哈哈哈。烫金的《微连续原本》几个字在何夕眼前跳动，大得像是几座山。每一座就像是家里那座山。几个月了，就像是刘青预见的那样，没有任何人对那本书感兴趣。刘青拿走了一套，塞给他四百块钱，然后一语不发地离开。他的背影走出很远之后让何夕看见轻轻叹口气把书扔进了道旁的垃圾桶。正是刘青的这个举动真正让何夕意识到微连续的确是一个无用的理论-甚至连带回家摆设都不够格。天空里有一本汗津津的存折飞来飞去，夏群芳在说话，这里厂里买断妈二十七年工龄的钱。何夕灌了口啤酒咧嘴傻笑，二十七年，三百六十四个月，九千八百五十五天，母亲的半辈子。但何夕内心里却有一个声音在说，这个世上惟一不用感到内疚的只有母亲。</p>
+<p>　　书山还在何夕眼前晃动着，不过已经变得有些小了。那天何夕刚到这有夏群芳便很高兴地说有几套书被买走了，是C大的图书馆。夏群芳说话的时候得意地亮着手里的钞票。但是何夕去的时候管理员说篇目上并没有这套书，数学类书架也找不到。何夕说一定有一定有准是没登记上麻烦你再找找。管理员拗不过只得又到书架上去翻，后来果真找出了一套。何夕觉得自己就要晕过去了，他大口呼吸着油墨的清香，又手颤抖着轻轻抚过书的表面，就像是抚摸自己的生命，巨大的小滴掉落在了扉页上。管理员讷闷地嘀咕，这书咋放在文学类里。他抓过书翻开了封面，然后有大发现地说，这不是我们的书，没印章。对啦，准是前天那个闯起来说要找人的疯婆子偷偷塞进去的。管理员恼恨地将书往外面地上一扔，我就说她是个神经病嘛，还以为我们查不出来。何夕简直不知道自己是怎样回到家里的，他仿佛整个人都散了架一般。一进门夏群芳又是满面笑容地指着日渐变小的书山说今天市图书馆又买了两册，还有蜀光中学，还有育英小学。</p>
+<p>　　这里不远处的老康突然打了个喷嚏。国内空气太糟，他大笑着说，然后掏出手帕来擦拭鼻子，手帕上是一条清澈的河流，天空中飘着洁白的雪花。</p>
+<p>　　我伸出手去，想挡住何夕的视线，但是我忘了这根本没有用。</p>
+<p>　　……</p>
+<p>　　“老康打了个喷嚏，”老麦挠挠头说，“然后何夕便疯了。我也不明白是怎么一回事，反正我看到的就是那样。真是邪门。”“后来呢。”精神病医生刘苦舟有些期待地盯着神神叨叨的老麦，他觉得此人说不定有望发展成自己的下一个客户。</p>
+<p>　　“何夕冲上去捏老康的鼻子，嘴里说叫你擤叫你擤。他还抢老康的手帕，”老麦苦笑，“抢过来之后他便把脸贴上去翻来覆去地亲。”老麦厌恶地摆头，“上面糊满了NIAN乎乎的鼻涕。之后他便不说话了，一句话也不说，不管别人怎么样都不说。”“关于这个人你还知道什么？”刘苦舟开始写病历，语句都是现成的，根本不经过大脑，“我是说比较特别的一些事情。”老康想了想：“他出过一套书。是大部头，很大的大部头。”“是写什么的。”刘苦舟来了兴趣，“野史？计算机编程？网络？烹调？经济学？生物工程？或者是建筑学？”“都不是。是最老套的东西，数学。”“那就对了。”刘苦舟释怀地笑，顺利地在病历上写下结论，“那他算是来对地方了。”这里夏群芳冲了进来，身上还系着油腻的围裙，这使她整个人显得滑JI.她的眼睛红得发肿，目光惊慌而散乱。何夕怎么啦？出什么事啦？好端端的怎么让飞机机撞了？她方寸大乱地问，然后她的视线落到了屋子的左角，何夕安静地坐在那里，眼神飘渺地浮在虚空，仿佛无法对上焦距。他已经不是以前的何夕了，这飘浮的眼光证明了这一点。”让飞机撞了？老麦想着夏群芳的话，他不知道是不是自己在机场报信里说得太快让他听错了。</p>
+<p>　　“医生说治起来会很难。”老麦低声地说。</p>
+<p>　　但是夏群芳并没有听见这句话，她的全部心思已经落到了何夕身上。从看到何夕的时刻她的目光就变了，变得安定而坚定。何夕就在她的面前，她的独生子就在她的面前，他没有被飞机撞，这让她觉得没来由的踏实，她的心情与几分钟之前已经大不一样。何夕不说话了，他紧抿着嘴，关闭了与世界的交往，而且看起来也许以后都不会说话了。不过这有什么关系呢，何夕生下来的时候也不会说话的。在夏群芳眼里何夕现在就像他小时候一样，乘得让人心痛，安静得让人心痛。</p>
+<p>　　【完结篇】</p>
+<p>　　我是何宏伟。</p>
+<p>　　一连两天我没有见过一个客人，尽管外界对于此次划时代事件的关注激情已经到了白热化的程序。这两天里我一直在写一份材料。现在我已经写好了。其实这两天我只是写下了几个人的名字，连连同简短的说明。但是每写下一个字我的心里都会滚过长久的浩叹，而当我写下最后那个人的名字时几乎握不住自己的笔。然后我带着这样一份不足半页的资料站到了诺贝尔物理学奖的领奖台上。无论怎么评价我的得奖项目都不会过分，因为我和我的领导的实验室是因为大统一场方程而得奖的。这是人类最伟大的梦想，从某种意义上讲是人类认识的终极。</p>
+<p>　　“女士们先生们。”我环视全场，“大家肯定知道，从爱因斯坦算起为了大统一场理论已经过去了两百多年，至少耗尽了十几代最优秀的人的生命。我是在三十年前开始涉足这个领域的。在差不多十七年前的时候我便已经在物理意义上明晰了大统一理论，但是这时候我遇到无法逾越的障碍。实际上不仅是我，当时有很多人都做到了这一步，但是却再也无法前行一步。你们有过这样的体会吗，就是有一件事情，你自己心里似乎明白了，但却无法把它说出来，甚至根本无法描述它。你张开了嘴，但是却发现吐不了一个字，就像是你的舌头根本不属于你。此后我一直同其他人一样徘徊在神山的脚下，已经看得见事情的转机说来有几分戏剧性。两年前的某末我送十一岁的小儿子去上学，当时他们的一幢老图书楼正被推倒。在废墟里我见到一套装在密封袋里的书，后来我才知道这套书已经出版了一百五十年，但是当时它的包装竟然完好无损，也就是说从未有人留意过它。如果当时我不屑一顾地走开，那么我敢说世界还将在黑暗里摸索一百五十年。但是一股好奇心让我拆开了它，然后你们可以想像我当时的心情，就像是一个穷到极点的乞丐有一天突然发现了阿里巴巴的宝藏。我不知道这样一部我难以用语言来评述的伟大著作怎么会被收藏在一所小学校里，不知道上天为何对我这样好，让我有幸读到这样非凡的思想。我只知道当时我简直失去了控制了，在废墟上大喊大叫不能自己。这正是我要找的东西，它就是大统一理论的数学表达式，甚至比我要的还要多得多。那一时刻我想到了牛顿。他的引力思想并非独有，比如同时代的胡克不能，所以只能是牛顿来解决引力问题。现在我面临的问题又何尝不是这样。书的名字叫《微连续原本》，作者叫何夕。</p>
+<p>　　“是的，当时我的惊讶并不比你们此刻少。这是个完全陌生的名字。后来的事正如你们看到的，在不到半年的时间里我发表了一系列重要论文，简直是神速地完成了大统一理论的方程式，甚至在几个月前我和我的小组还试制出基于大统一理论的时空转换设备。有人说我是天才，但是今天我只想说一句，超越时代的不是我，而是一百五十年前的那位叫何夕的人。不要以为我这样说会感到难堪，其实我只感到幸运，因为我现在已经知道超越时代意味着什么。如果何夕生在我们的时代根本轮不到我站在这个地方。在他的那个时代支持大统一理论的物理事实少得可怜，现在我们知道必须达到一千万亿吉电子伏特的能级才可能观察到足够多的大统一场物理现象。而在何夕的时代这是不可想象的，这也就注定了他的命运。他是个什么样的人？为何他写下了这样伟大的著作但却被历史的黄沙掩埋？为了解开心中的这些疑团，我将第一次时空实验的时区定在了何夕生活的那个年代。我们安排一个虚拟的观察体出现在了那个过往的年代，那实际上是一处极小的时空洞。它可以随意地出现在指定的时间和地点，从而观察到当时的事情。我亲眼目睹了事情的全部过程，如果诸位不反对的话我想把我知道的全讲出来。”台下没有一个人说话，甚至听不到大声出气的声音。我轻声描述着自己近日来的经历，描述着何夕，描述着何夕的母亲夏群芳，描述着那个时代我见过的每一个人。他们在我的眼前鲜活过来了，连同他们的向往与烦恼。工作人员打开了投影仪，两幅老照片投放在了屏幕上。这是我委托政府找到的，可惜只有两张。一张是年轻漂亮的少妇夏群芳抱着她刚满周岁的胖儿子何夕坐在公园的长椅上，脸上是幸福而憧憬的笑容。别一张是风烛残年的半文盲妇人夏群芳，她拿着一把梳子专注地给她满脸胡须的目光痴呆的傻儿子何夕梳头，目光里充满爱怜。</p>
+<p>　　“尽管我想忍住但还是流下了泪水。我觉得照片上的母亲和儿子是那样的亲密，他们都是那样的SHAN良，而同时他们又是那样的-伤心。是的，他们真的很伤心。而现在他们早已离开这个他们一生都无法理解的世界了，就仿佛他们从来没有来过。</p>
+<p>　　“如果没有何夕，大统一理论的完成还将遥遥无期。”我接着说，“而纯粹是由于他母亲的缘故，《微连续原本》才得以保存到今天，当然这燕非她的本意，当初她只是想骗骗自己的儿子，想让他开心。以她的水平根本不知道这里面究竟写的什么东西，根本不知道这是怎样的一本著作，所以她才会将这部闪烁不朽光芒的巨著偷偷放到一所小学校的图书楼里。从局外人的观点看她的行为会觉得荒唐可笑，但她只是在顺应一个母亲的本能。自始至终她只知道一点，那就是她有一个好孩子，这是她的好孩子选择去做的事情。</p>
+<p>　　“我不否认对何夕那个时代来说《微连续原本》的确没有什么意义，但我只想说的是，对有一些东西是不应该过多地讲求回报的，你不应该要求它们长出漂亮的叶子和花来，因为它们是根。这是一位母亲教给我的。母亲对自己的孩子永远都不会要求回报，但是请相信我们可爱的孩子自会回报他的母亲。</p>
+<p>　　“还有一点，”我稍稍顿了一下，“记得当初在长达几个世纪的时光里有无数人为了永动机耗尽了他们的一生。也许我们可以说这只是一些愚蠢的人，可是正是这些人的探索才最终让我们认识了热力学定律。他们虽然没能告诉后人应当走哪能条路，但却指明了其中的某些路是死路。所以我要说，即使微连续理论在今天仍然被证明是无用的，我们依然应当对何夕表示敬意。因为他曾经尽力求索过，这就够了。”我看着手里的半页纸，上面的每一个名字都是那样的伤心。“也许我们应该永远记住这样一些人。”我照着纸往下念，声音在静悄悄的大厅里回响。</p>
+<p>　　“古希腊几何学家阿波洛尼乌斯总结了圆锥曲线理论，一千八百年后由德国天文学家开普勒将其应用于行星轨道理论。</p>
+<p>　　数学家伽罗华公元1831年创立群论，一百余年后获得物理应用。</p>
+<p>　　公元1860年创立的矩阵理论在六十年后应用量子力学。</p>
+<p>　　数学J.H莱姆伯脱，高斯，黎曼，罗马切夫斯基等人提出并发展了非欧几何。高斯一生都在探索非欧几何的实际应用，但他抱憾而终。非欧几何诞生一百七十年后，这种在当时毫无用处的理论以及由之发展而来的张量分析理论成为爱因斯坦广义相对论的核心基础。</p>
+<p>　　何夕提出并于公元1999年完成的微连续理论，一百五十年后这一成果最终导致了大统一场理论方程式的诞生。”</p>
+<p>　　世界沉默着，为了这些伤心的名字，为了这些伤心的名字后面那千百年的寂寞时光。</p>
+<p>　　我拿出一张光盘：“何夕后来一直没有说过话，医生说他已经丧失了语言能力。但是我这里有一段录音，是后来何夕临死前由医院制作为医案的，当时离他的母亲去世不到一个星期。我现在已无法知道这究竟是因为何夕在母亲去世之后失去了支撑呢，还是他虽然疯了但却一直在潜意识里坚持着比母亲活得长久——这也许是他惟一能够报答母亲的方式了。还是让我们来听听吧。”</p>
+<p>　　背景声很嘈杂，很多人在说话。似乎有几位医生在场。放弃吧。一个浑厚的声音说，他没救了，现在是十点零七分，你记下时间。好吧，一个年轻的声音说，我收拾一下。年轻的声音突然升高，听，病人在说话，他在说话。不可能，浑厚的声音说，他已经二十年没说过一句话了，再说话也不可能有力气说话。但是浑厚的声音突然打住，像是有什么发现。周围安静下来，这里可以听见一个带着潮气仿佛已经锈蚀多年来的声音在说着什么。</p>
+<p>　　“妈——妈——”那个声音有些含糊地喊到。</p>
+<p>　　“妈——妈——”他又喊了一声，无比的清晰。</p>
+<p>　　</p>
+]]></content>
+      
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[4.21-Hexo博客]]></title>
+      <url>/2019/04/21/Hexo%E5%8D%9A%E5%AE%A2/</url>
+      <content type="html"><![CDATA[<blockquote>
+<p>本文由 <a href="http://ksria.com/simpread/" target="_blank" rel="noopener">简悦 SimpRead</a> 转码， 原文地址 <a href="http://github.yuluhuang.com/2016/03/17/hexo%E6%90%AD%E5%BB%BA%E8%BD%AC%E8%BD%BD/" target="_blank" rel="noopener">http://github.yuluhuang.com/2016/03/17/hexo%E6%90%AD%E5%BB%BA%E8%BD%AC%E8%BD%BD/</a></p>
+</blockquote>
+<p>小白独立搭建博客–Github Pages 和 Hexo 简明教程<br>2016 年 03 月 16 日 ⁄ Android 开发经验 ⁄ 共 9767 字 ⁄ 字号 小 中 大 ⁄ 评论关闭<br>首先欢迎各位来参观我的博客：<a href="http://lijianchang.xyz/" target="_blank" rel="noopener">Ryane’s Blog</a></p>
+<p>Github 地址：<a href="https://github.com/ryanlijianchang/ryanlijianchang.github.io" target="_blank" rel="noopener">https://github.com/ryanlijianchang/ryanlijianchang.github.io</a></p>
+<p>摘要：这是一篇有关如何使用 Github Pages 和 Hexo 搭建自己独立博客的详尽教程，里面介绍了如何使用和配置 Hexo 框架，如何将 Hexo 部署到自己的 Github 项目中，域名注册，以及域名的绑定，还有我在搭建自己博客过程中所遇到的各种困难。<br><a id="more"></a></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我是一名安卓入门开发者，但，我只是<strong>入门</strong>！而且我对网站开发以及前端的知识几乎是零基础，所以在自己刚接触这个东西的时候，我像很多人一样，都是上网找教程，但是要知道，<strong>那都是程序员的教程。</strong>所以对于我这个网站技术小白来说，真是很难受，所以藉此机会写一篇让小白看得懂的教程。如果你是一个小白而且又想做自己的博客，可以，请跟着我的脚步，我会带你真真正正做一个属于你自己的博客。</p>
+<p>如果你还不知道你为什么要做一个博客，推荐你看：<a href="http://www.cnblogs.com/jhzhu/p/3893297.html" target="_blank" rel="noopener">《我为什么写博客》</a></p>
+<h2 id="入门门槛"><a href="#入门门槛" class="headerlink" title="入门门槛"></a>入门门槛</h2><ol>
+<li>必须耐得住折腾。</li>
+<li>刻苦的学习精神和耐心。</li>
+</ol>
+<h2 id="关于-Github"><a href="#关于-Github" class="headerlink" title="关于 Github"></a>关于 Github</h2><center><a href="http://7xrwkh.com1.z0.glb.clouddn.com/github-jxw.jpg" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/github-jxw.jpg" alt></a></center>
+
+<h3 id="一、Github-的优点"><a href="#一、Github-的优点" class="headerlink" title="一、Github 的优点"></a>一、Github 的优点</h3><ul>
+<li>GitHub 是基于 git 实现的代码托管。git 可能是目前最好用的版本控制系统了，非常受欢迎。</li>
+<li>GitHub 可以免费使用，并且快速稳定。</li>
+<li>Github 上面的世界很精彩，用久了你的眼界会开阔很多。</li>
+</ul>
+<h3 id="二、什么是-Github-Pages"><a href="#二、什么是-Github-Pages" class="headerlink" title="二、什么是 Github Pages"></a>二、什么是 Github Pages</h3><p>Github Pages 可以被认为是用户编写的、托管在 github 上的静态网页。</p>
+<h3 id="三、为什么要使用-Github-Pages"><a href="#三、为什么要使用-Github-Pages" class="headerlink" title="三、为什么要使用 Github Pages"></a>三、为什么要使用 Github Pages</h3><ul>
+<li>可以绑定你的域名 (但暂时貌似只能绑定一个)。</li>
+<li>简单快捷，使用 Github Pages 可以为你提供一个免费的服务器，免去了自己搭建服务器和写数据库的麻烦。</li>
+</ul>
+<h2 id="安装-Node-js"><a href="#安装-Node-js" class="headerlink" title="安装 Node.js"></a>安装 Node.js</h2><p>在 Windows 环境下安装 Node.js 非常简单，仅须到<a href="https://nodejs.org/en/download/" target="_blank" rel="noopener">官网下载</a>安装文件并执行即可完成安装。<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/image-nodeJs-dl.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/image-nodeJs-dl.png" alt></a><br>像我的是 Windows 64 位，直接下载安装，不需要配置环境变量。</p>
+<h2 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h2><p>下载 msysgit 并执行即可完成安装。(上官网要翻墙，如果你的是 64 位，可以<a href="http://pan.baidu.com/s/1i4xAM9Z" target="_blank" rel="noopener">点击此处</a>下载)</p>
+<p>怎么打开 Git？</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-1.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-1.png" alt></a><br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-2.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-2.png" alt></a></p>
+<ul>
+<li><p>安装教程：<a href="http://jingyan.baidu.com/article/90895e0fb3495f64ed6b0b50.html" target="_blank" rel="noopener">如何在 windows 下安装 GIT</a></p>
+</li>
+<li><p>Git 入门教程：<a href="http://git.oschina.net/progit/" target="_blank" rel="noopener">Pro Git（中文版）</a></p>
+</li>
+<li><p>Git 基本操作：</p>
+</li>
+</ul>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/git.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/git.png" alt></a></p>
+<p>##Hexo<br>Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
+<h3 id="一、Hexo-安装"><a href="#一、Hexo-安装" class="headerlink" title="一、Hexo 安装"></a>一、Hexo 安装</h3><p>桌面右键鼠标，点击 Git Bash Here，输入 npm 命令即可安装</p>
+<p>npm install hexo-cli -g<br>npm install hexo –save</p>
+<p>#如果命令无法运行，可以尝试更换 taobao 的 npm 源<br>npm install -g cnpm –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="noopener">https://registry.npm.taobao.org</a></p>
+<h3 id="二、Hexo-初始化配置"><a href="#二、Hexo-初始化配置" class="headerlink" title="二、Hexo 初始化配置"></a>二、Hexo 初始化配置</h3><h5 id="创建-Hexo-文件夹"><a href="#创建-Hexo-文件夹" class="headerlink" title="创建 Hexo 文件夹"></a><a href="#创建Hexo文件夹" title="创建Hexo文件夹"></a>创建 Hexo 文件夹</h5><p>安装完成后，根据自己喜好建立目录（如 F:\Blog\Hexo），直接进入 F:\Blog\Hexo 文件夹下右键鼠标，点击 Git Bash Here，进入 Git 命令框，执行以下操作。</p>
+<p>hexo init<br>npm install</p>
+<p>安装 Hexo 完成后，Hexo 将会在指定文件夹中新建所需要的文件。Hexo 文件夹下的目录如下：<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/hexo-content.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/hexo-content.png" alt></a></p>
+<h5 id="安装-Hexo-插件"><a href="#安装-Hexo-插件" class="headerlink" title="安装 Hexo 插件"></a><a href="#安装Hexo插件" title="安装Hexo插件"></a>安装 Hexo 插件</h5><p>如果想不出错，就将下面的插件都安装完。</p>
+<p>npm install hexo-generator-index –save<br>npm install hexo-generator-archive –save<br>npm install hexo-generator-category –save<br>npm install hexo-generator-tag –save<br>npm install hexo-server –save<br>npm install hexo-deployer-git –save<br>npm install hexo-deployer-heroku –save<br>npm install hexo-deployer-rsync –save<br>npm install hexo-deployer-openshift –save<br>npm install <a href="mailto:hexo-renderer-marked@0.2" target="_blank" rel="noopener">hexo-renderer-marked@0.2</a> –save<br>npm install <a href="mailto:hexo-renderer-stylus@0.2" target="_blank" rel="noopener">hexo-renderer-stylus@0.2</a> –save<br>npm install hexo-generator-feed@1 –save<br>npm install hexo-generator-sitemap@1 –save</p>
+<h5 id="本地查看效果"><a href="#本地查看效果" class="headerlink" title="本地查看效果"></a><a href="#本地查看效果" title="本地查看效果"></a>本地查看效果</h5><p>执行下面语句，执行完即可登录 localhost:4000 查看效果</p>
+<p>hexo generate<br>hexo server<br>登录 localhost:4000，即可看到本地的效果如下：<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/imagelocalhost.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/imagelocalhost.png" alt></a></p>
+<h2 id="将博客部署到-Github-Pages-上"><a href="#将博客部署到-Github-Pages-上" class="headerlink" title="将博客部署到 Github Pages 上"></a>将博客部署到 Github Pages 上</h2><p>那么现在本地的博客已经搭建起来了，但是我们只可以通过本地连接查看我们的博客。那么我们现在需要做的就是把本地的博客发布到服务器上，让别人也可以连接我们的博客，而 Github Pages 就帮我完成了这件事情。但是 Github Pages 的代码就是寄存在 Github 上面的。那么接下来我们需要在 Github 上面创建一个新的项目。</p>
+<h3 id="一、注册-Github-账户"><a href="#一、注册-Github-账户" class="headerlink" title="一、注册 Github 账户"></a>一、注册 Github 账户</h3><ol>
+<li>访问 <a href="访问：http://www.github.com/">Github 首页</a></li>
+<li>点击右上角的 <a href="https://github.com/join?source=header-home" target="_blank" rel="noopener">Sign Up</a>，注册自己的账户</li>
+</ol>
+<h3 id="二、创建项目代码库"><a href="#二、创建项目代码库" class="headerlink" title="二、创建项目代码库"></a>二、创建项目代码库</h3><ol>
+<li>注册完登陆后，我们就创建一个我们自己的 Github Pages 项目。点击 <a href="https://github.com/new" target="_blank" rel="noopener">New repository</a>。</li>
+<li>创建要点如下：<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/how-to-create-reposity.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/how-to-create-reposity.png" alt></a></li>
+</ol>
+<h3 id="三、配置-SSH-密钥"><a href="#三、配置-SSH-密钥" class="headerlink" title="三、配置 SSH 密钥"></a>三、配置 SSH 密钥</h3><p>配置 Github 的 SSH 密钥可以让本地 git 项目与远程的 github 建立联系，让我们在本地写了代码之后直接通过 git 操作就可以实现本地代码库与 Github 代码库同步。操作如下：</p>
+<h5 id="第一步、看看是否存在-SSH-密钥-keys"><a href="#第一步、看看是否存在-SSH-密钥-keys" class="headerlink" title="第一步、看看是否存在 SSH 密钥 (keys)"></a><a href="#第一步、看看是否存在SSH密钥-keys" title="第一步、看看是否存在SSH密钥(keys)"></a>第一步、看看是否存在 SSH 密钥 (keys)</h5><p>首先，我们需要看看是否看看本机是否存在 SSH keys, 打开 Git Bash, 并运行:</p>
+<p>cd ~/. ssh<br>检查你本机用户 home 目录下是否存在. ssh 目录</p>
+<p>如果，不存在此目录，则进行第二步操作，否则，你本机已经存在 ssh 公钥和私钥，可以略过第二步，直接进入第三步操作。</p>
+<h5 id="第二步、创建一对新的-SSH-密钥-keys"><a href="#第二步、创建一对新的-SSH-密钥-keys" class="headerlink" title="第二步、创建一对新的 SSH 密钥 (keys)"></a><a href="#第二步、创建一对新的SSH密钥-keys" title="第二步、创建一对新的SSH密钥(keys)"></a>第二步、创建一对新的 SSH 密钥 (keys)</h5><p>ssh-keygen -t rsa -C “<a href="mailto:your_email@example.com" target="_blank" rel="noopener">your_email@example.com</a>“</p>
+<p>#这将按照你提供的邮箱地址，创建一对密钥<br>Generating public/private rsa key pair.<br>Enter file in which to save the key (/c/Users/you/.ssh/id_rsa): [Press enter]</p>
+<p>直接回车，则将密钥按默认文件进行存储。此时也可以输入特定的文件名，比如 / c/Users/you/.ssh/github_rsa</p>
+<p>接着，根据提示，你需要输入密码和确认密码（说到这里，如果你很放心，其实可以不用密码，就是到输密码的地方，都直接回车，所以每次 push 就只管回车就行了。所谓的最安全的密码，就是没有密码 哈哈）。相关提示如下：</p>
+<p>Enter passphrase (empty for no passphrase): [Type a passphrase]<br>Enter same passphrase again: [Type passphrase again]</p>
+<p>输入完成之后，屏幕会显示如下信息：</p>
+<p>Your identification has been saved in /c/Users/you/.ssh/id_rsa.<br>Your public key has been saved in /c/Users/you/.ssh/id_rsa.pub.<br>The key fingerprint is:<br>01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db <a href="mailto:your_email@example.com" target="_blank" rel="noopener">your_email@example.com</a></p>
+<h5 id="第三步、在-GitHub-账户中添加你的公钥"><a href="#第三步、在-GitHub-账户中添加你的公钥" class="headerlink" title="第三步、在 GitHub 账户中添加你的公钥"></a><a href="#第三步、在GitHub账户中添加你的公钥" title="第三步、在GitHub账户中添加你的公钥"></a>第三步、在 GitHub 账户中添加你的公钥</h5><p>运行如下命令，将公钥的内容复制到系统粘贴板 (clipboard) 中。</p>
+<p>clip &lt; ~/.ssh/id_rsa.pub</p>
+<p>接着：</p>
+<ol>
+<li>登陆 GitHub, 进入你的 Account Settings.</li>
+</ol>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting.png" alt></a></p>
+<p>2. 选择 SSH Keys</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting-SSH.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting-SSH.png" alt></a></p>
+<p>3. 粘贴密钥，添加即可</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-SSH-OK.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-SSH-OK.png" alt></a></p>
+<h5 id="第四步、测试"><a href="#第四步、测试" class="headerlink" title="第四步、测试"></a><a href="#第四步、测试" title="第四步、测试"></a>第四步、测试</h5><p>可以输入下面的命令，看看设置是否成功，<a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a> 的部分不要修改：</p>
+<p>ssh -T <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a></p>
+<p>如果是下面的反馈：</p>
+<p>The authenticity of host ‘github.com (207.97.227.239)’ can’t be established.<br>RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.<br>Are you sure you want to continue connecting (yes/no)?</p>
+<p>不要紧张，输入 yes 就好，然后会看到：</p>
+<p>Hi cnfeat! You’ve successfully authenticated, but GitHub does not provide shell access.</p>
+<h5 id="第五步、设置用户信息"><a href="#第五步、设置用户信息" class="headerlink" title="第五步、设置用户信息"></a><a href="#第五步、设置用户信息" title="第五步、设置用户信息"></a>第五步、设置用户信息</h5><p>现在你已经可以通过 SSH 链接到 GitHub 了，还有一些个人信息需要完善的。<br>Git 会根据用户的名字和邮箱来记录提交。GitHub 也是用这些信息来做权限的处理，输入下面的代码进行个人信息的设置，把名称和邮箱替换成你自己的，名字必须是你的真名，而不是 GitHub 的昵称。</p>
+<p>git config –global user.name “cnfeat”// 用户名<br>git config –global user.email “<a href="mailto:cnfeat@gmail.com" target="_blank" rel="noopener">cnfeat@gmail.com</a>“// 填写自己的邮箱</p>
+<h5 id="第六步、SSH-Key-配置成功"><a href="#第六步、SSH-Key-配置成功" class="headerlink" title="第六步、SSH Key 配置成功"></a><a href="#第六步、SSH-Key配置成功" title="第六步、SSH Key配置成功"></a>第六步、SSH Key 配置成功</h5><p>本机已成功连接到 github。<br>如有问题，请参考：</p>
+<p><a href="https://help.github.com/articles/generating-an-ssh-key/" target="_blank" rel="noopener">GitHub Help - Generating SSH Keys</a></p>
+<p><a href="https://help.github.com/articles/error-permission-denied-publickey/" target="_blank" rel="noopener">Error: Permission denied (publickey)</a></p>
+<h3 id="四、将本地的-Hexo-文件更新到-Github-的库中"><a href="#四、将本地的-Hexo-文件更新到-Github-的库中" class="headerlink" title="四、将本地的 Hexo 文件更新到 Github 的库中"></a>四、将本地的 Hexo 文件更新到 Github 的库中</h3><h5 id="第一步、登录-Github-打开自己的项目-username-github-io"><a href="#第一步、登录-Github-打开自己的项目-username-github-io" class="headerlink" title="第一步、登录 Github 打开自己的项目 username.github.io"></a><a href="#第一步、登录Github打开自己的项目-username-github-io" title="第一步、登录Github打开自己的项目 username.github.io"></a>第一步、登录 Github 打开自己的项目 username.github.io</h5><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_1.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_1.png" alt></a></p>
+<h5 id="第二步、打开之后，点击-HTTPS，选择-HTTPS-类型地址"><a href="#第二步、打开之后，点击-HTTPS，选择-HTTPS-类型地址" class="headerlink" title="第二步、打开之后，点击 HTTPS，选择 HTTPS 类型地址"></a><a href="#第二步、打开之后，点击HTTPS，选择HTTPS类型地址" title="第二步、打开之后，点击HTTPS，选择HTTPS类型地址"></a>第二步、打开之后，点击 HTTPS，选择 HTTPS 类型地址</h5><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_2.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_2.png" alt></a></p>
+<h5 id="第三步、复制地址"><a href="#第三步、复制地址" class="headerlink" title="第三步、复制地址"></a><a href="#第三步、复制地址" title="第三步、复制地址"></a>第三步、复制地址</h5><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_3.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_3.png" alt></a></p>
+<h5 id="第四步、打开你一开始创建的-Hexo-文件夹（如-F-Blog-Hexo），用记事本打开刚文件夹下的-config-yml-文件"><a href="#第四步、打开你一开始创建的-Hexo-文件夹（如-F-Blog-Hexo），用记事本打开刚文件夹下的-config-yml-文件" class="headerlink" title="第四步、打开你一开始创建的 Hexo 文件夹（如 F:\Blog\Hexo），用记事本打开刚文件夹下的_config.yml 文件"></a><a href="#第四步、打开你一开始创建的Hexo文件夹（如F-Blog-Hexo），用记事本打开刚文件夹下的-config-yml文件" title="第四步、打开你一开始创建的Hexo文件夹（如F:\Blog\Hexo），用记事本打开刚文件夹下的_config.yml文件"></a>第四步、打开你一开始创建的 Hexo 文件夹（如 F:\Blog\Hexo），用记事本打开刚文件夹下的_config.yml 文件</h5><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_4.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_4.png" alt></a></p>
+<h5 id="第五步、在配置文件里作如下修改，保存"><a href="#第五步、在配置文件里作如下修改，保存" class="headerlink" title="第五步、在配置文件里作如下修改，保存"></a><a href="#第五步、在配置文件里作如下修改，保存" title="第五步、在配置文件里作如下修改，保存"></a>第五步、在配置文件里作如下修改，保存</h5><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_5.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_5.png" alt></a></p>
+<h5 id="第六步、在-Hexo-文件夹下执行："><a href="#第六步、在-Hexo-文件夹下执行：" class="headerlink" title="第六步、在 Hexo 文件夹下执行："></a><a href="#第六步、在Hexo文件夹下执行：" title="第六步、在Hexo文件夹下执行："></a>第六步、在 Hexo 文件夹下执行：</h5><p>hexo g<br>hexo d</p>
+<p>或者直接执行</p>
+<p>hexo g -d</p>
+<p>执行完之后会让你输入 github 的账号和密码，输入完后就可以登录我们自己的部署在 Github Pages 服务器上的博客了。对应的地址是 username.github.io(我的是：ryanlijianchang.github.io)。</p>
+<h5 id="第七步、在浏览器上输入自己的主页地址"><a href="#第七步、在浏览器上输入自己的主页地址" class="headerlink" title="第七步、在浏览器上输入自己的主页地址"></a><a href="#第七步、在浏览器上输入自己的主页地址" title="第七步、在浏览器上输入自己的主页地址"></a>第七步、在浏览器上输入自己的主页地址</h5><p>在浏览器上输入即可看到我们自己的博客，别人电脑输入也可以哦。<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/blog-main.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/blog-main.png" alt></a></p>
+<h2 id="美化自己博客"><a href="#美化自己博客" class="headerlink" title="美化自己博客"></a>美化自己博客</h2><p>那么现在我们的博客已经挂在了服务器上面，别人已经可以通过网址来登陆我们的博客了，但是我们这时就有了新的需求，就是自己的博客并不好看，那怎么办的？这很简单，要知道很多前端开发者在 Hexo 框架下开发了很多的主题给我们使用，我们只需要把他们的主题克隆过来，然后通过修改配置文件即可达到我们所需要的效果。</p>
+<p>那么我们应该怎么修改呢？</p>
+<h3 id="一、进入-Hexo-的官网主题专栏"><a href="#一、进入-Hexo-的官网主题专栏" class="headerlink" title="一、进入 Hexo 的官网主题专栏"></a><a href="#一、进入Hexo的官网主题专栏" title="一、进入Hexo的官网主题专栏"></a>一、进入 <a href="https://hexo.io/themes/" target="_blank" rel="noopener">Hexo 的官网主题专栏</a></h3><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/themes.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/themes.png" alt></a></p>
+<h3 id="二、挑选我们喜欢的主题"><a href="#二、挑选我们喜欢的主题" class="headerlink" title="二、挑选我们喜欢的主题"></a>二、挑选我们喜欢的主题</h3><p>可以看到有很多主题给我们选，我们只要选择喜欢的主题点击进去，然后进入到它的 github 地址，我们只要把这个地址复制下来 (例如我是选择：hexo-theme-next 这个主题)</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/address.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/address.png" alt></a></p>
+<h3 id="三、克隆主题"><a href="#三、克隆主题" class="headerlink" title="三、克隆主题"></a>三、克隆主题</h3><p>再打开 Hexo 文件夹下的 themes 目录（F:\Blog\hexo\themes），右键 Git Bash，在命令行输入:</p>
+<p>git clone <a href="https://github.com/iissnan/hexo-theme-next(此处地址替换成你需要使用的主题的地址" target="_blank" rel="noopener">https://github.com/iissnan/hexo-theme-next(此处地址替换成你需要使用的主题的地址)</a>)</p>
+<p>下载中，等待下载完成：</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/downloading.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/downloading.png" alt></a></p>
+<h3 id="四、修改-Hexo-配置文件"><a href="#四、修改-Hexo-配置文件" class="headerlink" title="四、修改 Hexo 配置文件"></a>四、修改 Hexo 配置文件</h3><p>下载完成后，打开 Hexo 文件夹下的配置文件<code>_config.yml</code></p>
+<p>修改参数为：<code>theme: hexo-theme-next</code></p>
+<h3 id="五、部署主题，本地查看效果"><a href="#五、部署主题，本地查看效果" class="headerlink" title="五、部署主题，本地查看效果"></a><a href="#五、部署主题，本地查看效果" title="五、部署主题，本地查看效果"></a>五、部署主题，本地查看效果</h3><p>返回 Hexo 目录，右键 Git Bash，输入</p>
+<p>hexo g<br>hexo s</p>
+<p>打开浏览器，输入 <code>http://localhost:4000/</code> 即可看见我们的主题已经更换了。</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/new-theme.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/new-theme.png" alt></a></p>
+<h3 id="六、如果效果满意，将它部署到-Github-上"><a href="#六、如果效果满意，将它部署到-Github-上" class="headerlink" title="六、如果效果满意，将它部署到 Github 上"></a>六、如果效果满意，将它部署到 Github 上</h3><p>打开 Hexo 文件夹，右键 Git Bash，输入</p>
+<p>hexo clean (必须要，不然有时因为缓存问题，服务器更新不了主题)<br>hexo g -d</p>
+<h3 id="七、打开自己的主页，即可看到修改后的效果"><a href="#七、打开自己的主页，即可看到修改后的效果" class="headerlink" title="七、打开自己的主页，即可看到修改后的效果"></a>七、打开自己的主页，即可看到修改后的效果</h3><p>更多修改效果请查看对应主题的说明文档，<a href="http://theme-next.iissnan.com/" target="_blank" rel="noopener">点击此</a>查看本主题 (Next) 对应的说明文档。</p>
+<h2 id="在博客写文章"><a href="#在博客写文章" class="headerlink" title="在博客写文章"></a><a href="#在博客写文章" title="在博客写文章"></a>在博客写文章</h2><h3 id="一、用-hexo-发表新文章"><a href="#一、用-hexo-发表新文章" class="headerlink" title="一、用 hexo 发表新文章"></a><a href="#一、用hexo发表新文章" title="一、用hexo发表新文章"></a>一、用 hexo 发表新文章</h3><p>hexo n “文章标题”<br>其中 我的家 为文章标题，执行命令 <code>hexo n &quot;我的家&quot;</code> 后，会在项目 \Hexo\source_posts 中生成 <code>我的家.md</code>文件，用编辑器打开编写即可。</p>
+<p>当然，也可以直接在 \ Hexo\source_posts 中新建一个 md 文件，我就是这么做的。<br>写完后，推送到服务器上，执行以下命令即可在我们的站点看到新的文章。</p>
+<p>hexo g #生成<br>hexo d #部署 # 可与 hexo g 合并为 hexo d -g</p>
+<h3 id="二、用-Markdown-写文章"><a href="#二、用-Markdown-写文章" class="headerlink" title="二、用 Markdown 写文章"></a>二、用 Markdown 写文章</h3><p>我们注意到在 \Hexo\source_posts 文件夹下存放着我们的文章，它们的格式都是以<code>.md</code>格式结尾的，没错，Hexo 也是支持 Markdown 语法的，所以当我们需要写具有格式化的文章时，我们可以使用支持 Markdown 语法的编辑器进行文章编译，然后保存文件到 \Hexo\source_posts 文件夹下即可。</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/markdown.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/markdown.png" alt></a></p>
+<p>复制进去之后，只要执行</p>
+<p>hexo d -g</p>
+<p>推送到我们的 Github 仓库即可。</p>
+<h5 id="那么什么是-Markdown？"><a href="#那么什么是-Markdown？" class="headerlink" title="那么什么是 Markdown？"></a><a href="#那么什么是Markdown？" title="那么什么是Markdown？"></a>那么什么是 Markdown？</h5><p>Markdown 是一种轻量级的「标记语言」，它的优点很多，目前也被越来越多的写作爱好者，撰稿者广泛使用。看到这里请不要被「标记」、「语言」所迷惑，Markdown 的语法十分简单。常用的标记符号也不超过十个，这种相对于更为复杂的 HTML 标记语言来说，Markdown 可谓是十分轻量的，学习成本也不需要太多，且一旦熟悉这种语法规则，会有一劳永逸的效果。</p>
+<h5 id="Markdown-有什么优点？"><a href="#Markdown-有什么优点？" class="headerlink" title="Markdown 有什么优点？"></a><a href="#Markdown有什么优点？" title="Markdown有什么优点？"></a>Markdown 有什么优点？</h5><ul>
+<li>专注你的文字内容而不是排版样式。</li>
+<li>轻松的导出 HTML、PDF 和本身的 .md 文件。</li>
+<li>纯文本内容，兼容所有的文本编辑器与字处理软件。</li>
+<li>可读，直观。适合所有人的写作语言。</li>
+</ul>
+<h5 id="我该用什么工具？"><a href="#我该用什么工具？" class="headerlink" title="我该用什么工具？"></a><a href="#我该用什么工具？" title="我该用什么工具？"></a>我该用什么工具？</h5><ul>
+<li>Windows 下可以使用 MarkdownPad2。</li>
+<li>在 Mac OS X 上，我建议你用 Mou 这款免费且十分好用的 Markdown 编辑器。</li>
+<li>Web 端上，我强烈推荐 简书 这款产品。</li>
+</ul>
+<p>关于 Markdown 的更多资料可以查看如下：</p>
+<ul>
+<li><a href="http://sspai.com/25137" target="_blank" rel="noopener">认识与入门 Markdown</a></li>
+<li><a href="https://www.douban.com/note/350126154/?type=like" target="_blank" rel="noopener">Markdown 入门指南</a></li>
+</ul>
+<h2 id="将自己的域名关联到-Github-Pages-上"><a href="#将自己的域名关联到-Github-Pages-上" class="headerlink" title="将自己的域名关联到 Github Pages 上"></a><a href="#将自己的域名关联到Github-Pages上" title="将自己的域名关联到Github Pages上"></a>将自己的域名关联到 Github Pages 上</h2><p>很多朋友创建了自己的博客之后会选择买一个属于自己的域名，然后将自己域名绑定到自己的 Github Pages 博客上，其实这也并不难，只要你有个域名。</p>
+<h3 id="一、购买域名"><a href="#一、购买域名" class="headerlink" title="一、购买域名"></a><a href="#一、购买域名" title="一、购买域名"></a>一、购买域名</h3><p>如果你不是很有钱，在<a href="https://wanwang.aliyun.com/domain/?spm=5176.383338.1907008.1.LWIFhw" target="_blank" rel="noopener">阿里云</a>上，你只要几块钱就可以买到一个域名。</p>
+<p>选择你喜欢的域名，然后购买即可。</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/yuming.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/yuming.png" alt></a></p>
+<h3 id="二、配置-CNAME-文件"><a href="#二、配置-CNAME-文件" class="headerlink" title="二、配置 CNAME 文件"></a>二、配置 CNAME 文件</h3><p>在 \hexo\source 文件夹下创建文件 CNAME （新建记事本文件命名 CNAME，然后打开）</p>
+<p>内容为你的域名，例如我的域名是：lijianchang.xyz</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/cname2.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/cname2.png" alt></a></p>
+<p>在 Hexo 文件夹提交</p>
+<p>hexo g -d</p>
+<h3 id="三、修改-DNS-的-DNS"><a href="#三、修改-DNS-的-DNS" class="headerlink" title="三、修改 DNS 的 DNS"></a><a href="#三、修改DNS的DNS" title="三、修改DNS的DNS"></a>三、修改 DNS 的 DNS</h3><p>1. 如果你是在阿里云购买域名的话，请登录阿里云网站。打开个人中心，点击域名</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/domain_1.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_1.png" alt></a></p>
+<p>2. 选择管理</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/domain_2.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_2.png" alt></a></p>
+<p>3. 修改 DNS 为</p>
+<p>f1g1ns2.dnspod.net<br>f1g1ns1.dnspod.net</p>
+<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/domain_3.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_3.png" alt></a></p>
+<h3 id="四、域名解析"><a href="#四、域名解析" class="headerlink" title="四、域名解析"></a><a href="#四、域名解析" title="四、域名解析"></a>四、域名解析</h3><ol>
+<li><p>打开 <a href="https://www.dnspod.cn/" target="_blank" rel="noopener">DNSPOD</a>，注册一个账户</p>
+</li>
+<li><p>点击添加域名，把你的域名添加进去，如无意外，添加完之后就是以下这个状态<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/domain_4.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_4.png" alt></a></p>
+</li>
+<li><p>此时点击添加记录，添加两个记录，一个主机记录为<code>@</code>， 一个为<code>www</code>，而记录值都是填同一个，填你的博客主页对应的 ip，添加完后如下。<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/ip2.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/ip2.png" alt></a></p>
+</li>
+<li><p>但是如何获取 ip 值呢？打开运行，输入 cmd，打开命令窗口输入 <code>ping 主页地址</code> ， 红色部分即为你的 ip 值<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/ip.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/ip.png" alt></a></p>
+</li>
+<li><p>将 IP 输入过去即可。等待生效，最迟 72 小时生效。即可通过你的域名浏览你的博客主页。</p>
+</li>
+</ol>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>当你完成了你的博客之后，相信你的心情跟我刚做完的心情是一样的，即便很累，但是当自己的博客成型之后，自己还是有一个成就感的，那么完成后，以后的路还很长，真正想要自己博客能够积累人气，还得靠好的内容，所以认真写文章吧，相信你会受益于此的。</p>
+<p>如果大家有什么问题的话，可以在我留言板下留言，我看到评论时会第一时间回答大家。</p>
+<p>#参考资料：</p>
+<ol>
+<li><a href="http://wowubuntu.com/markdown/index.html" target="_blank" rel="noopener">Markdown 入门手册中文版</a></li>
+<li><a href="http://www.jianshu.com/p/1e402922ee32/" target="_blank" rel="noopener">Markdown–入门指南</a></li>
+<li><a href="http://cnfeat.com/blog/2014/05/10/how-to-build-a-blog/" target="_blank" rel="noopener">如何搭建一个独立博客——简明 Github Pages 与 jekyll 教程</a> by cnfeat</li>
+<li><a href="http://www.cnblogs.com/zhcncn/p/4097881.html" target="_blank" rel="noopener">Hexo 搭建 Github 静态博客</a> by 金石开</li>
+<li><a href="http://www.xuanfengge.com/using-ssh-key-link-github-photo-tour.html" target="_blank" rel="noopener">使用 SSH 密钥连接 Github【图文教程】</a> by 轩枫</li>
+</ol>
+]]></content>
+      
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[运动会]]></title>
+      <url>/2019/04/18/%E8%BF%90%E5%8A%A8%E4%BC%9A/</url>
+      <content type="html"><![CDATA[<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<div id="hbe-security">
+  <div class="hbe-input-container">
+  <input type="password" class="hbe-form-control" id="pass" placeholder="Welcome to my blog, enter password to read." />
+    <label for="pass">Welcome to my blog, enter password to read.</label>
+    <div class="bottom-line"></div>
+  </div>
+</div>
+<div id="decryptionError" style="display: none;">Incorrect Password!</div>
+<div id="noContentError" style="display: none;">No content to display!</div>
+<div id="encrypt-blog" style="display:none">
+U2FsdGVkX1/OfbMRxHAq+Ssa6hnWZtpCBzD6rcqbBpaRYE7zBiR7631EjfaIzvQSahbYyhlOaJ/QVULoBXxw8mKAx695q0bM95Mp5NiXdfBQz4c/5DV1ywg4erU8GpVuAn9qGb2yhmlo+x9YL25glz3apIKwD8yJm6fEpJUY2Mz1tjmZUhgDF5L2YeWfiuBT38rahcLQQVOWLGgbY40itDf3HspWw32SXbIQWahJEGgEBjQ80L7jT+gDzW5XXDEVub3dneKHQILspQxXCHT3D+qTw7xN4U2SXFQnOR5JiQbxZeWJLxrnArmOI6F/7vN5NhKvEW+x/hpyUNGRWVBsVmm2evPXFYzTkRub2b8sg+IkKqw42xp48YS98UJX8OAS8/cDJV/vVoXTf0Tq3gmeMyhDg9WgxCgK2D0p9TOIH7c76dM9f1w+MHdANCcy65XjEoQkXN+eWk+Aq1g+e5rIo+fIp35wP/KEk6dZO0cLMtX/Cu4PetkqMnLrRfy9hufRgi0uk66yY7L6E0bZK1TYg841tMnmNCN7dRKHhI14GjxR45oiHEd0rL2lrE/9m2ac7XFh45utIwLbfl5cZJSCOSExeg9Jo5yMkQQwBs9VIY4skTRXc9rllBAojtpLDuaDa8FsW3HbSXYPHcViDBppZwFkpyXE9qcF8eYf6XnJ4HcFJVn0xv8Q1wwtTgL7tyS3Ue0X1zZiTmwQI+VDJP2bz4zm25+/FlwBh2GLhNVB68jUmmaSe6m7Xw378e8e7g7hcz3fpNRyYSoE8rfWEkhbrt6qchxVKmKbn6Bt2jVC0+kL7xlMQ9bOf5LaJEiftNWgcLWoNJG7i+miGvuvwRrNN0rdiYzQ1FigcDVF9l+R94Q/vJwxdniixxK6TxLJYbDagvm0NtEhdFt4nl6qWpdx0cdnMpiBTFGrXS1cdw9lxRkXq4MqJZ7aCeyormnhEd/vbK3TyR2dNqbRFt4fAs3kCee1b7GBTnRtlQf7O8qmgg22U1IgcAAs5f6ARuF9J9nibc1KoHj082JljIARzU69TwvYTwebYXOq8P6qClPggxQc1QKvwnF6ueul+Wxt79kL6i6xSpdwQlCq6GPufqhi9+ZgvfwLgwcspQbi4uDP58kBUpfXKjl773KEzV+d/KBpTAe2+3o1YPVs1K97nHAN95QcwWQ6wHmWvraRKmQavN34rC+pmFh1yFOWWqKz8BS0pSwPmNfP1gIS5lZqeuA8abSZaIyuULVa17Oi/PmZwRa7fvJXblMeW+j7cbF4pH9peaGFv2G1qqcit/7ibnDEJQZtA4IDpyghqC1IMAAAdiJTVek5Iy0u0CUf4Rg5giyohbLkRHpW+PrPQNNpxUvMgPV4+IKrSd3AcNM2yQfrhGr8/df4Fqsjb9MEcR2RGN/xRsvXH/XnO+Zk4xLMkU7TOoBmzxfHxPL0ZTaDSNP/QETYicQ+WiFehr3TJiOXMs1T1prl2RiScHomU6M/OEYY/zAGqM+wCeyOO74IoTsCNbGStRbsG7V+v9AGzbv7KrtgsNyt4Q0bK/S+ILGAvCNuhNlxpnkT6XRNjx26vGeXHq/XXnFcFk7t85f8tdZBAGjoodsYfHYZMLQyf9sp0YSMyOEqcZSb8CioL2Im6ZtIy93qDm5L9bjKf2ix4mqVLAt6K8YsW2gOcGxZ3vefCcYoXOUKUPcBnLNac0uJf+Vnn2X9pVVH/SBl/Ib9DrJnjg2aBF0WD+JMqn1BpieQyPY5sgwMPPtblBFzI5AtNigUG9nZWEmtnDlZQ7tD2OOt7wqGSZ03S0Qy8sQYLj/bANdA8DL8f2kxCskjHcRaryHQ1SBxHfubw2BKBv13oDYF0/eaMtbtqKKsFjHpnSTLCZRusjwIXfjENIn82hh9PGxRqYRCfanr6oyWMqDksKVhFhOiq/e3PzlgFeqFskaHaLvrsCTaYbFwMgC9FX1ZozrzIWY8EbSZr0u0/ZCMUEzByduaXCVY+nY7VCPJXrAh2kL0Z/5TEQ8TBDLE8X/syY3Cl2tE+Rn5LuWGRJBuxEmQWwfCsG43QD4eBYE4PIa6RFvWtGcjlSQLUj9R8TcZzd/QLEIfhXq3kCJRoiugmpH1uEgMamRfqkIEI21o9yLyAXeIzwDcSwALC0uDCSUMtEi47mu/9q7R7KjR4L9WkJJ1f5y6uUW00sFetWqODpX+b3LnZXBx2qB6x90cSBSg6AL5Fh/12URGC2+W9TfTHJ8uUHtAwVoOb1toXnuyIb4EvMQeM4IYh1fNvqCfSCR5r8J2hFrEnDCgUuZdLWufTD+e8e2yHPq342nowSewF4peMgK59M2AjMPhfU2sONulU1n2mBAgkTwC1MF+fAcxquJxHMARbHgSuc9tlFGTPjfXYiicYYRL3pAQT/vztwFPPEYclvn5FehYyNifKQqI19eAqcTuVkp6RrINuysuABRkS0Ubpo0dqRxDsOxESbAeQW4mksl++rhvxWObYqlf7YBwDehOKlHSteREZnqI6RZ6aUYK+viwOe91/r7oQBhzOt9nw4o/I7eM1W8JlRmXN8pJ9vHsfvYgYSNwFeGBGP6+tZiXqq0k6Jb50MSuYabNrDRupAtYneiXLC3KkA56G3A8HaQkvzZQjDOee6LCyqU69o29gx3ijgpJwAn6SloM630zwAsY/1MAsPuQROj8KP8p15mx3H/07LjXoInqFv607ShA+5fs59uHhc1rbXC3vUxmdS674shtlNP/ondNkry6Pp63Ozn+Pzf8ueeXClrxWYDTTwjhsqkiaO2fXveHKSthhn4y8RrNC1ME1HDXKzrw3YEnr6xvFJhdqItqC+FWkL589ss8mhpOu/v6BvKkBu9WyYWoq+Ymyn0nvqqbiXQcA9mtohGrEjseblK7p7JSyChj2bTs52h6IAWMzKMLG7CaoP0oblraiIwNrv/kuBm4G6ifnEtqwle2FiLNxazgutZu1zQs/7deRwjWRVvk/0oRj1nHt6WjHBX0JLbW5l18EGcyJ1bjkvoddoiNYJe6pS5RBN9NUhGoSvCM5N/dZ4ep4D4P9SVmWMMle+RzNBUgkY3c87G/PjpqudBoiceMTdN1Mw+xqzcR62vS41+TJpsOi80+ff6ZFT1XArcwq7p+FUDfD5iOdzCXMULWwbRChIGZfPFYeT5FjvVdoWPjjyvXmi5jIe/jEhrUdCDy3Ka0Z7TZ
+</div>
+<script src="/lib/crypto-js.js"></script><script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">]]></content>
+      
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[英语竞赛]]></title>
+      <url>/2019/04/14/%E8%8B%B1%E8%AF%AD%E7%AB%9E%E8%B5%9B/</url>
+      <content type="html"><![CDATA[<p><img src="/2019/04/14/英语竞赛/images/参赛证书.jpg" alt="参赛证书"></p>
+]]></content>
+      
+        
+        <tags>
+            
+            <tag> 日常 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+  
+  
+</search>

@@ -1,91 +1,236 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head><meta name="generator" content="Hexo 3.8.0">
-  <meta charset="utf-8">
-  
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>
+    <meta charset="utf-8">
     
-    TK的个人小站</title>
-  
-    <link rel="shortcut icon" href="/favicon.ico">
-  
-  <link rel="stylesheet" href="/css/style.css">
-  
-    <link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
-  
-  <script src="/js/pace.min.js"></script>
+    
+    <title>TK的个人小站</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.2">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":null}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
 </head>
-</html>
+
+
 <body>
-<main class="content">
-  <section class="jumbotron">
-  <div class="video">
-    
-      <div class="video-frame">
-        <img src="/images/ocean/ocean.mp4overlay-hero.png" alt="Decorative image frame">
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class>
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">TK</h5>
+          <a href="mailto:tkqqmail@qq.com" title="tkqqmail@qq.com" class="mail">
+            
+              <span>t</span>
+            
+              <span>k</span>
+            
+              <span>q</span>
+            
+              <span>q</span>
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>i</span>
+            
+              <span>l</span>
+            
+              <span>@</span>
+            
+              <span>q</span>
+            
+              <span>q</span>
+            
+              <span>.</span>
+            
+              <span>c</span>
+            
+              <span>o</span>
+            
+              <span>m</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/tkboy96" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
       </div>
-    
-    <div class="video-media">
-      <video playsinline autoplay loop muted data-autoplay poster="/images/ocean/ocean.mp4ocean.png" x5-video-player-type="h5">
-        <source src="/images/ocean/ocean.mp4ocean.mp4" type="video/mp4">
-        <source src="/images/ocean/ocean.mp4ocean.ogv" type="video/ogg">
-        <source src="/images/ocean/ocean.mp4ocean.webm" type="video/webm">
-        <p>Your user agent does not support the HTML5 Video element.</p>
-      </video>
-      <div class="video-overlay"></div>
     </div>
-    <div class="video-inner text-center text-white">
-      <h1><a href="/">TK的个人小站</a></h1>
-      <p></p>
-      <div><img src="/images/hexo-inverted.svg" class="brand" alt="TK的个人小站"></div>
-    </div>
-    <div class="video-learn-more">
-      <a class="anchor" href="#landingpage"><i class="fe fe-mouse"></i></a>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class=" active">
+              <a href="/">
+                <i class="icon icon-lg icon-home"></i>
+                HOME
+              </a>
+            </li>
+        
+            <li class>
+              <a href="/categories">
+                <i class="icon icon-lg icon-th-list"></i>
+                CATEGORIES
+              </a>
+            </li>
+        
+            <li class>
+              <a href="/tags">
+                <i class="icon icon-lg icon-tags"></i>
+                TAGS
+              </a>
+            </li>
+        
+            <li class>
+              <a href="/archives">
+                <i class="icon icon-lg icon-archives"></i>
+                ARCHIVES
+              </a>
+            </li>
+        
+            <li class>
+              <a href="/custom">
+                <i class="icon icon-lg icon-plus-square"></i>
+                CUSTOM
+              </a>
+            </li>
+        
+      </ul>
     </div>
   </div>
-</section>
+</aside>
 
-<div id="landingpage">
-  <section class="outer">
-  <article class="articles">
-    
-    <h1 class="page-type-title"></h1>
-
-    
-      
-        <article id="post-安卓微信本地数据库解密与删除聊天记录恢复完全教程" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
-
-  <div class="article-inner">
-    
-      <header class="article-header">
+    <main id="main">
         
-  
-    <h2 itemprop="name">
-      <a class="article-title" href="/2019/04/27/安卓微信本地数据库解密与删除聊天记录恢复完全教程/">安卓微信本地数据库解密与删除聊天记录恢复完全教程</a>
-    </h2>
-  
-
-      </header>
-    
-
-    
-      <div class="article-meta">
-        <a href="/2019/04/27/安卓微信本地数据库解密与删除聊天记录恢复完全教程/" class="article-date">
-  <time datetime="2019-04-27T07:04:00.000Z" itemprop="datePublished">2019-04-27</time>
-</a>
+    <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>TK的个人小站</span>
+            
+        </div>
         
-      </div>
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header index-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">TK的个人小站</h1>
+        <h5 class="subtitle">
+            
+                
+            
+        </h5>
+        
+    </div>
     
 
-    <div class="article-entry" itemprop="articleBody">
-      
+</header>
 
-      
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left">
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
 
-      
+    <div class="container body-wrap">
+        <ul class="post-list">
+        
+            <li class="post-list-item fade">
+                <article id="post-安卓微信本地数据库解密与删除聊天记录恢复完全教程" class="article-card article-type-post" itemprop="blogPost">
+  
+        
+<div class="item-thumb">
+    <a class="thumb-link" href="/2019/04/27/安卓微信本地数据库解密与删除聊天记录恢复完全教程/"></a>
+    <div class="thumb-hover">
+        <span class="icon icon-eye"></span>
+    </div>
+    <img src="/img/thumb/7.jpg" alt="图片路径不正确">
+    
+
+
+  
+    <h3 class="post-title ab-title" itemprop="name">
+      <a class="post-title-link" href="/2019/04/27/安卓微信本地数据库解密与删除聊天记录恢复完全教程/">安卓微信本地数据库解密与删除聊天记录恢复完全教程</a>
+    </h3>
+  
+
+
+
+</div>
+
+        
+    
+    
+    
+    <div class="post-meta">
+        <time class="post-time" title="2019-04-27 15:04:00" datetime="2019-04-27T07:04:00.000Z" itemprop="datePublished">2019-04-27</time>
+
+        
+
+
+        
+
+        
+
+
+        
+        
+    </div>
+    
+    <div class="post-content" id="post-content" itemprop="postContent">
+    
+    
         <p>【转载内容，欢迎转载，请注明出处】</p>
 <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>====</p>
 <p>在电子数据取证过程中，对微信本地数据库的解密、提取与恢复是非常重要的工作内容。本文以华为mate系列手机和最新版的微信（7.0.3）为例，通过总结互联网上已经发表的文章经验，主要针对<strong>华为手机备份软件升级、微信7.0以后索引库加密以及通过索引库恢复被删除聊天记录</strong>等内容予以补充。</p>
@@ -100,154 +245,128 @@
 </li>
 </ol>
 <h2 id="新的问题"><a href="#新的问题" class="headerlink" title="新的问题"></a>新的问题</h2><hr>
-        
-          <a class="article-more-link" href="/2019/04/27/安卓微信本地数据库解密与删除聊天记录恢复完全教程/">Read More...</a>
-        
-      
+    
+    <a href="/2019/04/27/安卓微信本地数据库解密与删除聊天记录恢复完全教程/" class="post-more waves-effect waves-button">
+        more
+    </a>
     </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/27/安卓微信本地数据库解密与删除聊天记录恢复完全教程/" data-id="cjuz5wuyt0006gow13sdkzbiq" class="article-share-link">Share</a>
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术/">技术</a></li></ul>
-
-    </footer>
-
-  </div>
-
-  
-
-  
-
 </article>
 
-
-
-      
-        <article id="post-获匹匹配与非获取匹配" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
-
-  <div class="article-inner">
+<div class="post-footer">
     
-      <header class="article-header">
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术/">技术</a></li></ul>
+
+</div>
+
+
+            </li>
         
+            <li class="post-list-item fade">
+                <article id="post-获匹匹配与非获取匹配" class="article-card article-type-post" itemprop="blogPost">
   
-    <h2 itemprop="name">
-      <a class="article-title" href="/2019/04/23/获匹匹配与非获取匹配/">获匹匹配与非获取匹配</a>
-    </h2>
-  
-
-      </header>
-    
-
-    
-      <div class="article-meta">
-        <a href="/2019/04/23/获匹匹配与非获取匹配/" class="article-date">
-  <time datetime="2019-04-23T09:16:41.000Z" itemprop="datePublished">2019-04-23</time>
-</a>
         
-      </div>
+<div class="item-thumb">
+    <a class="thumb-link" href="/2019/04/23/获匹匹配与非获取匹配/"></a>
+    <div class="thumb-hover">
+        <span class="icon icon-eye"></span>
+    </div>
+    <img src="/img/thumb/6.jpg" alt="图片路径不正确">
     
 
-    <div class="article-entry" itemprop="articleBody">
-      
 
-      
+  
+    <h3 class="post-title ab-title" itemprop="name">
+      <a class="post-title-link" href="/2019/04/23/获匹匹配与非获取匹配/">获匹匹配与非获取匹配</a>
+    </h3>
+  
 
-      
-        <p>在使用正则表达式的时候，我们经常会使用()把某个部分括起来，称为一个子模式。</p>
-<pre><code>子模式有Capturing和Non-Capturing两种情况。
+
+
+</div>
+
+        
+    
+    
+    
+    <div class="post-meta">
+        <time class="post-time" title="2019-04-23 17:16:41" datetime="2019-04-23T09:16:41.000Z" itemprop="datePublished">2019-04-23</time>
+
+        
+
+
+        
+
+        
+
+
+        
+        
+    </div>
+    
+    <div class="post-content" id="post-content" itemprop="postContent">
+    
+    
+        在使用正则表达式的时候，我们经常会使用()把某个部分括起来，称为一个子模式。
+子模式有Capturing和Non-Capturing两种情况。
 
 Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹配结果保存起来，供我们查找或者替换。如后向引用的使用；
 
-而Non-Capturing指**非获取匹配** ，这时系统并不会保存子模式的匹配结果，子模式的匹配更多的只是作为一种限制条件使用，如正向预查，反向预查，负正向预查，负反向预查等。
-</code></pre><p><strong>\
-</strong></p>
-<p><strong>后向引用</strong></p>
-<p><strong>使用”\数字”代表前面某个子模式的匹配内容</strong></p>
-<pre><code>我们使用正则表达式，在很多场景下的作用是为了查找和替换，大部分语言的正则表达式实现中，在查找时，使用后向引用来代表一个子模式，语法是&quot;\数字&quot;，而在替换中，语法是&quot;$数字&quot;。
-
-在正则表达式中，我们可以使用 &quot;\数字 &quot; 来进行后向引用，数字 表示这里引用的是前面的第几个子模式。如下：
-</code></pre><p><strong>Text</strong>\<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;h1&gt;This is a valid header&lt;/h1&gt;\</span><br><span class="line">&lt;h2&gt;This is not valid.&lt;/h3&gt;\</span><br><span class="line">**RegEx**\</span><br><span class="line">&lt;h([1-6])&gt;.*?&lt;/h\1 &gt;\</span><br><span class="line">**Result**\</span><br><span class="line">&lt;h1&gt;This is a valid header&lt;/h1&gt;\</span><br><span class="line">&lt;h2&gt;This is not valid.&lt;/h3&gt;</span><br></pre></td></tr></table></figure></p>
-<pre><code>上面示例中，\1代表前面的子模式([1-6])的匹配结果 1，所以不符合的匹配&lt;h2&gt;..&lt;/h3&gt;并没有被匹配。
-
-后向应用常见的应用常见是：
-</code></pre><ul>
-<li><p>匹配重复单词 (\w+) \1</p>
-</li>
-<li><p>匹配合法的html标记，如上例。</p>
-</li>
-</ul>
-<p><strong>非获取匹配</strong></p>
-<p><strong>在子模式内部前面添加”?:”</strong></p>
-<pre><code>非获取匹配表示这个子模式的匹配内容不会被保存，不能用于后向引用中。简单说，非获取匹配就是 只匹配，不保存。看个例子：
-</code></pre><p><strong>Text</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.\<br><strong>RegEx</strong>\<br>Windows (?:[\w]+\b)\<br><strong>Result</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.</p>
-<pre><code>在这个例子中，子模式(?:[\w]+\b)是一个非获取匹配，只匹配内容，单并未保存字匹配的结果。
-</code></pre><p><strong>正向预查</strong></p>
-<p><strong>在子模式的内部前面添加”?=”</strong></p>
-<pre><code>正向预查的意思是，子模式仅仅作为条件限制，并不作为匹配结果输出，子模式前面的。
-</code></pre><p><strong>Text</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.\<br><strong>RegEx</strong>\<br>Windows(?= [\d]+\b)\<br><strong>Result</strong>\<br>Windows 95 and Windows 98 are the successor.\<br>Then Windows 2000 and Windows Xp appeared.\<br>Windows Vista is the Latest version of the family.</p>
-<pre><code>这个例子中，要获取所有后面带有数字的Windows字符串。子模式在这里仅仅作为一个限制条件使用，仅参与匹配过程，并不作为匹配结果输出。
-
-**负正向预查的作用正好与正向预查相反，语法为在子模式内部前面增加&quot;?!&quot;。**
-
-比如上面例子，如果RegEx为Windows(?! [\d]+\b)，则匹配的结果会是Windows Xp和Windows Vista中的windows。
-</code></pre><p><strong>反向预查</strong></p>
-<p><strong>在子模式的内部前面添加”?&lt;=”</strong></p>
-<pre><code>反向预查与正向预查很相似，子模式仅仅作为条件限制，不作为结果输出，唯一的不同是，正向预查匹配子模式前面的结果作为匹配结果，而反向预查匹配子模式后面的结果作为匹配结果。看个例子：
-</code></pre><p><strong>Text</strong>\<br>CNY:100.2\<br>USD:222.1\<br>USD:301.3\<br>HKD:122.1\<br>CNY:114.4\<br><strong> RegEx</strong>\<br>(?&lt;=CNY:)\d+.\d\<br><strong>Result</strong>\<br>CNY:100.2\<br>USD:222.1\<br>USD:301.3\<br>HKD:122.1\<br>CNY:114.4</p>
-<pre><code>这个例子里，要获取属于CNY的金额。子模式仅参与匹配过程，并不作为匹配结果输出。
-
-**负反向预查的作用正好与反向预查相反，语法为在子模式内部前面增加&quot;?&lt;!&quot;。**
-
-比如上面例子，如果RegEx为(?&lt;!CNY:)\b\d+\.\d，则会获取不属于CNY的金额.
-</code></pre>
-      
+而Non-Capturing指**非获取匹配** ，这时系统并不会保存子模式的匹配结果，子模式的匹配更多的只是作为一种...
+    
+    <a href="/2019/04/23/获匹匹配与非获取匹配/" class="post-more waves-effect waves-button">
+        more
+    </a>
     </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/23/获匹匹配与非获取匹配/" data-id="cjuz5wuxh0002gow1cpkst4ys" class="article-share-link">Share</a>
-      
-    </footer>
-
-  </div>
-
-  
-
-  
-
 </article>
 
 
-
-      
-        <article id="post-Git心得" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
-
-  <div class="article-inner">
-    
-      <header class="article-header">
+            </li>
         
+            <li class="post-list-item fade">
+                <article id="post-Git心得" class="article-card article-type-post" itemprop="blogPost">
   
-    <h2 itemprop="name">
-      <a class="article-title" href="/2019/04/22/Git心得/">Git心得</a>
-    </h2>
-  
-
-      </header>
-    
-
-    
-      <div class="article-meta">
-        <a href="/2019/04/22/Git心得/" class="article-date">
-  <time datetime="2019-04-22T11:57:29.000Z" itemprop="datePublished">2019-04-22</time>
-</a>
         
-      </div>
+<div class="item-thumb">
+    <a class="thumb-link" href="/2019/04/22/Git心得/"></a>
+    <div class="thumb-hover">
+        <span class="icon icon-eye"></span>
+    </div>
+    <img src="/img/thumb/5.jpg" alt="图片路径不正确">
     
 
-    <div class="article-entry" itemprop="articleBody">
-      
 
-      
+  
+    <h3 class="post-title ab-title" itemprop="name">
+      <a class="post-title-link" href="/2019/04/22/Git心得/">Git心得</a>
+    </h3>
+  
 
-      
+
+
+</div>
+
+        
+    
+    
+    
+    <div class="post-meta">
+        <time class="post-time" title="2019-04-22 19:57:29" datetime="2019-04-22T11:57:29.000Z" itemprop="datePublished">2019-04-22</time>
+
+        
+
+
+        
+
+        
+
+
+        
+        
+    </div>
+    
+    <div class="post-content" id="post-content" itemprop="postContent">
+    
+    
         <h1 id="Git和Github简单教程"><a href="#Git和Github简单教程" class="headerlink" title="Git和Github简单教程"></a><a href="https://www.cnblogs.com/schaepher/p/5561193.html" target="_blank" rel="noopener">Git和Github简单教程</a></h1><p>==================================================================</p>
 <p>原文链接：<a href="http://www.cnblogs.com/schaepher/p/5561193.html" target="_blank" rel="noopener">Git和Github简单教程</a></p>
 <hr>
@@ -271,345 +390,425 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 <li><a href="http://www.cnblogs.com/schaepher/p/5561193.html#problem" target="_blank" rel="noopener">八、一些可能碰到的问题</a></li>
 </ul>
 <hr>
-        
-          <a class="article-more-link" href="/2019/04/22/Git心得/">Read More...</a>
-        
-      
+    
+    <a href="/2019/04/22/Git心得/" class="post-more waves-effect waves-button">
+        more
+    </a>
     </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/22/Git心得/" data-id="cjuz5wuz00009gow1f5vulvmc" class="article-share-link">Share</a>
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术/">技术</a></li></ul>
-
-    </footer>
-
-  </div>
-
-  
-
-  
-
 </article>
 
-
-
-      
-        <article id="post-伤心者" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
-
-  <div class="article-inner">
+<div class="post-footer">
     
-      <header class="article-header">
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术/">技术</a></li></ul>
+
+</div>
+
+
+            </li>
         
+            <li class="post-list-item fade">
+                <article id="post-伤心者" class="article-card article-type-post" itemprop="blogPost">
   
-    <h2 itemprop="name">
-      <a class="article-title" href="/2019/04/21/伤心者/">伤心者</a>
-    </h2>
-  
-
-      </header>
-    
-
-    
-      <div class="article-meta">
-        <a href="/2019/04/21/伤心者/" class="article-date">
-  <time datetime="2019-04-21T10:16:34.000Z" itemprop="datePublished">2019-04-21</time>
-</a>
         
-      </div>
+<div class="item-thumb">
+    <a class="thumb-link" href="/2019/04/21/伤心者/"></a>
+    <div class="thumb-hover">
+        <span class="icon icon-eye"></span>
+    </div>
+    <img src="/img/thumb/4.jpg" alt="图片路径不正确">
     
 
-    <div class="article-entry" itemprop="articleBody">
-      
 
-      
+  
+    <h3 class="post-title ab-title" itemprop="name">
+      <a class="post-title-link" href="/2019/04/21/伤心者/">伤心者</a>
+    </h3>
+  
 
-      
+
+
+</div>
+
+        
+    
+    
+    
+    <div class="post-meta">
+        <time class="post-time" title="2019-04-21 18:16:34" datetime="2019-04-21T10:16:34.000Z" itemprop="datePublished">2019-04-21</time>
+
+        
+
+
+        
+
+        
+
+
+        
+        
+    </div>
+    
+    <div class="post-content" id="post-content" itemprop="postContent">
+    
+    
         <p>　　</p>
 <h1 id="《伤心者》"><a href="#《伤心者》" class="headerlink" title="《伤心者》"></a>《伤心者》</h1><p><img src="/2019/04/21/伤心者/images/伤心者.jpg" alt="伤心者"><br>　　（2003年银河奖特等奖）</p>
 <p>　　上午的菜场正是最繁忙的时候，我看着夏群芳穿过拥护的人群-她的背影很臃肿。隔着两三米的距离我看不清她买了些什么菜，不过她跟小贩们的讨价还价声倒是以听得很清楚。从这两天的经历我知道小贩们对夏群芳说话是不太客气的，有时候甚至于就是直接的奚落。不过我从未见过夏群芳为此而表现出生气什么的，她似乎只关心最后的结果，也就是说菜要买得合算，至于另的事情至少从表面上看去她是不计较的。现在她已经买完菜准备离开，我知道她要去哪儿。</p>
 <p>　　这座城市的四月是最漂亮的时候，各个角落里都盛开着各种各样的花。气候不冷也不太热，老年人皮帽还没取小姑娘们就钻空在天气晴朗的时候迫不及待地穿起了短裙，这本来就是乱穿衣的时候呢。“乱花渐欲迷人眼”在这样的季节里成了不折不扣的双关说话。</p>
 <p>　　夏群芳对街景显然并没有欣赏的打算，她只是低着头很费劲地朝公共汽车站的方向走，装满蔬菜的篮子不时和她短胖的小腿撞在一起，使得她每走几步就会有些滑稽地打个趔趄。道路两旁的行道树都是清一色的塔松，在这座温带城市里这种树比原产地要长得快，但木质也相对要差一些。夏群芳今天走的路线与平时稍有不同，因为今天是星期天，她总是在这个时候到C大去看她的儿子何夕。</p>
 <p>　　由于历史的原因，C大的校园网被一条街道分成了两个部分，在这条街上还开着一路公共汽车。夏群芳下车后进入校园的东区，现在是上午十点，她直接朝着图书馆的方向走去，她知道这个时候何夕肯定在那里。同样由于历史的原因，C大的图书馆有两个，分别位于东西两个区。实际上C大的东西两区曾经是两所独立的高校，用校方的语言来说这两所学校是合并，但现在的校名沿用了东区的，所以当年从西区那所学校毕业的不少学生常常戏称自己是亡校奴并只对西区的那所学校寄予母校的情怀。何夕严格来讲也该算是亡校奴，不过何夕是在合并后才开始攻读C大的硕士学位，所以在何夕心中母校就是东区和西区的整体。<br></p>
-        
-          <a class="article-more-link" href="/2019/04/21/伤心者/">Read More...</a>
-        
-      
+    
+    <a href="/2019/04/21/伤心者/" class="post-more waves-effect waves-button">
+        more
+    </a>
     </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/21/伤心者/" data-id="cjuz5wv00000bgow19c2ciuot" class="article-share-link">Share</a>
-      
-    </footer>
-
-  </div>
-
-  
-
-  
-
 </article>
 
 
-
-      
-        <article id="post-Hexo博客" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
-
-  <div class="article-inner">
-    
-      <header class="article-header">
+            </li>
         
+            <li class="post-list-item fade">
+                <article id="post-Hexo博客" class="article-card article-type-post" itemprop="blogPost">
   
-    <h2 itemprop="name">
-      <a class="article-title" href="/2019/04/21/Hexo博客/">4.21-Hexo博客</a>
-    </h2>
-  
-
-      </header>
-    
-
-    
-      <div class="article-meta">
-        <a href="/2019/04/21/Hexo博客/" class="article-date">
-  <time datetime="2019-04-21T09:38:25.000Z" itemprop="datePublished">2019-04-21</time>
-</a>
         
-      </div>
+<div class="item-thumb">
+    <a class="thumb-link" href="/2019/04/21/Hexo博客/"></a>
+    <div class="thumb-hover">
+        <span class="icon icon-eye"></span>
+    </div>
+    <img src="/img/thumb/3.jpg" alt="图片路径不正确">
     
 
-    <div class="article-entry" itemprop="articleBody">
-      
 
-      
+  
+    <h3 class="post-title ab-title" itemprop="name">
+      <a class="post-title-link" href="/2019/04/21/Hexo博客/">4.21-Hexo博客</a>
+    </h3>
+  
 
-      
+
+
+</div>
+
+        
+    
+    
+    
+    <div class="post-meta">
+        <time class="post-time" title="2019-04-21 17:38:25" datetime="2019-04-21T09:38:25.000Z" itemprop="datePublished">2019-04-21</time>
+
+        
+
+
+        
+
+        
+
+
+        
+        
+    </div>
+    
+    <div class="post-content" id="post-content" itemprop="postContent">
+    
+    
         <blockquote>
 <p>本文由 <a href="http://ksria.com/simpread/" target="_blank" rel="noopener">简悦 SimpRead</a> 转码， 原文地址 <a href="http://github.yuluhuang.com/2016/03/17/hexo%E6%90%AD%E5%BB%BA%E8%BD%AC%E8%BD%BD/" target="_blank" rel="noopener">http://github.yuluhuang.com/2016/03/17/hexo%E6%90%AD%E5%BB%BA%E8%BD%AC%E8%BD%BD/</a></p>
 </blockquote>
 <p>小白独立搭建博客–Github Pages 和 Hexo 简明教程<br>2016 年 03 月 16 日 ⁄ Android 开发经验 ⁄ 共 9767 字 ⁄ 字号 小 中 大 ⁄ 评论关闭<br>首先欢迎各位来参观我的博客：<a href="http://lijianchang.xyz/" target="_blank" rel="noopener">Ryane’s Blog</a></p>
 <p>Github 地址：<a href="https://github.com/ryanlijianchang/ryanlijianchang.github.io" target="_blank" rel="noopener">https://github.com/ryanlijianchang/ryanlijianchang.github.io</a></p>
 <p>摘要：这是一篇有关如何使用 Github Pages 和 Hexo 搭建自己独立博客的详尽教程，里面介绍了如何使用和配置 Hexo 框架，如何将 Hexo 部署到自己的 Github 项目中，域名注册，以及域名的绑定，还有我在搭建自己博客过程中所遇到的各种困难。<br></p>
-        
-          <a class="article-more-link" href="/2019/04/21/Hexo博客/">Read More...</a>
-        
-      
+    
+    <a href="/2019/04/21/Hexo博客/" class="post-more waves-effect waves-button">
+        more
+    </a>
     </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/21/Hexo博客/" data-id="cjuz5wuyq0005gow1ds5zzdii" class="article-share-link">Share</a>
-      
-    </footer>
-
-  </div>
-
-  
-
-  
-
 </article>
 
 
-
-      
-        <article id="post-运动会" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
-
-  <div class="article-inner">
-    
-      <header class="article-header">
+            </li>
         
+            <li class="post-list-item fade">
+                <article id="post-运动会" class="article-card article-type-post" itemprop="blogPost">
   
-    <h2 itemprop="name">
-      <a class="article-title" href="/2019/04/18/运动会/">运动会</a>
-    </h2>
-  
-
-      </header>
-    
-
-    
-      <div class="article-meta">
-        <a href="/2019/04/18/运动会/" class="article-date">
-  <time datetime="2019-04-17T16:00:00.000Z" itemprop="datePublished">2019-04-18</time>
-</a>
         
-      </div>
-    
-
-    <div class="article-entry" itemprop="articleBody">
-      
-
-      
-
-      
-        Welcome to my blog, enter password to read.
-        
-          <a class="article-more-link" href="/2019/04/18/运动会/">Read More...</a>
-        
-      
+<div class="item-thumb">
+    <a class="thumb-link" href="/2019/04/18/运动会/"></a>
+    <div class="thumb-hover">
+        <span class="icon icon-eye"></span>
     </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/18/运动会/" data-id="cjuz5wuwx0000gow17uc79g93" class="article-share-link">Share</a>
-      
-    </footer>
-
-  </div>
-
-  
-
-  
-
-</article>
-
-
-
-      
-        <article id="post-英语竞赛" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
-
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h2 itemprop="name">
-      <a class="article-title" href="/2019/04/14/英语竞赛/">英语竞赛</a>
-    </h2>
-  
-
-      </header>
+    <img src="/img/thumb/2.jpg" alt="图片路径不正确">
     
 
-    
-      <div class="article-meta">
-        <a href="/2019/04/14/英语竞赛/" class="article-date">
-  <time datetime="2019-04-13T16:00:00.000Z" itemprop="datePublished">2019-04-14</time>
-</a>
-        
-      </div>
-    
-
-    <div class="article-entry" itemprop="articleBody">
-      
-
-      
-
-      
-        <p><img src="/2019/04/14/英语竞赛/images/参赛证书.jpg" alt="参赛证书"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/14/英语竞赛/" data-id="cjuz5wuxd0001gow1orx3clsw" class="article-share-link">Share</a>
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/日常/">日常</a></li></ul>
-
-    </footer>
-
-  </div>
 
   
-
+    <h3 class="post-title ab-title" itemprop="name">
+      <a class="post-title-link" href="/2019/04/18/运动会/">运动会</a>
+    </h3>
   
 
-</article>
 
 
-
-      
-  </article>
-  
-  
-</section>
 </div>
 
-  <footer class="footer">
-  
-  <div class="outer">
-    <div class="float-right">
-      <ul class="list-inline">
-  
-    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
-  
-    <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
-  
-</ul>
+        
+    
+    
+    
+    <div class="post-meta">
+        <time class="post-time" title="2019-04-18 00:00:00" datetime="2019-04-17T16:00:00.000Z" itemprop="datePublished">2019-04-18</time>
+
+        
+
+
+        
+
+        
+
+
+        
+        
     </div>
-    <ul class="list-inline">
-      <li>&copy; 2019 TK的个人小站</li>
-      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
-      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
-    </ul>
-  </div>
+    
+    <div class="post-content" id="post-content" itemprop="postContent">
+    
+    
+        Welcome to my blog, enter password to read.
+    
+    <a href="/2019/04/18/运动会/" class="post-more waves-effect waves-button">
+        more
+    </a>
+    </div>
+</article>
+
+
+            </li>
+        
+            <li class="post-list-item fade">
+                <article id="post-英语竞赛" class="article-card article-type-post" itemprop="blogPost">
+  
+        
+<div class="item-thumb">
+    <a class="thumb-link" href="/2019/04/14/英语竞赛/"></a>
+    <div class="thumb-hover">
+        <span class="icon icon-eye"></span>
+    </div>
+    <img src="/img/thumb/1.jpg" alt="图片路径不正确">
+    
+
+
+  
+    <h3 class="post-title ab-title" itemprop="name">
+      <a class="post-title-link" href="/2019/04/14/英语竞赛/">英语竞赛</a>
+    </h3>
+  
+
+
+
+</div>
+
+        
+    
+    
+    
+    <div class="post-meta">
+        <time class="post-time" title="2019-04-14 00:00:00" datetime="2019-04-13T16:00:00.000Z" itemprop="datePublished">2019-04-14</time>
+
+        
+
+
+        
+
+        
+
+
+        
+        
+    </div>
+    
+    <div class="post-content" id="post-content" itemprop="postContent">
+    
+    
+        
+
+    
+    <a href="/2019/04/14/英语竞赛/" class="post-more waves-effect waves-button">
+        more
+    </a>
+    </div>
+</article>
+
+<div class="post-footer">
+    
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/日常/">日常</a></li></ul>
+
+</div>
+
+
+            </li>
+        
+        </ul>
+        
+    </div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.lujingtao.com" target="_blank">HOME</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                TK &copy; 2017 - 2019
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
 </footer>
 
-</main>
-<aside class="sidebar">
-  <button class="navbar-toggle"></button>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
 
-<nav class="navbar">
-  
-    <div class="logo">
-      <a href="/"><img src="/images/hexo.svg" alt="TK的个人小站"></a>
-    </div>
-  
-  <ul class="nav nav-main">
-    
-      <li class="nav-item">
-        <a class="nav-item-link" href="/">Home</a>
-      </li>
-    
-      <li class="nav-item">
-        <a class="nav-item-link" href="/archives">Archives</a>
-      </li>
-    
-      <li class="nav-item">
-        <a class="nav-item-link" href="/gallery">Gallery</a>
-      </li>
-    
-      <li class="nav-item">
-        <a class="nav-item-link" href="/about">About</a>
-      </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link nav-item-search" title="Search">
-        <i class="fe fe-search"></i>
-        Search
-      </a>
-    </li>
-  </ul>
-</nav>
 
-<nav class="navbar navbar-bottom">
-  <ul class="nav">
-      <li class="nav-item">
-          <div class="totop" id="totop">
-    <i class="fe fe-rocket"></i>
-</div>
-      </li>
-    <li class="nav-item">
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
       
-        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
-          <i class="fe fe-feed"></i>
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/&title=TK的个人小站&pic=http://yoursite.com/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
         </a>
+      </li>
       
-    </li>
-  </ul>
-</nav>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/&title=TK的个人小站&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
 
-<div class="search-form-wrap">
-  <div class="local-search local-search-plugin">
-  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
-  <div id="local-search-result" class="local-search-result"></div>
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAAAAAAZai4+AAABW0lEQVR42u3aQQ7DIAxE0dz/0qnUVaUUMjNOF7W/VxVKw8sCMIbjkON8x6r9M/T/PhCwYDVindu4PqO0XNv1vmDBmszaD2y9S/33jQEWLFjC6/QFGBYsWL9muV3CggVrz1KSZmWy0JPvx3J5WLBasCrLbSVRfri+BQvW37JOM9xlOwtYsKax9CLRfhRXtrhGBgELVlPWSpptSvVk+qYvWLBgRUWiynWEL++BBQuW0KUy1BXWsgUWrGEsN2nOQNJRij67wILVlKUUZCvLuVJsks5gYcFqyqqUbt0jE2PqgQVrMMu9fJAdcCqTCCxY01jZQUi2uS2d/MCC1ZpVuXCQlWul1BwWrGGsLOXdd6kv5PVEHBasTqxsUtDTZXcqgQVrMisr/WTbVOkZWLBgyYPcPcMxMgVYsGA9tL1Uik3Lz4AFayQrS5rd1NmYE2DBGsbKrgtkxFI1CxasnqwXXY7FbVPN83MAAAAASUVORK5CYII=" alt="微信分享二维码">
 </div>
-</div>
-</aside>
-<script src="/js/jquery-2.0.3.min.js"></script>
-<script src="/js/lazyload.min.js"></script>
-<script src="/js/busuanzi-2.3.pure.min.js"></script>
 
 
-  <script src="/fancybox/jquery.fancybox.min.js"></script>
+    
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.2"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.2"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.2"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.2"></script>
+
+<!-- third-party -->
 
 
 
 
-<script src="/js/ocean.js"></script>
 
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.2"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+
+
+
+    
 </body>
 </html>

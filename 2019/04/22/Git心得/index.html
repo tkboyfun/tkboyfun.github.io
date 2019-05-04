@@ -1,59 +1,212 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head><meta name="generator" content="Hexo 3.8.0">
-  <meta charset="utf-8">
-  
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>
-    Git心得 |
+    <meta charset="utf-8">
     
-    TK的个人小站</title>
-  
-    <link rel="shortcut icon" href="/favicon.ico">
-  
-  <link rel="stylesheet" href="/css/style.css">
-  
-    <link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
-  
-  <script src="/js/pace.min.js"></script>
+    
+    <title>Git心得 | TK的个人小站</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="技术">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.2">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":null}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
 </head>
-</html>
+
+
 <body>
-<main class="content">
-  <section class="outer">
-  <article id="post-Git心得" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal>
+    <div id="loading" class="active"></div>
 
-  <div class="article-inner">
-    
-      <header class="article-header">
+    <aside id="menu" class>
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">TK</h5>
+          <a href="mailto:tkqqmail@qq.com" title="tkqqmail@qq.com" class="mail">
+            
+              <span>t</span>
+            
+              <span>k</span>
+            
+              <span>q</span>
+            
+              <span>q</span>
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>i</span>
+            
+              <span>l</span>
+            
+              <span>@</span>
+            
+              <span>q</span>
+            
+              <span>q</span>
+            
+              <span>.</span>
+            
+              <span>c</span>
+            
+              <span>o</span>
+            
+              <span>m</span>
+            
+          </a>
+        </hgroup>
         
-  
-    <h1 class="article-title" itemprop="name">
-      Git心得
-    </h1>
-  
-
-      </header>
-    
-
-    
-      <div class="article-meta">
-        <a href="/2019/04/22/Git心得/" class="article-date">
-  <time datetime="2019-04-22T11:57:29.000Z" itemprop="datePublished">2019-04-22</time>
-</a>
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/tkboy96" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+        </ul>
         
       </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class>
+              <a href="/">
+                <i class="icon icon-lg icon-home"></i>
+                HOME
+              </a>
+            </li>
+        
+            <li class>
+              <a href="/categories">
+                <i class="icon icon-lg icon-th-list"></i>
+                CATEGORIES
+              </a>
+            </li>
+        
+            <li class>
+              <a href="/tags">
+                <i class="icon icon-lg icon-tags"></i>
+                TAGS
+              </a>
+            </li>
+        
+            <li class>
+              <a href="/archives">
+                <i class="icon icon-lg icon-archives"></i>
+                ARCHIVES
+              </a>
+            </li>
+        
+            <li class>
+              <a href="/custom">
+                <i class="icon icon-lg icon-plus-square"></i>
+                CUSTOM
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Git心得</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">Git心得</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-04-22T11:57:29.000Z" itemprop="datePublished" class="page-time">
+  2019-04-22
+</time>
+
+
+            
+        </h5>
+        
+    </div>
     
 
-    <div class="article-entry" itemprop="articleBody">
-      
+</header>
 
-      
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left">
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
 
-      
-        <h1 id="Git和Github简单教程"><a href="#Git和Github简单教程" class="headerlink" title="Git和Github简单教程"></a><a href="https://www.cnblogs.com/schaepher/p/5561193.html" target="_blank" rel="noopener">Git和Github简单教程</a></h1><p>==================================================================</p>
+
+<div class="container body-wrap">
+    <article id="post-Git心得" class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Git心得</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-04-22 19:57:29" datetime="2019-04-22T11:57:29.000Z" itemprop="datePublished">2019-04-22</time>
+
+            
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <h1 id="Git和Github简单教程"><a href="#Git和Github简单教程" class="headerlink" title="Git和Github简单教程"></a><a href="https://www.cnblogs.com/schaepher/p/5561193.html" target="_blank" rel="noopener">Git和Github简单教程</a></h1><p>==================================================================</p>
 <p>原文链接：<a href="http://www.cnblogs.com/schaepher/p/5561193.html" target="_blank" rel="noopener">Git和Github简单教程</a></p>
 <hr>
 <p>网络上关于Git和GitHub的教程不少，但是这些教程有的命令太少不够用，有的命令太多，使得初期学习的时候需要额外花不少时间在一些当前用不到的命令上。\<br>这篇文章主要的目标是用较少的时间学习Git和GitHub的基本使用。在足够一般使用的前提下，尽量减少命令。\<br>如果需要其他命令，到时候再去其他地方了解就行了。</p>
@@ -80,7 +233,7 @@
 <h2 id="零、Git是什么"><a href="#零、Git是什么" class="headerlink" title="零、Git是什么"></a>零、Git是什么</h2><p>我才不告诉你嘞</p>
 <hr>
 <h2 id="一、Git的主要功能：版本控制"><a href="#一、Git的主要功能：版本控制" class="headerlink" title="一、Git的主要功能：版本控制"></a>一、Git的主要功能：版本控制</h2><ol>
-<li><p>版本：\<br>想想你平时用的软件，在软件升级之后，你用的就是新版本的软件。你应该见过这样的版本号：<code>v2.0</code> 或者 <code>1511</code>（表示发布时为15年11月），如下图：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213745539-478220006.png" alt>\<br>那么如果你修改并保存了一个文件，从版本管理的角度来说，你得到的是这个文件的新版本。\<br>可是很多情况下，这种修改是不可逆的。你修改完之后，无法回到你修改前的样子。为了避免这种情况，有的人会把新版本的内容保存到一个新的文件里面。\<br>由于 Git 更多地用于代码管理，举个程序员的例子。比如以下是计算机专业学生的作业：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213816196-183384611.png" alt>\<br>这样存储多个文件夹，可能会造成混乱。你可能想保存以前写的代码，因为它们可能在以后会用到。但是更多的时候是，你不知道各个文件夹都做了什么修改。\<br>这时候你需要一款软件帮你管理版本，它就是Git。</p>
+<li><p>版本：\<br>想想你平时用的软件，在软件升级之后，你用的就是新版本的软件。你应该见过这样的版本号：<code>v2.0</code> 或者 <code>1511</code>（表示发布时为15年11月），如下图：\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213745539-478220006.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213745539-478220006.png" alt></a>\<br>那么如果你修改并保存了一个文件，从版本管理的角度来说，你得到的是这个文件的新版本。\<br>可是很多情况下，这种修改是不可逆的。你修改完之后，无法回到你修改前的样子。为了避免这种情况，有的人会把新版本的内容保存到一个新的文件里面。\<br>由于 Git 更多地用于代码管理，举个程序员的例子。比如以下是计算机专业学生的作业：\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213816196-183384611.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213816196-183384611.png" alt></a>\<br>这样存储多个文件夹，可能会造成混乱。你可能想保存以前写的代码，因为它们可能在以后会用到。但是更多的时候是，你不知道各个文件夹都做了什么修改。\<br>这时候你需要一款软件帮你管理版本，它就是Git。</p>
 </li>
 <li><p>控制：\<br>你可以用Git来对这些不同的版本进行控制。还可以很方便地查看两个不同版本之间的不同之处。\<br>——使用Git，你只保存最新的一份文件就可以了。\<br>——那我以前的文件怎么办？\<br>——可以用Git的 reset 帮你把文件回退到你想要的版本。\<br>——如果回去了，那我的最新版本呢？\<br>——还可以用 reflog 和 reset 的组合来还原。</p>
 </li>
@@ -204,8 +357,8 @@
 </tr>
 </tbody>
 </table>
-<p>可以用一张图直观地看出以上主要的命令对仓库的影响。\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213832164-1203726937.png" alt>\<br>图片引用自：<a href="http://blog.podrezo.com/git-introduction-for-cvssvntfs-users/" target="_blank" rel="noopener">Git introduction for CVS/SVN/TFS users</a></p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213850274-1309981476.jpg" alt>\<br>图片引用自：<a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/0013745374151782eb658c5a5ca454eaa451661275886c6000" target="_blank" rel="noopener">工作区和暂存区 - 廖雪峰的官方网站</a> （做了点修改）</p>
+<p>可以用一张图直观地看出以上主要的命令对仓库的影响。\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213832164-1203726937.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213832164-1203726937.png" alt></a>\<br>图片引用自：<a href="http://blog.podrezo.com/git-introduction-for-cvssvntfs-users/" target="_blank" rel="noopener">Git introduction for CVS/SVN/TFS users</a></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213850274-1309981476.jpg" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213850274-1309981476.jpg" alt></a>\<br>图片引用自：<a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/0013745374151782eb658c5a5ca454eaa451661275886c6000" target="_blank" rel="noopener">工作区和暂存区 - 廖雪峰的官方网站</a> （做了点修改）</p>
 <p>对照查看两张图：</p>
 <ul>
 <li><p>workspace 即工作区，逻辑上是本地计算机，还没添加到repository的状态；</p>
@@ -218,7 +371,7 @@
 </li>
 </ul>
 <hr>
-<h2 id="三、Git-for-Windows软件安装"><a href="#三、Git-for-Windows软件安装" class="headerlink" title="三、Git for Windows软件安装"></a>三、Git for Windows软件安装</h2><p><img src="https://images2015.cnblogs.com/blog/809218/201612/809218-20161203000226318-877439216.png" alt>\<br>Git for Windows（又msysgit）</p>
+<h2 id="三、Git-for-Windows软件安装"><a href="#三、Git-for-Windows软件安装" class="headerlink" title="三、Git for Windows软件安装"></a>三、Git for Windows软件安装</h2><p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201612/809218-20161203000226318-877439216.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201612/809218-20161203000226318-877439216.png" alt></a>\<br>Git for Windows（又msysgit）</p>
 <ul>
 <li><p>安装包可以到官方网站^<a href="https://git-for-windows.github.io/" target="_blank" rel="noopener"><code>[1]</code></a>^下载，或者在github^<a href="https://github.com/git-for-windows/git/releases" target="_blank" rel="noopener"><code>[2]</code></a>^下载。如果下载不下来，可以把链接复制下来用迅雷下载。如果用迅雷下载不放心，在下载完后去在github下载的那个地方查看SHA-256值，并和下载的文件对比，如果值一样就可以放心使用。</p>
 </li>
@@ -239,35 +392,35 @@
 <p>这里先不引入Github，而是在本地计算机上的操作。</p>
 </blockquote>
 <p>打开命令行（cmd）或者在想要创建repository的地方右键鼠标并点击 <code>Git Bash Here</code> 打开窗口。</p>
-<h3 id="1-新的仓库-》初始化"><a href="#1-新的仓库-》初始化" class="headerlink" title="1.新的仓库-》初始化"></a>1.新的仓库-》初始化</h3><p>运行 <code>git init</code> 来初始化仓库，如下图：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213940508-828815164.png" alt></p>
+<h3 id="1-新的仓库-》初始化"><a href="#1-新的仓库-》初始化" class="headerlink" title="1.新的仓库-》初始化"></a>1.新的仓库-》初始化</h3><p>运行 <code>git init</code> 来初始化仓库，如下图：\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213940508-828815164.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213940508-828815164.png" alt></a></p>
 <p>它会创建一个隐藏的文件夹 <code>.git</code> 这里不去管它是用来干嘛的。关闭windows的<code>显示隐藏的项目</code>吧。</p>
 <hr>
 <h3 id="2-文件的添加和提交"><a href="#2-文件的添加和提交" class="headerlink" title="2.文件的添加和提交"></a>2.文件的添加和提交</h3><p>我在这个文件夹里面创建了一个 <code>today.txt</code> 的文件。并且不要脸地祝自己儿童节快乐：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213956149-723619418.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213956149-723619418.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213956149-723619418.png" alt></a></p>
 <p>这时我使用 <code>git status</code> 来查看有什么变化：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214005055-1866468380.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214005055-1866468380.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214005055-1866468380.png" alt></a></p>
 <p>它告诉我有一个还未追踪的文件，并提示我可以使用 <code>git add &lt;file&gt;...</code> 把它加进去。</p>
 <p>但是我并不打算把所有命令都介绍一遍，所以我选择使用上面概览时所提到的 <code>git add -A</code> 命令。</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214016508-253679176.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214016508-253679176.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214016508-253679176.png" alt></a></p>
 <p>嗯，什么提示都没有。没关系，我们再次使用 <code>git status</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214024992-260849170.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214024992-260849170.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214024992-260849170.png" alt></a></p>
 <p>状态变了！说明add成功。再看看它的提示 <code>Changes to be committed</code> ，也就是说现在可以执行commit了。下面一行则告诉你如何将文件从stage里移出，这里不管。\<br>执行 <code>git commit -m &quot;提交信息&quot;</code> 将文件提交到repository里。提交信息用英文的双引号括起来。</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214038492-1522093568.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214038492-1522093568.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214038492-1522093568.png" alt></a></p>
 <p>这时运行 <code>git log</code> 就可以看到提交的记录了：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214048071-1516052651.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214048071-1516052651.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214048071-1516052651.png" alt></a></p>
 <p>这样第一步就完成了。</p>
 <blockquote>
 <p>也许你会奇怪：为什么要有一个add，直接commit不就行了？这是因为stage有很多用处，具体可以去查找相关资料。这里就算不了解问题也不大。</p>
 </blockquote>
 <h3 id="3-文件的修改"><a href="#3-文件的修改" class="headerlink" title="3.文件的修改"></a>3.文件的修改</h3><p>接着我修改文件内容。改成祝大家儿童节快乐好了 (～￣▽￣)～</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214108227-292232158.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214108227-292232158.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214108227-292232158.png" alt></a></p>
 <p>我们用 <code>git status</code> 看看有什么变化：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214116571-1026727305.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214116571-1026727305.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214116571-1026727305.png" alt></a></p>
 <p>这和之前的提示不一样了。之前是这个：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214132992-1418825706.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214132992-1418825706.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214132992-1418825706.png" alt></a></p>
 <p>比较一下就会看到，之前的是添加新文件，当时文件还没被追踪（untracked），而这次是更改已经追踪（tracked）的文件。</p>
 <p>现在我们通过git看看文件做了哪些变化，执行 <code>git diff</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214145649-1116632145.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214145649-1116632145.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214145649-1116632145.png" alt></a></p>
 <p>它默认跟最新的一个commit进行比较。\<br>红色（前面有减号<code>-</code>）表示删除，绿色（前面有加号<code>+</code>）表示添加。\<br>因此，在git看来，我们是删除了原来那一行，并添加了新的两行。这在文件内容特别多的时候效果比较明显。\<br>这个命令在以下情况可以使用：</p>
 <ul>
 <li>你忘记改了什么，又想知道</li>
@@ -275,49 +428,49 @@
 </ul>
 <p>注：如果你用 windows 创建 txt 文件，并用自带文本编辑器来编辑文本，得到的编码是 GBK 。而 Git 读取文件时，使用 UTF-8 无 ROM 编码。因此会出现中文无法正常显示的情况。</p>
 <p>假如我现在想撤销这些更改，执行 <code>git checkout -- .</code> 就行了：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214206821-1921800298.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214206821-1921800298.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214206821-1921800298.png" alt></a></p>
 <p>恩，仍然没有任何提示。执行 <code>git status</code> 看看：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214215774-1596938603.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214215774-1596938603.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214215774-1596938603.png" alt></a></p>
 <p>上一个status的提示已经不见咯。再来看看文件：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214227930-813645920.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214227930-813645920.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214227930-813645920.png" alt></a></p>
 <p>果然复原了！那么再次进行修改：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214241102-284859029.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214241102-284859029.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214241102-284859029.png" alt></a></p>
 <p>接着：\<br><code>git add -A</code>\<br><code>git commit -m &quot;将[自己]改为[米娜桑]&quot;</code></p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214257633-193132615.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214257633-193132615.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214257633-193132615.png" alt></a></p>
 <p>用 <code>git log</code> 看看提交（commit）记录：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt></a></p>
 <p>嗯。现在有两个提交了。</p>
 <h3 id="4-版本回退！"><a href="#4-版本回退！" class="headerlink" title="4.版本回退！"></a>4.版本回退！</h3><p>如果我写的是一篇很长的文章，并且在之前的版本基础上修改了一部分内容，生成一个新的commit，现在我发现我在修改的时候删掉了一部分内容，而这部分内容是我现在需要用到的，怎么办？版本回退！</p>
 <p>还是以刚才的文件为例，现在我试着将文件回退到第一个commit时的状态。但在这之前，我们看看这个文件夹里面的东西：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214321555-282676581.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214321555-282676581.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214321555-282676581.png" alt></a></p>
 <p><code>.git</code> 文件夹因为本来就是隐藏的，我在关了 <code>显示隐藏的项目</code> 的选项后，它就不显示了。\<br>现在看到的是只有一个文件，而且是最新的一个版本。</p>
 <blockquote>
 <p>文件的修改日期为 <code>2016\6\1 21:52</code></p>
 </blockquote>
 <p>从刚才的 <code>git log</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt></a></p>
 <p>我们看到两行黄色部分是以 <code>commit</code> 开头的，后面接着一串字符。这一串字符是16进制的数，是一串哈希值。我们叫它版本号就行了。</p>
 <p>开始回退，执行 <code>git reset --hard 1df0573</code> （取版本号前7位就可以了）：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604215412196-1252165674.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604215412196-1252165674.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604215412196-1252165674.png" alt></a></p>
 <p>这里提示HEAD已经更改指向至1df0573了。此时文件：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214419821-1776623416.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214419821-1776623416.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214419821-1776623416.png" alt></a></p>
 <p>其内容：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214429133-794948365.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214429133-794948365.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214429133-794948365.png" alt></a></p>
 <p>已经回到我的第一个版本的状态。</p>
 <blockquote>
 <p>这里文件的修改日期被更改为我现在的时间 <code>2016\6\2 19:29</code>\<br>这是由于文件的修改日期是由windows修改的，因为它检测到这个文件被修改了。而我们刚才从最新版本回退到现在这个版本，就像是我们手动修改了文件内容一样，事实上是由git来完成的。\<br>其实可以不管上面这一段</p>
 </blockquote>
 <p>现在再执行 <code>git log</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214442242-370029640.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214442242-370029640.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214442242-370029640.png" alt></a></p>
 <p>新版本的commit记录不见了！这就是 reset –hard 的力量，很好很强硬！</p>
 <p>现在已经看到了之前版本的内容，那么如何回到最新版呢？\<br>先执行 <code>git reflog</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214451727-1120509429.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214451727-1120509429.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214451727-1120509429.png" alt></a></p>
 <p>可以看到HEAD的变化情况。\<br>第一行表示当前HEAD所在的版本号是 <code>1df0573</code> ，而之所以在这个版本号，是由于我们执行了reset命令。\<br>看第二行，它告诉我们，这个HEAD所在的版本号是 <code>ad93b89</code> ，这个版本号是在执行commit之后形成的。</p>
 <p>此时我再用一次reset，将HEAD指向 <code>ad93b89</code> ， 同时查看log ：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard ad93b89</span><br><span class="line">git log</span><br></pre></td></tr></table></figure>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214514571-1686368650.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214514571-1686368650.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214514571-1686368650.png" alt></a></p>
 <p>回到第一次reset前的状态了！</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214526321-588410549.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214526321-588410549.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214526321-588410549.png" alt></a></p>
 <h3 id="5-清除未追踪的文件"><a href="#5-清除未追踪的文件" class="headerlink" title="5.清除未追踪的文件"></a>5.清除未追踪的文件</h3><p>通常在reset或者pull（后面会讲）之前要做两件事：</p>
 <ul>
 <li><p>将新添加且为追踪的文件删除掉（比如编译程序后所产生的文件）</p>
@@ -327,14 +480,14 @@
 </ul>
 <p>还原已做修改的tracked文件，上面已经讲过。\<br>现在看看如何用命令删除新加的文件。</p>
 <p>首先我手动创建个文件，用来演示：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214540008-1448402387.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214540008-1448402387.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214540008-1448402387.png" alt></a></p>
 <p>用checkout是没办法删除掉它的，使用 <code>git clean -xf</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214601305-1764138916.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214601305-1764138916.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214601305-1764138916.png" alt></a></p>
 <p>这个命令的杀伤力比较大，它删除当前目录下所有没有track过的文件。不管它是否是.gitignore文件里面指定的文件夹和文件。当然，也有杀伤力比较小的，但这里就不介绍了。</p>
 <h3 id="6-关于git-status中文乱码问题"><a href="#6-关于git-status中文乱码问题" class="headerlink" title="6.关于git status中文乱码问题"></a>6.关于git status中文乱码问题</h3><p>如果你的文件名是中文的，在使用<code>git status</code>时会乱码。如下图所示：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144122025-2131985383.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144122025-2131985383.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144122025-2131985383.png" alt></a></p>
 <p>如果要使它显示为中文，在命令行里执行：<code>git config --global core.quotepath false</code>。\<br>再使用 <code>git status</code>：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144614463-158907487.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144614463-158907487.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144614463-158907487.png" alt></a></p>
 <p>如果 <code>git log</code> 也会乱码，执行以下命令：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git config --global i18n.commitencoding utf-8</span><br><span class="line">git config --global i18n.logoutputencoding utf-8</span><br></pre></td></tr></table></figure>
 <p>请根据需要将后面的 utf-8 替换成你想要的编码。如果是团队项目，请确保所有成员的设置都一致。</p>
@@ -345,15 +498,15 @@
 </li>
 <li><p>本地配置用户名和邮箱（如果已经设置好，跳过该步）：</p>
 <ul>
-<li><p><code>git config --global user.name &quot;你的用户名&quot;</code>\<br><code>git config --global user.email &quot;你的邮箱&quot;</code>\<br>如图所示：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214615274-442852618.png" alt></p>
+<li><p><code>git config --global user.name &quot;你的用户名&quot;</code>\<br><code>git config --global user.email &quot;你的邮箱&quot;</code>\<br>如图所示：\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214615274-442852618.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214615274-442852618.png" alt></a></p>
 </li>
-<li><p>或者你直接在config文件里改，位置在 <code>C:\Users\你的用户名\.gitconfig</code> 。如下图所示，添加相应信息：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214628289-1147405553.png" alt></p>
+<li><p>或者你直接在config文件里改，位置在 <code>C:\Users\你的用户名\.gitconfig</code> 。如下图所示，添加相应信息：\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214628289-1147405553.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214628289-1147405553.png" alt></a></p>
 </li>
 </ul>
 </li>
-<li><p>生成ssh key\<br>运行 <code>ssh-keygen -t rsa -C &quot;你的邮箱&quot;</code> ，它会有三次等待你输入，直接回车即可。\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214640930-1505693290.png" alt>\<br>将生成的ssh key复制到剪贴板，执行 <code>clip &lt; ~/.ssh/id_rsa.pub</code> （或者到上图提示的路径里去打开文件并复制）：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214651414-743953505.png" alt></p>
+<li><p>生成ssh key\<br>运行 <code>ssh-keygen -t rsa -C &quot;你的邮箱&quot;</code> ，它会有三次等待你输入，直接回车即可。\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214640930-1505693290.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214640930-1505693290.png" alt></a>\<br>将生成的ssh key复制到剪贴板，执行 <code>clip &lt; ~/.ssh/id_rsa.pub</code> （或者到上图提示的路径里去打开文件并复制）：\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214651414-743953505.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214651414-743953505.png" alt></a></p>
 </li>
-<li><p>打开Github，进入Settings：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214703352-921010313.png" alt>\<br>点击左边的 <code>SSH and GPG keys</code> ，将ssh key粘贴到右边的Key里面。Title随便命名即可。\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214714492-1086473957.png" alt>\<br>点击下面的 <code>Add SSH key</code> 就添加成功了。\<br>测试一下吧，执行 <code>ssh -T git@github.com</code> ：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214732274-152795627.png" alt>\<br>嗯，这样就成功了！</p>
+<li><p>打开Github，进入Settings：\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214703352-921010313.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214703352-921010313.png" alt></a>\<br>点击左边的 <code>SSH and GPG keys</code> ，将ssh key粘贴到右边的Key里面。Title随便命名即可。\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214714492-1086473957.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214714492-1086473957.png" alt></a>\<br>点击下面的 <code>Add SSH key</code> 就添加成功了。\<br>测试一下吧，执行 <code>ssh -T git@github.com</code> ：\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214732274-152795627.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214732274-152795627.png" alt></a>\<br>嗯，这样就成功了！</p>
 <p>注：</p>
 <ul>
 <li><p>对于 oschina 的 “码云” ，执行 <code>ssh -T git@git.oschina.net</code></p>
@@ -365,27 +518,27 @@
 </ol>
 <h3 id="2）创建远程仓库并与本地关联"><a href="#2）创建远程仓库并与本地关联" class="headerlink" title="2）创建远程仓库并与本地关联"></a>2）创建远程仓库并与本地关联</h3><ol>
 <li><p>创建远程仓库\<br>首先是在右上角点击进入创建界面：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214751961-141228472.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214751961-141228472.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214751961-141228472.png" alt></a></p>
 <p>接着输入远程仓库名：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214801899-1730149221.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214801899-1730149221.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214801899-1730149221.png" alt></a></p>
 <p>点击 <code>Create repository</code> 就创建好了。其他选项可以暂时不管。</p>
 </li>
 <li><p>将远程仓库和本地仓库关联起来</p>
 <p>先到Github上复制远程仓库的SSH地址：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214816680-697003144.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214816680-697003144.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214816680-697003144.png" alt></a></p>
 <p>有两种方式可以关联，一种是SSH，一种是HTTPS。由于<strong>HTTPS比较慢</strong>，所以推荐使用SSH。\<br>注意SSH的地址格式是这样开头的： <a href="mailto:`git@github.com" target="_blank" rel="noopener">`git@github.com</a>`</p>
 <p>运行 <code>git remote add origin 你复制的地址</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214829571-1197635501.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214829571-1197635501.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214829571-1197635501.png" alt></a></p>
 <p>如果你在创建 repository 的时候，加入了 README.md 或者 LICENSE ，那么 github 会拒绝你的 push 。你需要先执行 <code>git pull origin master</code>。</p>
 <p>执行 <code>git push -u origin master</code> 将本地仓库上传至Github的仓库并进行关联：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214838133-1236297143.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214838133-1236297143.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214838133-1236297143.png" alt></a></p>
 </li>
 </ol>
 <p>关联已经完成！</p>
 <p>以后想在commit后同步到Github上，只要直接执行 <code>git push</code> 就行啦：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214848133-733016980.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214848133-733016980.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214848133-733016980.png" alt></a></p>
 <p>可以在Github上看到修改：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214855602-1059095970.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214855602-1059095970.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214855602-1059095970.png" alt></a></p>
 <hr>
 <h2 id="六、团队合作开发"><a href="#六、团队合作开发" class="headerlink" title="六、团队合作开发"></a>六、团队合作开发</h2><p>关于团队合作开发，我在之前已经专门用一篇文章来说明了。\<br>原文链接： <a href="http://www.cnblogs.com/schaepher/p/4933873.html" target="_blank" rel="noopener">GitHub团队项目合作流程</a></p>
 <p>上文的目录：</p>
@@ -412,10 +565,10 @@
 </blockquote>
 <ol>
 <li><p>复制别人远程仓库的SSH。方法和上面关联git一样，进入仓库页面后，就能找到SSH地址。</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214904539-240211117.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214904539-240211117.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214904539-240211117.png" alt></a></p>
 </li>
 <li><p>执行 <code>git clone 复制的SSH地址</code></p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214911899-487998689.png" alt></p>
+<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214911899-487998689.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214911899-487998689.png" alt></a></p>
 <p>整个项目42M，花了点时间才clone下来。</p>
 </li>
 </ol>
@@ -459,142 +612,301 @@
 <p>2、添加 cmder 到右键菜单：环境变量添加后，在任意文件夹中即可打开Cmder，上一步的把 Cmder 加到环境变量就是为此服务的, 在管理员权限的终端输入以下语句即可:\<br><code>Cmder.exe /REGISTER ALL</code></p>
 <p>3、为Cmder.exe创建快捷方式，右击Cmder.exe选择”创建快捷方式”点击即可，以后打开Cmder.exe只要点击桌面对应的快捷方式即可</p>
 
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/22/Git心得/" data-id="cjuz5wuz00009gow1f5vulvmc" class="article-share-link">Share</a>
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术/">技术</a></li></ul>
-
-    </footer>
-
-  </div>
-
-  
-    
-  <nav class="article-nav">
-    
-      <a href="/2019/04/23/获匹匹配与非获取匹配/" class="article-nav-link">
-        <strong class="article-nav-caption">Newer posts</strong>
-        <div class="article-nav-title">
-          
-            获匹匹配与非获取匹配
-          
         </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    Last updated: <time datetime="2019-04-23T07:02:45.535Z" itemprop="dateUpdated">2019-04-23 15:02:45</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/04/22/Git心得/" target="_blank" rel="external">http://yoursite.com/2019/04/22/Git心得/</a>
+        
+    </div>
+    <footer>
+        <a href="http://yoursite.com">
+            <img src="/img/avatar.png" alt="TK">
+            TK
+        </a>
+    </footer>
+</blockquote>
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术/">技术</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2019/04/22/Git心得/&title=《Git心得》 — TK的个人小站&pic=http://yoursite.com/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2019/04/22/Git心得/&title=《Git心得》 — TK的个人小站&source=Git和Github简单教程===============================================================..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/04/23/获匹匹配与非获取匹配/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">获匹匹配与非获取匹配</h4>
       </a>
-    
-    
-      <a href="/2019/04/21/伤心者/" class="article-nav-link">
-        <strong class="article-nav-caption">Olde posts</strong>
-        <div class="article-nav-title">伤心者</div>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/04/21/伤心者/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">伤心者</h4>
       </a>
+    </div>
+  
+</nav>
+
+
     
-  </nav>
-
-
-  
-
-  
     
-  
-
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Git和Github简单教程"><span class="post-toc-number">1.</span> <span class="post-toc-text">Git和Github简单教程</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#零、Git是什么"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">零、Git是什么</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#一、Git的主要功能：版本控制"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">一、Git的主要功能：版本控制</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#二、概览"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">二、概览</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-个人本地使用"><span class="post-toc-number">1.3.1.</span> <span class="post-toc-text">1.个人本地使用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-个人使用远程仓库"><span class="post-toc-number">1.3.2.</span> <span class="post-toc-text">2.个人使用远程仓库</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#三、Git-for-Windows软件安装"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">三、Git for Windows软件安装</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#四、本地Git的使用"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">四、本地Git的使用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-新的仓库-》初始化"><span class="post-toc-number">1.5.1.</span> <span class="post-toc-text">1.新的仓库-》初始化</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-文件的添加和提交"><span class="post-toc-number">1.5.2.</span> <span class="post-toc-text">2.文件的添加和提交</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-文件的修改"><span class="post-toc-number">1.5.3.</span> <span class="post-toc-text">3.文件的修改</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-版本回退！"><span class="post-toc-number">1.5.4.</span> <span class="post-toc-text">4.版本回退！</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-清除未追踪的文件"><span class="post-toc-number">1.5.5.</span> <span class="post-toc-text">5.清除未追踪的文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#6-关于git-status中文乱码问题"><span class="post-toc-number">1.5.6.</span> <span class="post-toc-text">6.关于git status中文乱码问题</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#五、Github与Git的关联"><span class="post-toc-number">1.6.</span> <span class="post-toc-text">五、Github与Git的关联</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1）本地Git和Github的连接"><span class="post-toc-number">1.6.1.</span> <span class="post-toc-text">1）本地Git和Github的连接</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2）创建远程仓库并与本地关联"><span class="post-toc-number">1.6.2.</span> <span class="post-toc-text">2）创建远程仓库并与本地关联</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#六、团队合作开发"><span class="post-toc-number">1.7.</span> <span class="post-toc-text">六、团队合作开发</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#七、Github的其他介绍"><span class="post-toc-number">1.8.</span> <span class="post-toc-text">七、Github的其他介绍</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1）获取其他人的远程仓库"><span class="post-toc-number">1.8.1.</span> <span class="post-toc-text">1）获取其他人的远程仓库</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2）另一种关联远程空仓库的方法"><span class="post-toc-number">1.8.2.</span> <span class="post-toc-text">2）另一种关联远程空仓库的方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3）使用GitHub的好处"><span class="post-toc-number">1.8.3.</span> <span class="post-toc-text">3）使用GitHub的好处</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#八、一些可能碰到的问题"><span class="post-toc-number">1.9.</span> <span class="post-toc-text">八、一些可能碰到的问题</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#使用hexo时deploy部署网站到github或gitcafe的gitpages时重复输入用户名密码的解决办法"><span class="post-toc-number">2.</span> <span class="post-toc-text">使用hexo时deploy部署网站到github或gitcafe的gitpages时重复输入用户名密码的解决办法</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#将Cmder添加到系统右键菜单中"><span class="post-toc-number">3.</span> <span class="post-toc-text">将Cmder添加到系统右键菜单中</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </div></div></aside>
+    
 </article>
 
-
-
-</section>
-  <footer class="footer">
-  
-  <div class="outer">
-    <div class="float-right">
-      <ul class="list-inline">
-  
-    <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
-  
-    <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
-  
-</ul>
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        我们一起来让这个世界有趣一点
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/reward-wechat.jpg" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.jpg">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
     </div>
-    <ul class="list-inline">
-      <li>&copy; 2019 TK的个人小站</li>
-      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
-      <li>Theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
-    </ul>
-  </div>
+</div>
+
+    
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.lujingtao.com" target="_blank">HOME</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                TK &copy; 2017 - 2019
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
 </footer>
 
-</main>
-<aside class="sidebar">
-  <button class="navbar-toggle"></button>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
 
-<nav class="navbar">
-  
-    <div class="logo">
-      <a href="/"><img src="/images/hexo.svg" alt="TK的个人小站"></a>
-    </div>
-  
-  <ul class="nav nav-main">
-    
-      <li class="nav-item">
-        <a class="nav-item-link" href="/">Home</a>
-      </li>
-    
-      <li class="nav-item">
-        <a class="nav-item-link" href="/archives">Archives</a>
-      </li>
-    
-      <li class="nav-item">
-        <a class="nav-item-link" href="/gallery">Gallery</a>
-      </li>
-    
-      <li class="nav-item">
-        <a class="nav-item-link" href="/about">About</a>
-      </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link nav-item-search" title="Search">
-        <i class="fe fe-search"></i>
-        Search
-      </a>
-    </li>
-  </ul>
-</nav>
 
-<nav class="navbar navbar-bottom">
-  <ul class="nav">
-      <li class="nav-item">
-          <div class="totop" id="totop">
-    <i class="fe fe-rocket"></i>
-</div>
-      </li>
-    <li class="nav-item">
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
       
-        <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
-          <i class="fe fe-feed"></i>
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2019/04/22/Git心得/&title=《Git心得》 — TK的个人小站&pic=http://yoursite.com/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
         </a>
+      </li>
       
-    </li>
-  </ul>
-</nav>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2019/04/22/Git心得/&title=《Git心得》 — TK的个人小站&source=Git和Github简单教程===============================================================..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
 
-<div class="search-form-wrap">
-  <div class="local-search local-search-plugin">
-  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
-  <div id="local-search-result" class="local-search-result"></div>
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABxUlEQVR42u3aS27DMAwFwNz/0u6miwKFZT7ScpNitArg3ygLQXrk61Uex8n4ebX+hvpTzYGLizvmHstRefX6zt9Xz96/NuDi4j7PTRHrN6SUigEXF/dTuOsPn00DFxf3P3HXrPpShYuL+yncysdODyStaW8/q+Hi4g649ZRy3+8t+S4uLm6Le4RjHpL2vvv9LC4u7iPc+dGlF4tU4pXTp3BxcTdzexuRNC6pN2RcfBEXF/cR7r0HnkqJpT6BOBzBxcW9lVvfytS3I3fdj4uL+27c3tLWa86IKz+4uLjbuJVIdBKCpM0WF1dxcXH/iFsJRNJC6WTxKlV+cHFxb+WmTVR3FVfSrU/wT+Di4o65vQijvqFJ7wnWXVxc3G3cXtAZdHaExdRm+yYuLu5mbv3D841Lug3CxcV9kpuWOdOejjQeDQoquLi4m7npduSuODWdHi4u7m7uEY76qyvTTku8uLi4z3B3hCa9HCOdNi4u7m5u2gaRtmf1lqpSqRUXF3czd3Ioqoehk0UTFxf3/bmTNqzRVHFxcd+YWy++9s5eW9ZdXFzckFs//KTlk7Tx4mLVwsXFfYSbxp1xz9egADPKd3FxcTvcL+FauWj4G9SyAAAAAElFTkSuQmCC" alt="微信分享二维码">
 </div>
-</div>
-</aside>
-<script src="/js/jquery-2.0.3.min.js"></script>
-<script src="/js/lazyload.min.js"></script>
-<script src="/js/busuanzi-2.3.pure.min.js"></script>
 
 
-  <script src="/fancybox/jquery.fancybox.min.js"></script>
+    
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.2"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.2"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.2"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.2"></script>
+
+<!-- third-party -->
 
 
 
 
-<script src="/js/ocean.js"></script>
 
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.2"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+
+
+
+    
 </body>
 </html>
