@@ -357,70 +357,80 @@
 </tr>
 </tbody>
 </table>
-<p>可以用一张图直观地看出以上主要的命令对仓库的影响。\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213832164-1203726937.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213832164-1203726937.png" alt></a>\<br>图片引用自：<a href="http://blog.podrezo.com/git-introduction-for-cvssvntfs-users/" target="_blank" rel="noopener">Git introduction for CVS/SVN/TFS users</a></p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213850274-1309981476.jpg" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213850274-1309981476.jpg" alt></a>\<br>图片引用自：<a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/0013745374151782eb658c5a5ca454eaa451661275886c6000" target="_blank" rel="noopener">工作区和暂存区 - 廖雪峰的官方网站</a> （做了点修改）</p>
-<p>对照查看两张图：</p>
-<ul>
-<li><p>workspace 即工作区，逻辑上是本地计算机，还没添加到repository的状态；</p>
-</li>
-<li><p>staging 即版本库中的stage，是暂存区。修改已经添加进repository，但还没有作为commit提交，类似于缓存；</p>
-</li>
-<li><p>Local repository 即版本库中master那个地方。到这一步才算是成功生成一个新版本；</p>
-</li>
-<li><p>Remote repository 则是远程仓库。用来将本地仓库上传到网络，可以用于备份、共享、合作。本文将使用Github作为远程仓库的例子。</p>
-</li>
-</ul>
-<hr>
-<h2 id="三、Git-for-Windows软件安装"><a href="#三、Git-for-Windows软件安装" class="headerlink" title="三、Git for Windows软件安装"></a>三、Git for Windows软件安装</h2><p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201612/809218-20161203000226318-877439216.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201612/809218-20161203000226318-877439216.png" alt></a>\<br>Git for Windows（又msysgit）</p>
-<ul>
-<li><p>安装包可以到官方网站^<a href="https://git-for-windows.github.io/" target="_blank" rel="noopener"><code>[1]</code></a>^下载，或者在github^<a href="https://github.com/git-for-windows/git/releases" target="_blank" rel="noopener"><code>[2]</code></a>^下载。如果下载不下来，可以把链接复制下来用迅雷下载。如果用迅雷下载不放心，在下载完后去在github下载的那个地方查看SHA-256值，并和下载的文件对比，如果值一样就可以放心使用。</p>
-</li>
-<li><p>安装的时候一路点击<code>Next</code>就行了。</p>
-</li>
-<li><p>刚安装完打开后，窗口比较小。如果不太习惯，可以把它改大一些。</p>
-<ol>
-<li>首先移到窗口右下角边缘，出现箭头后把窗口拉大。</li>
-<li>点击窗口顶部左边的图标 -&gt; Options… -&gt; Window -&gt; Current size -&gt; OK\<br>这样以后打开窗口都会是调整后的大小。</li>
-</ol>
-</li>
-</ul>
-<blockquote>
-<p>Git for Windows从2.8.0版本^<a href="https://github.com/git-for-windows/git/releases/tag/v2.8.0.windows.1" title="查看2.8.0版本的Release Note" target="_blank" rel="noopener"><code>[3]</code></a>^开始，默认添加环境变量，所以环境变量部分就不用再手动配置了。（这句可以无视）</p>
-</blockquote>
-<hr>
-<h2 id="四、本地Git的使用"><a href="#四、本地Git的使用" class="headerlink" title="四、本地Git的使用"></a>四、本地Git的使用</h2><blockquote>
-<p>这里先不引入Github，而是在本地计算机上的操作。</p>
-</blockquote>
-<p>打开命令行（cmd）或者在想要创建repository的地方右键鼠标并点击 <code>Git Bash Here</code> 打开窗口。</p>
-<h3 id="1-新的仓库-》初始化"><a href="#1-新的仓库-》初始化" class="headerlink" title="1.新的仓库-》初始化"></a>1.新的仓库-》初始化</h3><p>运行 <code>git init</code> 来初始化仓库，如下图：\<br><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213940508-828815164.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213940508-828815164.png" alt></a></p>
+<p>可以用一张图直观地看出以上主要的命令对仓库的影响。\<br><figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213832164-1203726937.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213832164-1203726937.png" alt title class></a>
+                <p></p>
+            </figure>\<br>图片引用自：<a href="http://blog.podrezo.com/git-introduction-for-cvssvntfs-users/" target="_blank" rel="noopener">Git introduction for CVS/SVN/TFS users</a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213850274-1309981476.jpg" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213850274-1309981476.jpg" alt title class></a>
+                <p></p>
+            </figure>\<br>图片引用自：<a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/0013745374151782eb658c5a5ca454eaa451661275886c6000" target="_blank" rel="noopener">工作区和暂存区 - 廖雪峰的官方网站</a> （做了点修改）<br><br>对照查看两张图：<br><br>-   workspace 即工作区，逻辑上是本地计算机，还没添加到repository的状态；<br><br>-   staging 即版本库中的stage，是暂存区。修改已经添加进repository，但还没有作为commit提交，类似于缓存；<br><br>-   Local repository 即版本库中master那个地方。到这一步才算是成功生成一个新版本；<br><br>-   Remote repository 则是远程仓库。用来将本地仓库上传到网络，可以用于备份、共享、合作。本文将使用Github作为远程仓库的例子。<br><br><em> </em> <em> </em> <em><br><br>三、Git for Windows软件安装<br>———————<br><br><figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201612/809218-20161203000226318-877439216.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201612/809218-20161203000226318-877439216.png" alt title class></a>
+                <p></p>
+            </figure>\<br>Git for Windows（又msysgit）<br><br>-   安装包可以到官方网站^<a href="https://git-for-windows.github.io/" target="_blank" rel="noopener"><code>[1]</code></a>^下载，或者在github^<a href="https://github.com/git-for-windows/git/releases" target="_blank" rel="noopener"><code>[2]</code></a>^下载。如果下载不下来，可以把链接复制下来用迅雷下载。如果用迅雷下载不放心，在下载完后去在github下载的那个地方查看SHA-256值，并和下载的文件对比，如果值一样就可以放心使用。<br><br>-   安装的时候一路点击<code>Next</code>就行了。<br><br>-   刚安装完打开后，窗口比较小。如果不太习惯，可以把它改大一些。<br>    1.  首先移到窗口右下角边缘，出现箭头后把窗口拉大。<br>    2.  点击窗口顶部左边的图标 -&gt; Options… -&gt; Window -&gt; Current size -&gt; OK\<br>        这样以后打开窗口都会是调整后的大小。<br><br>&gt; Git for Windows从2.8.0版本^<a href="https://github.com/git-for-windows/git/releases/tag/v2.8.0.windows.1" title="查看2.8.0版本的Release Note" target="_blank" rel="noopener"><code>[3]</code></a>^开始，默认添加环境变量，所以环境变量部分就不用再手动配置了。（这句可以无视）
+
+</em> <em> </em> <em> </em><br><br>四、本地Git的使用<br>———-<br><br>&gt; 这里先不引入Github，而是在本地计算机上的操作。<br><br>打开命令行（cmd）或者在想要创建repository的地方右键鼠标并点击 <code>Git Bash Here</code> 打开窗口。<br><br>### 1.新的仓库-》初始化<br><br>运行 <code>git init</code> 来初始化仓库，如下图：\<br><figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213940508-828815164.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213940508-828815164.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>它会创建一个隐藏的文件夹 <code>.git</code> 这里不去管它是用来干嘛的。关闭windows的<code>显示隐藏的项目</code>吧。</p>
 <hr>
 <h3 id="2-文件的添加和提交"><a href="#2-文件的添加和提交" class="headerlink" title="2.文件的添加和提交"></a>2.文件的添加和提交</h3><p>我在这个文件夹里面创建了一个 <code>today.txt</code> 的文件。并且不要脸地祝自己儿童节快乐：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213956149-723619418.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213956149-723619418.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213956149-723619418.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213956149-723619418.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>这时我使用 <code>git status</code> 来查看有什么变化：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214005055-1866468380.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214005055-1866468380.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214005055-1866468380.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214005055-1866468380.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>它告诉我有一个还未追踪的文件，并提示我可以使用 <code>git add &lt;file&gt;...</code> 把它加进去。</p>
 <p>但是我并不打算把所有命令都介绍一遍，所以我选择使用上面概览时所提到的 <code>git add -A</code> 命令。</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214016508-253679176.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214016508-253679176.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214016508-253679176.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214016508-253679176.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>嗯，什么提示都没有。没关系，我们再次使用 <code>git status</code> ：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214024992-260849170.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214024992-260849170.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214024992-260849170.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214024992-260849170.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>状态变了！说明add成功。再看看它的提示 <code>Changes to be committed</code> ，也就是说现在可以执行commit了。下面一行则告诉你如何将文件从stage里移出，这里不管。\<br>执行 <code>git commit -m &quot;提交信息&quot;</code> 将文件提交到repository里。提交信息用英文的双引号括起来。</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214038492-1522093568.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214038492-1522093568.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214038492-1522093568.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214038492-1522093568.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>这时运行 <code>git log</code> 就可以看到提交的记录了：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214048071-1516052651.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214048071-1516052651.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214048071-1516052651.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214048071-1516052651.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>这样第一步就完成了。</p>
 <blockquote>
 <p>也许你会奇怪：为什么要有一个add，直接commit不就行了？这是因为stage有很多用处，具体可以去查找相关资料。这里就算不了解问题也不大。</p>
 </blockquote>
 <h3 id="3-文件的修改"><a href="#3-文件的修改" class="headerlink" title="3.文件的修改"></a>3.文件的修改</h3><p>接着我修改文件内容。改成祝大家儿童节快乐好了 (～￣▽￣)～</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214108227-292232158.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214108227-292232158.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214108227-292232158.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214108227-292232158.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>我们用 <code>git status</code> 看看有什么变化：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214116571-1026727305.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214116571-1026727305.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214116571-1026727305.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214116571-1026727305.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>这和之前的提示不一样了。之前是这个：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214132992-1418825706.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214132992-1418825706.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214132992-1418825706.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214132992-1418825706.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>比较一下就会看到，之前的是添加新文件，当时文件还没被追踪（untracked），而这次是更改已经追踪（tracked）的文件。</p>
 <p>现在我们通过git看看文件做了哪些变化，执行 <code>git diff</code> ：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214145649-1116632145.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214145649-1116632145.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214145649-1116632145.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214145649-1116632145.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>它默认跟最新的一个commit进行比较。\<br>红色（前面有减号<code>-</code>）表示删除，绿色（前面有加号<code>+</code>）表示添加。\<br>因此，在git看来，我们是删除了原来那一行，并添加了新的两行。这在文件内容特别多的时候效果比较明显。\<br>这个命令在以下情况可以使用：</p>
 <ul>
 <li>你忘记改了什么，又想知道</li>
@@ -428,49 +438,94 @@
 </ul>
 <p>注：如果你用 windows 创建 txt 文件，并用自带文本编辑器来编辑文本，得到的编码是 GBK 。而 Git 读取文件时，使用 UTF-8 无 ROM 编码。因此会出现中文无法正常显示的情况。</p>
 <p>假如我现在想撤销这些更改，执行 <code>git checkout -- .</code> 就行了：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214206821-1921800298.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214206821-1921800298.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214206821-1921800298.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214206821-1921800298.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>恩，仍然没有任何提示。执行 <code>git status</code> 看看：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214215774-1596938603.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214215774-1596938603.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214215774-1596938603.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214215774-1596938603.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>上一个status的提示已经不见咯。再来看看文件：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214227930-813645920.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214227930-813645920.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214227930-813645920.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214227930-813645920.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>果然复原了！那么再次进行修改：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214241102-284859029.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214241102-284859029.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214241102-284859029.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214241102-284859029.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>接着：\<br><code>git add -A</code>\<br><code>git commit -m &quot;将[自己]改为[米娜桑]&quot;</code></p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214257633-193132615.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214257633-193132615.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214257633-193132615.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214257633-193132615.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>用 <code>git log</code> 看看提交（commit）记录：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>嗯。现在有两个提交了。</p>
 <h3 id="4-版本回退！"><a href="#4-版本回退！" class="headerlink" title="4.版本回退！"></a>4.版本回退！</h3><p>如果我写的是一篇很长的文章，并且在之前的版本基础上修改了一部分内容，生成一个新的commit，现在我发现我在修改的时候删掉了一部分内容，而这部分内容是我现在需要用到的，怎么办？版本回退！</p>
 <p>还是以刚才的文件为例，现在我试着将文件回退到第一个commit时的状态。但在这之前，我们看看这个文件夹里面的东西：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214321555-282676581.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214321555-282676581.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214321555-282676581.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214321555-282676581.png" alt title class></a>
+                <p></p>
+            </figure>
 <p><code>.git</code> 文件夹因为本来就是隐藏的，我在关了 <code>显示隐藏的项目</code> 的选项后，它就不显示了。\<br>现在看到的是只有一个文件，而且是最新的一个版本。</p>
 <blockquote>
 <p>文件的修改日期为 <code>2016\6\1 21:52</code></p>
 </blockquote>
 <p>从刚才的 <code>git log</code> ：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>我们看到两行黄色部分是以 <code>commit</code> 开头的，后面接着一串字符。这一串字符是16进制的数，是一串哈希值。我们叫它版本号就行了。</p>
 <p>开始回退，执行 <code>git reset --hard 1df0573</code> （取版本号前7位就可以了）：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604215412196-1252165674.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604215412196-1252165674.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604215412196-1252165674.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604215412196-1252165674.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>这里提示HEAD已经更改指向至1df0573了。此时文件：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214419821-1776623416.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214419821-1776623416.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214419821-1776623416.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214419821-1776623416.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>其内容：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214429133-794948365.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214429133-794948365.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214429133-794948365.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214429133-794948365.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>已经回到我的第一个版本的状态。</p>
 <blockquote>
 <p>这里文件的修改日期被更改为我现在的时间 <code>2016\6\2 19:29</code>\<br>这是由于文件的修改日期是由windows修改的，因为它检测到这个文件被修改了。而我们刚才从最新版本回退到现在这个版本，就像是我们手动修改了文件内容一样，事实上是由git来完成的。\<br>其实可以不管上面这一段</p>
 </blockquote>
 <p>现在再执行 <code>git log</code> ：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214442242-370029640.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214442242-370029640.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214442242-370029640.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214442242-370029640.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>新版本的commit记录不见了！这就是 reset –hard 的力量，很好很强硬！</p>
 <p>现在已经看到了之前版本的内容，那么如何回到最新版呢？\<br>先执行 <code>git reflog</code> ：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214451727-1120509429.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214451727-1120509429.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214451727-1120509429.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214451727-1120509429.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>可以看到HEAD的变化情况。\<br>第一行表示当前HEAD所在的版本号是 <code>1df0573</code> ，而之所以在这个版本号，是由于我们执行了reset命令。\<br>看第二行，它告诉我们，这个HEAD所在的版本号是 <code>ad93b89</code> ，这个版本号是在执行commit之后形成的。</p>
 <p>此时我再用一次reset，将HEAD指向 <code>ad93b89</code> ， 同时查看log ：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard ad93b89</span><br><span class="line">git log</span><br></pre></td></tr></table></figure>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214514571-1686368650.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214514571-1686368650.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214514571-1686368650.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214514571-1686368650.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>回到第一次reset前的状态了！</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214526321-588410549.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214526321-588410549.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214526321-588410549.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214526321-588410549.png" alt title class></a>
+                <p></p>
+            </figure>
 <h3 id="5-清除未追踪的文件"><a href="#5-清除未追踪的文件" class="headerlink" title="5.清除未追踪的文件"></a>5.清除未追踪的文件</h3><p>通常在reset或者pull（后面会讲）之前要做两件事：</p>
 <ul>
 <li><p>将新添加且为追踪的文件删除掉（比如编译程序后所产生的文件）</p>
@@ -480,14 +535,26 @@
 </ul>
 <p>还原已做修改的tracked文件，上面已经讲过。\<br>现在看看如何用命令删除新加的文件。</p>
 <p>首先我手动创建个文件，用来演示：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214540008-1448402387.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214540008-1448402387.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214540008-1448402387.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214540008-1448402387.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>用checkout是没办法删除掉它的，使用 <code>git clean -xf</code> ：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214601305-1764138916.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214601305-1764138916.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214601305-1764138916.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214601305-1764138916.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>这个命令的杀伤力比较大，它删除当前目录下所有没有track过的文件。不管它是否是.gitignore文件里面指定的文件夹和文件。当然，也有杀伤力比较小的，但这里就不介绍了。</p>
 <h3 id="6-关于git-status中文乱码问题"><a href="#6-关于git-status中文乱码问题" class="headerlink" title="6.关于git status中文乱码问题"></a>6.关于git status中文乱码问题</h3><p>如果你的文件名是中文的，在使用<code>git status</code>时会乱码。如下图所示：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144122025-2131985383.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144122025-2131985383.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144122025-2131985383.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144122025-2131985383.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>如果要使它显示为中文，在命令行里执行：<code>git config --global core.quotepath false</code>。\<br>再使用 <code>git status</code>：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144614463-158907487.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144614463-158907487.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144614463-158907487.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144614463-158907487.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>如果 <code>git log</code> 也会乱码，执行以下命令：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git config --global i18n.commitencoding utf-8</span><br><span class="line">git config --global i18n.logoutputencoding utf-8</span><br></pre></td></tr></table></figure>
 <p>请根据需要将后面的 utf-8 替换成你想要的编码。如果是团队项目，请确保所有成员的设置都一致。</p>
@@ -536,9 +603,15 @@
 </ol>
 <p>关联已经完成！</p>
 <p>以后想在commit后同步到Github上，只要直接执行 <code>git push</code> 就行啦：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214848133-733016980.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214848133-733016980.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214848133-733016980.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214848133-733016980.png" alt title class></a>
+                <p></p>
+            </figure>
 <p>可以在Github上看到修改：</p>
-<p><a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214855602-1059095970.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214855602-1059095970.png" alt></a></p>
+<figure class="image-box">
+                <a rel="Git心得" href="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214855602-1059095970.png" title data-fancybox="images"><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214855602-1059095970.png" alt title class></a>
+                <p></p>
+            </figure>
 <hr>
 <h2 id="六、团队合作开发"><a href="#六、团队合作开发" class="headerlink" title="六、团队合作开发"></a>六、团队合作开发</h2><p>关于团队合作开发，我在之前已经专门用一篇文章来说明了。\<br>原文链接： <a href="http://www.cnblogs.com/schaepher/p/4933873.html" target="_blank" rel="noopener">GitHub团队项目合作流程</a></p>
 <p>上文的目录：</p>
@@ -713,7 +786,7 @@
         <aside class="post-widget">
             <nav class="post-toc-wrap" id="post-toc">
                 <strong>目录</strong>
-                <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Git和Github简单教程"><span class="post-toc-number">1.</span> <span class="post-toc-text">Git和Github简单教程</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#零、Git是什么"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">零、Git是什么</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#一、Git的主要功能：版本控制"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">一、Git的主要功能：版本控制</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#二、概览"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">二、概览</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-个人本地使用"><span class="post-toc-number">1.3.1.</span> <span class="post-toc-text">1.个人本地使用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-个人使用远程仓库"><span class="post-toc-number">1.3.2.</span> <span class="post-toc-text">2.个人使用远程仓库</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#三、Git-for-Windows软件安装"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">三、Git for Windows软件安装</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#四、本地Git的使用"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">四、本地Git的使用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-新的仓库-》初始化"><span class="post-toc-number">1.5.1.</span> <span class="post-toc-text">1.新的仓库-》初始化</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-文件的添加和提交"><span class="post-toc-number">1.5.2.</span> <span class="post-toc-text">2.文件的添加和提交</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-文件的修改"><span class="post-toc-number">1.5.3.</span> <span class="post-toc-text">3.文件的修改</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-版本回退！"><span class="post-toc-number">1.5.4.</span> <span class="post-toc-text">4.版本回退！</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-清除未追踪的文件"><span class="post-toc-number">1.5.5.</span> <span class="post-toc-text">5.清除未追踪的文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#6-关于git-status中文乱码问题"><span class="post-toc-number">1.5.6.</span> <span class="post-toc-text">6.关于git status中文乱码问题</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#五、Github与Git的关联"><span class="post-toc-number">1.6.</span> <span class="post-toc-text">五、Github与Git的关联</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1）本地Git和Github的连接"><span class="post-toc-number">1.6.1.</span> <span class="post-toc-text">1）本地Git和Github的连接</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2）创建远程仓库并与本地关联"><span class="post-toc-number">1.6.2.</span> <span class="post-toc-text">2）创建远程仓库并与本地关联</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#六、团队合作开发"><span class="post-toc-number">1.7.</span> <span class="post-toc-text">六、团队合作开发</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#七、Github的其他介绍"><span class="post-toc-number">1.8.</span> <span class="post-toc-text">七、Github的其他介绍</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1）获取其他人的远程仓库"><span class="post-toc-number">1.8.1.</span> <span class="post-toc-text">1）获取其他人的远程仓库</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2）另一种关联远程空仓库的方法"><span class="post-toc-number">1.8.2.</span> <span class="post-toc-text">2）另一种关联远程空仓库的方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3）使用GitHub的好处"><span class="post-toc-number">1.8.3.</span> <span class="post-toc-text">3）使用GitHub的好处</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#八、一些可能碰到的问题"><span class="post-toc-number">1.9.</span> <span class="post-toc-text">八、一些可能碰到的问题</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#使用hexo时deploy部署网站到github或gitcafe的gitpages时重复输入用户名密码的解决办法"><span class="post-toc-number">2.</span> <span class="post-toc-text">使用hexo时deploy部署网站到github或gitcafe的gitpages时重复输入用户名密码的解决办法</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#将Cmder添加到系统右键菜单中"><span class="post-toc-number">3.</span> <span class="post-toc-text">将Cmder添加到系统右键菜单中</span></a></li></ol>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Git和Github简单教程"><span class="post-toc-number">1.</span> <span class="post-toc-text">Git和Github简单教程</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#零、Git是什么"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">零、Git是什么</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#一、Git的主要功能：版本控制"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">一、Git的主要功能：版本控制</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#二、概览"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">二、概览</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-个人本地使用"><span class="post-toc-number">1.3.1.</span> <span class="post-toc-text">1.个人本地使用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-个人使用远程仓库"><span class="post-toc-number">1.3.2.</span> <span class="post-toc-text">2.个人使用远程仓库</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-文件的添加和提交"><span class="post-toc-number">1.3.3.</span> <span class="post-toc-text">2.文件的添加和提交</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-文件的修改"><span class="post-toc-number">1.3.4.</span> <span class="post-toc-text">3.文件的修改</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-版本回退！"><span class="post-toc-number">1.3.5.</span> <span class="post-toc-text">4.版本回退！</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-清除未追踪的文件"><span class="post-toc-number">1.3.6.</span> <span class="post-toc-text">5.清除未追踪的文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#6-关于git-status中文乱码问题"><span class="post-toc-number">1.3.7.</span> <span class="post-toc-text">6.关于git status中文乱码问题</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#五、Github与Git的关联"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">五、Github与Git的关联</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1）本地Git和Github的连接"><span class="post-toc-number">1.4.1.</span> <span class="post-toc-text">1）本地Git和Github的连接</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2）创建远程仓库并与本地关联"><span class="post-toc-number">1.4.2.</span> <span class="post-toc-text">2）创建远程仓库并与本地关联</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#六、团队合作开发"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">六、团队合作开发</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#七、Github的其他介绍"><span class="post-toc-number">1.6.</span> <span class="post-toc-text">七、Github的其他介绍</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1）获取其他人的远程仓库"><span class="post-toc-number">1.6.1.</span> <span class="post-toc-text">1）获取其他人的远程仓库</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2）另一种关联远程空仓库的方法"><span class="post-toc-number">1.6.2.</span> <span class="post-toc-text">2）另一种关联远程空仓库的方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3）使用GitHub的好处"><span class="post-toc-number">1.6.3.</span> <span class="post-toc-text">3）使用GitHub的好处</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#八、一些可能碰到的问题"><span class="post-toc-number">1.7.</span> <span class="post-toc-text">八、一些可能碰到的问题</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#使用hexo时deploy部署网站到github或gitcafe的gitpages时重复输入用户名密码的解决办法"><span class="post-toc-number">2.</span> <span class="post-toc-text">使用hexo时deploy部署网站到github或gitcafe的gitpages时重复输入用户名密码的解决办法</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#将Cmder添加到系统右键菜单中"><span class="post-toc-number">3.</span> <span class="post-toc-text">将Cmder添加到系统右键菜单中</span></a></li></ol>
             </nav>
             <div class="toc-bar"><div>
         </div></div></aside>

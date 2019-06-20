@@ -3,6 +3,14 @@
   
     
     <entry>
+      <title><![CDATA[聚是一团火，散是满天星]]></title>
+      <url>/2019/06/20/%E8%81%9A%E6%98%AF%E4%B8%80%E5%9B%A2%E7%81%AB%EF%BC%8C%E6%95%A3%E6%98%AF%E6%BB%A1%E5%A4%A9%E6%98%9F/</url>
+      <content type="html"><![CDATA[<p><br>    <div style="width:100%; height:350px;border:none;text-align:center"><br>        <iframe allowtransparency="yes" frameborder="0" width="850" height="425" src="Flow_Map.html"><br>    </iframe></div><br></p>]]></content>
+      
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[安卓微信本地数据库解密与删除聊天记录恢复完全教程]]></title>
       <url>/2019/04/27/%E5%AE%89%E5%8D%93%E5%BE%AE%E4%BF%A1%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E5%BA%93%E8%A7%A3%E5%AF%86%E4%B8%8E%E5%88%A0%E9%99%A4%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E6%81%A2%E5%A4%8D%E5%AE%8C%E5%85%A8%E6%95%99%E7%A8%8B/</url>
       <content type="html"><![CDATA[<p>【转载内容，欢迎转载，请注明出处】</p>
@@ -27,12 +35,21 @@
 <h2 id="解决华为旧备份数据导出问题"><a href="#解决华为旧备份数据导出问题" class="headerlink" title="解决华为旧备份数据导出问题"></a>解决华为旧备份数据导出问题</h2><hr>
 <p>使用低版本华为备份软件得到的微信备份文件为一个com.tencent.mm.apk文件和一个com.tencent.mm.db文件。</p>
 <p>用sqlite数据库管理工具打开com.tencent.mm.db，发现只有三个表，其中apk_file_info表中储存了所有文件名和索引号，apk_file_data中则存储了文件数据。索引号为-1的是目录，索引号大于0的是有用的文件。</p>
-<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_UHEBU75TMQ92TYC.jpg" alt></p>
+<figure class="image-box">
+                <img src="https://bbs.pediy.com/upload/attach/201904/3305_UHEBU75TMQ92TYC.jpg" alt title class>
+                <p></p>
+            </figure>
 <p>在apk_file_data中索引号相同的是同一个文件，每个文件被切成若干个8K以内的碎片进行存储，导出时需要拼接起来再导出。</p>
-<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_EUWUM9U4A44ZUDD.jpg" alt></p>
+<figure class="image-box">
+                <img src="https://bbs.pediy.com/upload/attach/201904/3305_EUWUM9U4A44ZUDD.jpg" alt title class>
+                <p></p>
+            </figure>
 <p>导出文件数据的python代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">import sqlite3</span><br><span class="line">import os</span><br><span class="line">conn = sqlite3.connect(&apos;com.tencent.mm.db&apos;)</span><br><span class="line">cursor = conn.cursor()</span><br><span class="line">cursor.execute(&quot;SELECT count(*) FROM apk_file_info&quot;)</span><br><span class="line">all = cursor.fetchone()[0]</span><br><span class="line">cursor.execute(&quot;SELECT file_path,file_index FROM apk_file_info&quot;)</span><br><span class="line">result = cursor.fetchall()</span><br><span class="line">count = 0</span><br><span class="line">while (count &lt; all):</span><br><span class="line">  if (result[count][1] &gt; 0):</span><br><span class="line">      fullname = result[count][0]</span><br><span class="line">      findex = result[count][1]</span><br><span class="line">      dirname,filename = os.path.split(fullname)</span><br><span class="line">      fpath=&quot;.&quot; + dirname</span><br><span class="line">      fname=&quot;.&quot; + fullname</span><br><span class="line">      isExists=os.path.exists(fpath)</span><br><span class="line">      if not isExists:</span><br><span class="line">          os.makedirs(fpath)</span><br><span class="line">      with open(fname, &quot;wb&quot;) as output_file:</span><br><span class="line">        cursor.execute(&quot;SELECT count(*) FROM apk_file_data WHERE file_index = &quot; + str(findex))</span><br><span class="line">        total = cursor.fetchone()[0]</span><br><span class="line">        cursor.execute(&quot;SELECT file_data FROM apk_file_data WHERE file_index = &quot; + str(findex))</span><br><span class="line">        acount=0</span><br><span class="line">        while (acount &lt; total):</span><br><span class="line">          ablob = cursor.fetchone()</span><br><span class="line">          output_file.write(ablob[0])</span><br><span class="line">          acount = acount+1</span><br><span class="line">  count = count + 1</span><br><span class="line">cursor.close()</span><br><span class="line">conn.close()</span><br></pre></td></tr></table></figure></p>
 <p>将代码保存为out.py后与com.tencent.mm.db文件放在同一目录下，python out.py运行即可在当前目录下导出所有文件。生成目录为data/data/com.tencent.mm。</p>
-<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_9B9TN2APDDZV2U2.jpg" alt></p>
+<figure class="image-box">
+                <img src="https://bbs.pediy.com/upload/attach/201904/3305_9B9TN2APDDZV2U2.jpg" alt title class>
+                <p></p>
+            </figure>
 <p>比较懒，没有加注释和提示信息。实际使用时请自行添加提示信息和异常处理代码。如果导出文件数据较多程序效率比较低，可自行优化，代码仅供参考。</p>
 <h2 id="解密索引数据库"><a href="#解密索引数据库" class="headerlink" title="解密索引数据库"></a>解密索引数据库</h2><hr>
 <h3 id="先要解密微信消息库"><a href="#先要解密微信消息库" class="headerlink" title="先要解密微信消息库"></a>先要解密微信消息库</h3><p>首先需要解密EnMicroMsg.db，以便提取微信id。因为CompatibleInfo.cfg是通过java的HashMap编码的，因此从此文件中提取IMEI值需要解码。没找到python解码java HashMap的代码，所以就用java代码凑合一下。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">import java.io.FileInputStream;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.io.ObjectInputStream;</span><br><span class="line">import java.security.MessageDigest;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">public class GetDBKey &#123;</span><br><span class="line"> public static void main(String[] args) &#123;</span><br><span class="line">  try &#123;</span><br><span class="line">   ObjectInputStream in = new ObjectInputStream(new FileInputStream(&quot;CompatibleInfo.cfg&quot;));</span><br><span class="line">   Object DL = in.readObject();</span><br><span class="line">   HashMap hashWithOutFormat = (HashMap) DL;</span><br><span class="line">   String s = String.valueOf(hashWithOutFormat.get(Integer.valueOf(258))); // 取手机的IMEI</span><br><span class="line">   System.out.println(&quot;IMEI:&quot;+s);</span><br><span class="line">   ObjectInputStream in1 = new ObjectInputStream(new FileInputStream(&quot;systemInfo.cfg&quot;));</span><br><span class="line">   Object DJ = in1.readObject();</span><br><span class="line">   HashMap hashWithOutFormat1 = (HashMap) DJ;</span><br><span class="line">   String t = String.valueOf(hashWithOutFormat1.get(Integer.valueOf(1))); // 取微信的uin</span><br><span class="line">   System.out.println(&quot;uin:&quot;+t);</span><br><span class="line">   s = s + t; //合并到一个字符串</span><br><span class="line">   s = encode(s); // MD5</span><br><span class="line">   System.out.println(&quot;密码是 : &quot; + s.substring(0, 7));</span><br><span class="line">   in.close();</span><br><span class="line">   in1.close();</span><br><span class="line">  &#125; catch (Exception e) &#123;</span><br><span class="line">   e.printStackTrace();</span><br><span class="line">  &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> public static String encode(String content)</span><br><span class="line">  &#123;</span><br><span class="line">   try &#123;</span><br><span class="line">    MessageDigest digest = MessageDigest.getInstance(&quot;MD5&quot;);</span><br><span class="line">    digest.update(content.getBytes());</span><br><span class="line">    return getEncode32(digest);</span><br><span class="line">    &#125;</span><br><span class="line">   catch (Exception e)</span><br><span class="line">   &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">   &#125;</span><br><span class="line">   return null;</span><br><span class="line">  &#125;</span><br><span class="line">  private static String getEncode32(MessageDigest digest)</span><br><span class="line">  &#123;</span><br><span class="line">   StringBuilder builder = new StringBuilder();</span><br><span class="line">   for (byte b : digest.digest())</span><br><span class="line">   &#123;</span><br><span class="line">    builder.append(Integer.toHexString((b &gt;&gt; 4) &amp; 0xf));</span><br><span class="line">    builder.append(Integer.toHexString(b &amp; 0xf));</span><br><span class="line">   &#125;</span><br><span class="line">    return builder.toString();</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -45,7 +62,10 @@
 <p>将代码中的imei值和uin值替换成刚才获得的值即可。将EnMicroMsg.db与python程序放在同一目录下运行即可解密，生成的文件名为EnMicroMsg-decrypted.db。</p>
 <h3 id="解密索引库"><a href="#解密索引库" class="headerlink" title="解密索引库"></a>解密索引库</h3><p>微信索引库FTS5IndexMsg.db之前是不加密的，但到了微信7.0以后，索引库就变成了FTS5IndexMsg_encrypt.db，明显加密了。使用EnMicroMsg.db的密码进行解密失败，通过与几个电子取证公司的技术人员交流，了解到密码算法确实变了，而且加密参数也有变化。大体的情况是变成IMEI、uin、微信id三者拼接后的32位MD5值取前7位作为密码。涉及到产品细节无法透露，因此具体算法还需要自行研究。</p>
 <p>先用sqlite管理工具将EnMicroMsg-decrypted.db打开，打开userinfo表，其中id为2对应的值为微信id。通常为wxid_xxxxxxxxxxxxxx格式。</p>
-<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_SSHKS9MCAPW9HGP.jpg" alt></p>
+<figure class="image-box">
+                <img src="https://bbs.pediy.com/upload/attach/201904/3305_SSHKS9MCAPW9HGP.jpg" alt title class>
+                <p></p>
+            </figure>
 <p>这样的话至少素材已经齐了，接下来就是研究具体的算法了。</p>
 <p>算法只能通过反编译apk文件来查找。</p>
 <p>先从官网下载最新版的jadx 0.9.0zip版（不要下载exe版，因为需要调整运行参数）</p>
@@ -72,7 +92,10 @@
 <p>只要把IMEI、uin、微信id换成之前取出来的即可。把加密数据库和python代码放在同一个目录中运行就可以得到解密数据库。</p>
 <p>另外在搜索代码的过程中发现MicroMsgPriority.db也加密了，密码是uin、微信id、IMEI顺次拼接的32位MD5值取前7位。sqlcipher参数与索引库相同。可以简单修改以上代码就可以实现解密。</p>
 <h3 id="从索引库恢复被删除的消息"><a href="#从索引库恢复被删除的消息" class="headerlink" title="### 从索引库恢复被删除的消息"></a>### 从索引库恢复被删除的消息</h3><p>用winhex打开解密后的索引库：</p>
-<p><img src="https://bbs.pediy.com/upload/attach/201904/3305_VMSZVAJTBZY66Y3.jpg" alt></p>
+<figure class="image-box">
+                <img src="https://bbs.pediy.com/upload/attach/201904/3305_VMSZVAJTBZY66Y3.jpg" alt title class>
+                <p></p>
+            </figure>
 <p>在右侧显示区上方点击”ANSI ASCII”，选择”Unicode UTF-8”，向下滚动就可看到连续的中文，这些就是索引后的消息。其中包括已删除和未删除的内容。</p>
 <p>经查阅资料并与厂商技术人员沟通，发现这些信息的存储格式开头如下：</p>
 <p>aa bb 03 00 cc 或 aa bb 04 00 cc dd</p>
@@ -315,70 +338,80 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 </tr>
 </tbody>
 </table>
-<p>可以用一张图直观地看出以上主要的命令对仓库的影响。\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213832164-1203726937.png" alt>\<br>图片引用自：<a href="http://blog.podrezo.com/git-introduction-for-cvssvntfs-users/" target="_blank" rel="noopener">Git introduction for CVS/SVN/TFS users</a></p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213850274-1309981476.jpg" alt>\<br>图片引用自：<a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/0013745374151782eb658c5a5ca454eaa451661275886c6000" target="_blank" rel="noopener">工作区和暂存区 - 廖雪峰的官方网站</a> （做了点修改）</p>
-<p>对照查看两张图：</p>
-<ul>
-<li><p>workspace 即工作区，逻辑上是本地计算机，还没添加到repository的状态；</p>
-</li>
-<li><p>staging 即版本库中的stage，是暂存区。修改已经添加进repository，但还没有作为commit提交，类似于缓存；</p>
-</li>
-<li><p>Local repository 即版本库中master那个地方。到这一步才算是成功生成一个新版本；</p>
-</li>
-<li><p>Remote repository 则是远程仓库。用来将本地仓库上传到网络，可以用于备份、共享、合作。本文将使用Github作为远程仓库的例子。</p>
-</li>
-</ul>
-<hr>
-<h2 id="三、Git-for-Windows软件安装"><a href="#三、Git-for-Windows软件安装" class="headerlink" title="三、Git for Windows软件安装"></a>三、Git for Windows软件安装</h2><p><img src="https://images2015.cnblogs.com/blog/809218/201612/809218-20161203000226318-877439216.png" alt>\<br>Git for Windows（又msysgit）</p>
-<ul>
-<li><p>安装包可以到官方网站^<a href="https://git-for-windows.github.io/" target="_blank" rel="noopener"><code>[1]</code></a>^下载，或者在github^<a href="https://github.com/git-for-windows/git/releases" target="_blank" rel="noopener"><code>[2]</code></a>^下载。如果下载不下来，可以把链接复制下来用迅雷下载。如果用迅雷下载不放心，在下载完后去在github下载的那个地方查看SHA-256值，并和下载的文件对比，如果值一样就可以放心使用。</p>
-</li>
-<li><p>安装的时候一路点击<code>Next</code>就行了。</p>
-</li>
-<li><p>刚安装完打开后，窗口比较小。如果不太习惯，可以把它改大一些。</p>
-<ol>
-<li>首先移到窗口右下角边缘，出现箭头后把窗口拉大。</li>
-<li>点击窗口顶部左边的图标 -&gt; Options… -&gt; Window -&gt; Current size -&gt; OK\<br>这样以后打开窗口都会是调整后的大小。</li>
-</ol>
-</li>
-</ul>
-<blockquote>
-<p>Git for Windows从2.8.0版本^<a href="https://github.com/git-for-windows/git/releases/tag/v2.8.0.windows.1" title="查看2.8.0版本的Release Note" target="_blank" rel="noopener"><code>[3]</code></a>^开始，默认添加环境变量，所以环境变量部分就不用再手动配置了。（这句可以无视）</p>
-</blockquote>
-<hr>
-<h2 id="四、本地Git的使用"><a href="#四、本地Git的使用" class="headerlink" title="四、本地Git的使用"></a>四、本地Git的使用</h2><blockquote>
-<p>这里先不引入Github，而是在本地计算机上的操作。</p>
-</blockquote>
-<p>打开命令行（cmd）或者在想要创建repository的地方右键鼠标并点击 <code>Git Bash Here</code> 打开窗口。</p>
-<h3 id="1-新的仓库-》初始化"><a href="#1-新的仓库-》初始化" class="headerlink" title="1.新的仓库-》初始化"></a>1.新的仓库-》初始化</h3><p>运行 <code>git init</code> 来初始化仓库，如下图：\<br><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213940508-828815164.png" alt></p>
+<p>可以用一张图直观地看出以上主要的命令对仓库的影响。\<br><figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213832164-1203726937.png" alt title class>
+                <p></p>
+            </figure>\<br>图片引用自：<a href="http://blog.podrezo.com/git-introduction-for-cvssvntfs-users/" target="_blank" rel="noopener">Git introduction for CVS/SVN/TFS users</a></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213850274-1309981476.jpg" alt title class>
+                <p></p>
+            </figure>\<br>图片引用自：<a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/0013745374151782eb658c5a5ca454eaa451661275886c6000" target="_blank" rel="noopener">工作区和暂存区 - 廖雪峰的官方网站</a> （做了点修改）<br><br>对照查看两张图：<br><br>-   workspace 即工作区，逻辑上是本地计算机，还没添加到repository的状态；<br><br>-   staging 即版本库中的stage，是暂存区。修改已经添加进repository，但还没有作为commit提交，类似于缓存；<br><br>-   Local repository 即版本库中master那个地方。到这一步才算是成功生成一个新版本；<br><br>-   Remote repository 则是远程仓库。用来将本地仓库上传到网络，可以用于备份、共享、合作。本文将使用Github作为远程仓库的例子。<br><br><em> </em> <em> </em> <em><br><br>三、Git for Windows软件安装<br>———————<br><br><figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201612/809218-20161203000226318-877439216.png" alt title class>
+                <p></p>
+            </figure>\<br>Git for Windows（又msysgit）<br><br>-   安装包可以到官方网站^<a href="https://git-for-windows.github.io/" target="_blank" rel="noopener"><code>[1]</code></a>^下载，或者在github^<a href="https://github.com/git-for-windows/git/releases" target="_blank" rel="noopener"><code>[2]</code></a>^下载。如果下载不下来，可以把链接复制下来用迅雷下载。如果用迅雷下载不放心，在下载完后去在github下载的那个地方查看SHA-256值，并和下载的文件对比，如果值一样就可以放心使用。<br><br>-   安装的时候一路点击<code>Next</code>就行了。<br><br>-   刚安装完打开后，窗口比较小。如果不太习惯，可以把它改大一些。<br>    1.  首先移到窗口右下角边缘，出现箭头后把窗口拉大。<br>    2.  点击窗口顶部左边的图标 -&gt; Options… -&gt; Window -&gt; Current size -&gt; OK\<br>        这样以后打开窗口都会是调整后的大小。<br><br>&gt; Git for Windows从2.8.0版本^<a href="https://github.com/git-for-windows/git/releases/tag/v2.8.0.windows.1" title="查看2.8.0版本的Release Note" target="_blank" rel="noopener"><code>[3]</code></a>^开始，默认添加环境变量，所以环境变量部分就不用再手动配置了。（这句可以无视）
+
+</em> <em> </em> <em> </em><br><br>四、本地Git的使用<br>———-<br><br>&gt; 这里先不引入Github，而是在本地计算机上的操作。<br><br>打开命令行（cmd）或者在想要创建repository的地方右键鼠标并点击 <code>Git Bash Here</code> 打开窗口。<br><br>### 1.新的仓库-》初始化<br><br>运行 <code>git init</code> 来初始化仓库，如下图：\<br><figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213940508-828815164.png" alt title class>
+                <p></p>
+            </figure>
 <p>它会创建一个隐藏的文件夹 <code>.git</code> 这里不去管它是用来干嘛的。关闭windows的<code>显示隐藏的项目</code>吧。</p>
 <hr>
 <h3 id="2-文件的添加和提交"><a href="#2-文件的添加和提交" class="headerlink" title="2.文件的添加和提交"></a>2.文件的添加和提交</h3><p>我在这个文件夹里面创建了一个 <code>today.txt</code> 的文件。并且不要脸地祝自己儿童节快乐：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213956149-723619418.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604213956149-723619418.png" alt title class>
+                <p></p>
+            </figure>
 <p>这时我使用 <code>git status</code> 来查看有什么变化：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214005055-1866468380.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214005055-1866468380.png" alt title class>
+                <p></p>
+            </figure>
 <p>它告诉我有一个还未追踪的文件，并提示我可以使用 <code>git add &lt;file&gt;...</code> 把它加进去。</p>
 <p>但是我并不打算把所有命令都介绍一遍，所以我选择使用上面概览时所提到的 <code>git add -A</code> 命令。</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214016508-253679176.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214016508-253679176.png" alt title class>
+                <p></p>
+            </figure>
 <p>嗯，什么提示都没有。没关系，我们再次使用 <code>git status</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214024992-260849170.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214024992-260849170.png" alt title class>
+                <p></p>
+            </figure>
 <p>状态变了！说明add成功。再看看它的提示 <code>Changes to be committed</code> ，也就是说现在可以执行commit了。下面一行则告诉你如何将文件从stage里移出，这里不管。\<br>执行 <code>git commit -m &quot;提交信息&quot;</code> 将文件提交到repository里。提交信息用英文的双引号括起来。</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214038492-1522093568.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214038492-1522093568.png" alt title class>
+                <p></p>
+            </figure>
 <p>这时运行 <code>git log</code> 就可以看到提交的记录了：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214048071-1516052651.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214048071-1516052651.png" alt title class>
+                <p></p>
+            </figure>
 <p>这样第一步就完成了。</p>
 <blockquote>
 <p>也许你会奇怪：为什么要有一个add，直接commit不就行了？这是因为stage有很多用处，具体可以去查找相关资料。这里就算不了解问题也不大。</p>
 </blockquote>
 <h3 id="3-文件的修改"><a href="#3-文件的修改" class="headerlink" title="3.文件的修改"></a>3.文件的修改</h3><p>接着我修改文件内容。改成祝大家儿童节快乐好了 (～￣▽￣)～</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214108227-292232158.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214108227-292232158.png" alt title class>
+                <p></p>
+            </figure>
 <p>我们用 <code>git status</code> 看看有什么变化：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214116571-1026727305.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214116571-1026727305.png" alt title class>
+                <p></p>
+            </figure>
 <p>这和之前的提示不一样了。之前是这个：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214132992-1418825706.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214132992-1418825706.png" alt title class>
+                <p></p>
+            </figure>
 <p>比较一下就会看到，之前的是添加新文件，当时文件还没被追踪（untracked），而这次是更改已经追踪（tracked）的文件。</p>
 <p>现在我们通过git看看文件做了哪些变化，执行 <code>git diff</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214145649-1116632145.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214145649-1116632145.png" alt title class>
+                <p></p>
+            </figure>
 <p>它默认跟最新的一个commit进行比较。\<br>红色（前面有减号<code>-</code>）表示删除，绿色（前面有加号<code>+</code>）表示添加。\<br>因此，在git看来，我们是删除了原来那一行，并添加了新的两行。这在文件内容特别多的时候效果比较明显。\<br>这个命令在以下情况可以使用：</p>
 <ul>
 <li>你忘记改了什么，又想知道</li>
@@ -386,49 +419,94 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 </ul>
 <p>注：如果你用 windows 创建 txt 文件，并用自带文本编辑器来编辑文本，得到的编码是 GBK 。而 Git 读取文件时，使用 UTF-8 无 ROM 编码。因此会出现中文无法正常显示的情况。</p>
 <p>假如我现在想撤销这些更改，执行 <code>git checkout -- .</code> 就行了：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214206821-1921800298.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214206821-1921800298.png" alt title class>
+                <p></p>
+            </figure>
 <p>恩，仍然没有任何提示。执行 <code>git status</code> 看看：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214215774-1596938603.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214215774-1596938603.png" alt title class>
+                <p></p>
+            </figure>
 <p>上一个status的提示已经不见咯。再来看看文件：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214227930-813645920.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214227930-813645920.png" alt title class>
+                <p></p>
+            </figure>
 <p>果然复原了！那么再次进行修改：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214241102-284859029.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214241102-284859029.png" alt title class>
+                <p></p>
+            </figure>
 <p>接着：\<br><code>git add -A</code>\<br><code>git commit -m &quot;将[自己]改为[米娜桑]&quot;</code></p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214257633-193132615.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214257633-193132615.png" alt title class>
+                <p></p>
+            </figure>
 <p>用 <code>git log</code> 看看提交（commit）记录：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt title class>
+                <p></p>
+            </figure>
 <p>嗯。现在有两个提交了。</p>
 <h3 id="4-版本回退！"><a href="#4-版本回退！" class="headerlink" title="4.版本回退！"></a>4.版本回退！</h3><p>如果我写的是一篇很长的文章，并且在之前的版本基础上修改了一部分内容，生成一个新的commit，现在我发现我在修改的时候删掉了一部分内容，而这部分内容是我现在需要用到的，怎么办？版本回退！</p>
 <p>还是以刚才的文件为例，现在我试着将文件回退到第一个commit时的状态。但在这之前，我们看看这个文件夹里面的东西：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214321555-282676581.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214321555-282676581.png" alt title class>
+                <p></p>
+            </figure>
 <p><code>.git</code> 文件夹因为本来就是隐藏的，我在关了 <code>显示隐藏的项目</code> 的选项后，它就不显示了。\<br>现在看到的是只有一个文件，而且是最新的一个版本。</p>
 <blockquote>
 <p>文件的修改日期为 <code>2016\6\1 21:52</code></p>
 </blockquote>
 <p>从刚才的 <code>git log</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214311758-175378236.png" alt title class>
+                <p></p>
+            </figure>
 <p>我们看到两行黄色部分是以 <code>commit</code> 开头的，后面接着一串字符。这一串字符是16进制的数，是一串哈希值。我们叫它版本号就行了。</p>
 <p>开始回退，执行 <code>git reset --hard 1df0573</code> （取版本号前7位就可以了）：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604215412196-1252165674.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604215412196-1252165674.png" alt title class>
+                <p></p>
+            </figure>
 <p>这里提示HEAD已经更改指向至1df0573了。此时文件：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214419821-1776623416.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214419821-1776623416.png" alt title class>
+                <p></p>
+            </figure>
 <p>其内容：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214429133-794948365.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214429133-794948365.png" alt title class>
+                <p></p>
+            </figure>
 <p>已经回到我的第一个版本的状态。</p>
 <blockquote>
 <p>这里文件的修改日期被更改为我现在的时间 <code>2016\6\2 19:29</code>\<br>这是由于文件的修改日期是由windows修改的，因为它检测到这个文件被修改了。而我们刚才从最新版本回退到现在这个版本，就像是我们手动修改了文件内容一样，事实上是由git来完成的。\<br>其实可以不管上面这一段</p>
 </blockquote>
 <p>现在再执行 <code>git log</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214442242-370029640.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214442242-370029640.png" alt title class>
+                <p></p>
+            </figure>
 <p>新版本的commit记录不见了！这就是 reset –hard 的力量，很好很强硬！</p>
 <p>现在已经看到了之前版本的内容，那么如何回到最新版呢？\<br>先执行 <code>git reflog</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214451727-1120509429.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214451727-1120509429.png" alt title class>
+                <p></p>
+            </figure>
 <p>可以看到HEAD的变化情况。\<br>第一行表示当前HEAD所在的版本号是 <code>1df0573</code> ，而之所以在这个版本号，是由于我们执行了reset命令。\<br>看第二行，它告诉我们，这个HEAD所在的版本号是 <code>ad93b89</code> ，这个版本号是在执行commit之后形成的。</p>
 <p>此时我再用一次reset，将HEAD指向 <code>ad93b89</code> ， 同时查看log ：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard ad93b89</span><br><span class="line">git log</span><br></pre></td></tr></table></figure>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214514571-1686368650.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214514571-1686368650.png" alt title class>
+                <p></p>
+            </figure>
 <p>回到第一次reset前的状态了！</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214526321-588410549.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214526321-588410549.png" alt title class>
+                <p></p>
+            </figure>
 <h3 id="5-清除未追踪的文件"><a href="#5-清除未追踪的文件" class="headerlink" title="5.清除未追踪的文件"></a>5.清除未追踪的文件</h3><p>通常在reset或者pull（后面会讲）之前要做两件事：</p>
 <ul>
 <li><p>将新添加且为追踪的文件删除掉（比如编译程序后所产生的文件）</p>
@@ -438,14 +516,26 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 </ul>
 <p>还原已做修改的tracked文件，上面已经讲过。\<br>现在看看如何用命令删除新加的文件。</p>
 <p>首先我手动创建个文件，用来演示：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214540008-1448402387.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214540008-1448402387.png" alt title class>
+                <p></p>
+            </figure>
 <p>用checkout是没办法删除掉它的，使用 <code>git clean -xf</code> ：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214601305-1764138916.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214601305-1764138916.png" alt title class>
+                <p></p>
+            </figure>
 <p>这个命令的杀伤力比较大，它删除当前目录下所有没有track过的文件。不管它是否是.gitignore文件里面指定的文件夹和文件。当然，也有杀伤力比较小的，但这里就不介绍了。</p>
 <h3 id="6-关于git-status中文乱码问题"><a href="#6-关于git-status中文乱码问题" class="headerlink" title="6.关于git status中文乱码问题"></a>6.关于git status中文乱码问题</h3><p>如果你的文件名是中文的，在使用<code>git status</code>时会乱码。如下图所示：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144122025-2131985383.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144122025-2131985383.png" alt title class>
+                <p></p>
+            </figure>
 <p>如果要使它显示为中文，在命令行里执行：<code>git config --global core.quotepath false</code>。\<br>再使用 <code>git status</code>：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144614463-158907487.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201701/809218-20170113144614463-158907487.png" alt title class>
+                <p></p>
+            </figure>
 <p>如果 <code>git log</code> 也会乱码，执行以下命令：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git config --global i18n.commitencoding utf-8</span><br><span class="line">git config --global i18n.logoutputencoding utf-8</span><br></pre></td></tr></table></figure>
 <p>请根据需要将后面的 utf-8 替换成你想要的编码。如果是团队项目，请确保所有成员的设置都一致。</p>
@@ -494,9 +584,15 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 </ol>
 <p>关联已经完成！</p>
 <p>以后想在commit后同步到Github上，只要直接执行 <code>git push</code> 就行啦：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214848133-733016980.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214848133-733016980.png" alt title class>
+                <p></p>
+            </figure>
 <p>可以在Github上看到修改：</p>
-<p><img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214855602-1059095970.png" alt></p>
+<figure class="image-box">
+                <img src="https://images2015.cnblogs.com/blog/809218/201606/809218-20160604214855602-1059095970.png" alt title class>
+                <p></p>
+            </figure>
 <hr>
 <h2 id="六、团队合作开发"><a href="#六、团队合作开发" class="headerlink" title="六、团队合作开发"></a>六、团队合作开发</h2><p>关于团队合作开发，我在之前已经专门用一篇文章来说明了。\<br>原文链接： <a href="http://www.cnblogs.com/schaepher/p/4933873.html" target="_blank" rel="noopener">GitHub团队项目合作流程</a></p>
 <p>上文的目录：</p>
@@ -584,7 +680,11 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
       <title><![CDATA[伤心者]]></title>
       <url>/2019/04/21/%E4%BC%A4%E5%BF%83%E8%80%85/</url>
       <content type="html"><![CDATA[<p>　　</p>
-<h1 id="《伤心者》"><a href="#《伤心者》" class="headerlink" title="《伤心者》"></a>《伤心者》</h1><p><img src="/2019/04/21/伤心者/images/伤心者.jpg" alt="伤心者"><br>　　（2003年银河奖特等奖）</p>
+<h1 id="《伤心者》"><a href="#《伤心者》" class="headerlink" title="《伤心者》"></a>《伤心者》</h1><figure class="image-box">
+                <img src="/2019/04/21/伤心者/images/伤心者.jpg" alt="伤心者" title class>
+                <p>伤心者</p>
+            </figure>
+<p>　　（2003年银河奖特等奖）</p>
 <p>　　上午的菜场正是最繁忙的时候，我看着夏群芳穿过拥护的人群-她的背影很臃肿。隔着两三米的距离我看不清她买了些什么菜，不过她跟小贩们的讨价还价声倒是以听得很清楚。从这两天的经历我知道小贩们对夏群芳说话是不太客气的，有时候甚至于就是直接的奚落。不过我从未见过夏群芳为此而表现出生气什么的，她似乎只关心最后的结果，也就是说菜要买得合算，至于另的事情至少从表面上看去她是不计较的。现在她已经买完菜准备离开，我知道她要去哪儿。</p>
 <p>　　这座城市的四月是最漂亮的时候，各个角落里都盛开着各种各样的花。气候不冷也不太热，老年人皮帽还没取小姑娘们就钻空在天气晴朗的时候迫不及待地穿起了短裙，这本来就是乱穿衣的时候呢。“乱花渐欲迷人眼”在这样的季节里成了不折不扣的双关说话。</p>
 <p>　　夏群芳对街景显然并没有欣赏的打算，她只是低着头很费劲地朝公共汽车站的方向走，装满蔬菜的篮子不时和她短胖的小腿撞在一起，使得她每走几步就会有些滑稽地打个趔趄。道路两旁的行道树都是清一色的塔松，在这座温带城市里这种树比原产地要长得快，但木质也相对要差一些。夏群芳今天走的路线与平时稍有不同，因为今天是星期天，她总是在这个时候到C大去看她的儿子何夕。</p>
@@ -743,7 +843,10 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 <li>必须耐得住折腾。</li>
 <li>刻苦的学习精神和耐心。</li>
 </ol>
-<h2 id="关于-Github"><a href="#关于-Github" class="headerlink" title="关于 Github"></a>关于 Github</h2><center><a href="http://7xrwkh.com1.z0.glb.clouddn.com/github-jxw.jpg" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/github-jxw.jpg" alt></a></center>
+<h2 id="关于-Github"><a href="#关于-Github" class="headerlink" title="关于 Github"></a>关于 Github</h2><center>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/github-jxw.jpg" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/github-jxw.jpg)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/github-jxw.jpg)</p>
+            </figure></center>
 
 <h3 id="一、Github-的优点"><a href="#一、Github-的优点" class="headerlink" title="一、Github 的优点"></a>一、Github 的优点</h3><ul>
 <li>GitHub 是基于 git 实现的代码托管。git 可能是目前最好用的版本控制系统了，非常受欢迎。</li>
@@ -755,10 +858,19 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 <li>可以绑定你的域名 (但暂时貌似只能绑定一个)。</li>
 <li>简单快捷，使用 Github Pages 可以为你提供一个免费的服务器，免去了自己搭建服务器和写数据库的麻烦。</li>
 </ul>
-<h2 id="安装-Node-js"><a href="#安装-Node-js" class="headerlink" title="安装 Node.js"></a>安装 Node.js</h2><p>在 Windows 环境下安装 Node.js 非常简单，仅须到<a href="https://nodejs.org/en/download/" target="_blank" rel="noopener">官网下载</a>安装文件并执行即可完成安装。<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/image-nodeJs-dl.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/image-nodeJs-dl.png" alt></a><br>像我的是 Windows 64 位，直接下载安装，不需要配置环境变量。</p>
+<h2 id="安装-Node-js"><a href="#安装-Node-js" class="headerlink" title="安装 Node.js"></a>安装 Node.js</h2><p>在 Windows 环境下安装 Node.js 非常简单，仅须到<a href="https://nodejs.org/en/download/" target="_blank" rel="noopener">官网下载</a>安装文件并执行即可完成安装。<br>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/image-nodeJs-dl.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/image-nodeJs-dl.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/image-nodeJs-dl.png)</p>
+            </figure><br>像我的是 Windows 64 位，直接下载安装，不需要配置环境变量。</p>
 <h2 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h2><p>下载 msysgit 并执行即可完成安装。(上官网要翻墙，如果你的是 64 位，可以<a href="http://pan.baidu.com/s/1i4xAM9Z" target="_blank" rel="noopener">点击此处</a>下载)</p>
 <p>怎么打开 Git？</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-1.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-1.png" alt></a><br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-2.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-2.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-1.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-1.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-1.png)</p>
+            </figure><br>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-2.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-2.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/gitbash-2.png)</p>
+            </figure></p>
 <ul>
 <li><p>安装教程：<a href="http://jingyan.baidu.com/article/90895e0fb3495f64ed6b0b50.html" target="_blank" rel="noopener">如何在 windows 下安装 GIT</a></p>
 </li>
@@ -767,18 +879,27 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 <li><p>Git 基本操作：</p>
 </li>
 </ul>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/git.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/git.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/git.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/git.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/git.png)</p>
+            </figure></p>
 <p>##Hexo<br>Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
 <h3 id="一、Hexo-安装"><a href="#一、Hexo-安装" class="headerlink" title="一、Hexo 安装"></a>一、Hexo 安装</h3><p>桌面右键鼠标，点击 Git Bash Here，输入 npm 命令即可安装</p>
 <p>npm install hexo-cli -g<br>npm install hexo –save</p>
 <p>#如果命令无法运行，可以尝试更换 taobao 的 npm 源<br>npm install -g cnpm –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="noopener">https://registry.npm.taobao.org</a></p>
 <h3 id="二、Hexo-初始化配置"><a href="#二、Hexo-初始化配置" class="headerlink" title="二、Hexo 初始化配置"></a>二、Hexo 初始化配置</h3><h5 id="创建-Hexo-文件夹"><a href="#创建-Hexo-文件夹" class="headerlink" title="创建 Hexo 文件夹"></a><a href="#创建Hexo文件夹" title="创建Hexo文件夹"></a>创建 Hexo 文件夹</h5><p>安装完成后，根据自己喜好建立目录（如 F:\Blog\Hexo），直接进入 F:\Blog\Hexo 文件夹下右键鼠标，点击 Git Bash Here，进入 Git 命令框，执行以下操作。</p>
 <p>hexo init<br>npm install</p>
-<p>安装 Hexo 完成后，Hexo 将会在指定文件夹中新建所需要的文件。Hexo 文件夹下的目录如下：<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/hexo-content.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/hexo-content.png" alt></a></p>
+<p>安装 Hexo 完成后，Hexo 将会在指定文件夹中新建所需要的文件。Hexo 文件夹下的目录如下：<br>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/hexo-content.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/hexo-content.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/hexo-content.png)</p>
+            </figure></p>
 <h5 id="安装-Hexo-插件"><a href="#安装-Hexo-插件" class="headerlink" title="安装 Hexo 插件"></a><a href="#安装Hexo插件" title="安装Hexo插件"></a>安装 Hexo 插件</h5><p>如果想不出错，就将下面的插件都安装完。</p>
 <p>npm install hexo-generator-index –save<br>npm install hexo-generator-archive –save<br>npm install hexo-generator-category –save<br>npm install hexo-generator-tag –save<br>npm install hexo-server –save<br>npm install hexo-deployer-git –save<br>npm install hexo-deployer-heroku –save<br>npm install hexo-deployer-rsync –save<br>npm install hexo-deployer-openshift –save<br>npm install <a href="mailto:hexo-renderer-marked@0.2" target="_blank" rel="noopener">hexo-renderer-marked@0.2</a> –save<br>npm install <a href="mailto:hexo-renderer-stylus@0.2" target="_blank" rel="noopener">hexo-renderer-stylus@0.2</a> –save<br>npm install hexo-generator-feed@1 –save<br>npm install hexo-generator-sitemap@1 –save</p>
 <h5 id="本地查看效果"><a href="#本地查看效果" class="headerlink" title="本地查看效果"></a><a href="#本地查看效果" title="本地查看效果"></a>本地查看效果</h5><p>执行下面语句，执行完即可登录 localhost:4000 查看效果</p>
-<p>hexo generate<br>hexo server<br>登录 localhost:4000，即可看到本地的效果如下：<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/imagelocalhost.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/imagelocalhost.png" alt></a></p>
+<p>hexo generate<br>hexo server<br>登录 localhost:4000，即可看到本地的效果如下：<br>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/imagelocalhost.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/imagelocalhost.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/imagelocalhost.png)</p>
+            </figure></p>
 <h2 id="将博客部署到-Github-Pages-上"><a href="#将博客部署到-Github-Pages-上" class="headerlink" title="将博客部署到 Github Pages 上"></a>将博客部署到 Github Pages 上</h2><p>那么现在本地的博客已经搭建起来了，但是我们只可以通过本地连接查看我们的博客。那么我们现在需要做的就是把本地的博客发布到服务器上，让别人也可以连接我们的博客，而 Github Pages 就帮我完成了这件事情。但是 Github Pages 的代码就是寄存在 Github 上面的。那么接下来我们需要在 Github 上面创建一个新的项目。</p>
 <h3 id="一、注册-Github-账户"><a href="#一、注册-Github-账户" class="headerlink" title="一、注册 Github 账户"></a>一、注册 Github 账户</h3><ol>
 <li>访问 <a href="访问：http://www.github.com/">Github 首页</a></li>
@@ -786,7 +907,10 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 </ol>
 <h3 id="二、创建项目代码库"><a href="#二、创建项目代码库" class="headerlink" title="二、创建项目代码库"></a>二、创建项目代码库</h3><ol>
 <li>注册完登陆后，我们就创建一个我们自己的 Github Pages 项目。点击 <a href="https://github.com/new" target="_blank" rel="noopener">New repository</a>。</li>
-<li>创建要点如下：<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/how-to-create-reposity.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/how-to-create-reposity.png" alt></a></li>
+<li>创建要点如下：<br>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/how-to-create-reposity.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/how-to-create-reposity.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/how-to-create-reposity.png)</p>
+            </figure></li>
 </ol>
 <h3 id="三、配置-SSH-密钥"><a href="#三、配置-SSH-密钥" class="headerlink" title="三、配置 SSH 密钥"></a>三、配置 SSH 密钥</h3><p>配置 Github 的 SSH 密钥可以让本地 git 项目与远程的 github 建立联系，让我们在本地写了代码之后直接通过 git 操作就可以实现本地代码库与 Github 代码库同步。操作如下：</p>
 <h5 id="第一步、看看是否存在-SSH-密钥-keys"><a href="#第一步、看看是否存在-SSH-密钥-keys" class="headerlink" title="第一步、看看是否存在 SSH 密钥 (keys)"></a><a href="#第一步、看看是否存在SSH密钥-keys" title="第一步、看看是否存在SSH密钥(keys)"></a>第一步、看看是否存在 SSH 密钥 (keys)</h5><p>首先，我们需要看看是否看看本机是否存在 SSH keys, 打开 Git Bash, 并运行:</p>
@@ -805,11 +929,20 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 <ol>
 <li>登陆 GitHub, 进入你的 Account Settings.</li>
 </ol>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting.png)</p>
+            </figure></p>
 <p>2. 选择 SSH Keys</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting-SSH.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting-SSH.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting-SSH.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting-SSH.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-setting-SSH.png)</p>
+            </figure></p>
 <p>3. 粘贴密钥，添加即可</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-SSH-OK.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-SSH-OK.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-SSH-OK.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-SSH-OK.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/SSH-github-SSH-OK.png)</p>
+            </figure></p>
 <h5 id="第四步、测试"><a href="#第四步、测试" class="headerlink" title="第四步、测试"></a><a href="#第四步、测试" title="第四步、测试"></a>第四步、测试</h5><p>可以输入下面的命令，看看设置是否成功，<a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a> 的部分不要修改：</p>
 <p>ssh -T <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a></p>
 <p>如果是下面的反馈：</p>
@@ -821,31 +954,61 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 <h5 id="第六步、SSH-Key-配置成功"><a href="#第六步、SSH-Key-配置成功" class="headerlink" title="第六步、SSH Key 配置成功"></a><a href="#第六步、SSH-Key配置成功" title="第六步、SSH Key配置成功"></a>第六步、SSH Key 配置成功</h5><p>本机已成功连接到 github。<br>如有问题，请参考：</p>
 <p><a href="https://help.github.com/articles/generating-an-ssh-key/" target="_blank" rel="noopener">GitHub Help - Generating SSH Keys</a></p>
 <p><a href="https://help.github.com/articles/error-permission-denied-publickey/" target="_blank" rel="noopener">Error: Permission denied (publickey)</a></p>
-<h3 id="四、将本地的-Hexo-文件更新到-Github-的库中"><a href="#四、将本地的-Hexo-文件更新到-Github-的库中" class="headerlink" title="四、将本地的 Hexo 文件更新到 Github 的库中"></a>四、将本地的 Hexo 文件更新到 Github 的库中</h3><h5 id="第一步、登录-Github-打开自己的项目-username-github-io"><a href="#第一步、登录-Github-打开自己的项目-username-github-io" class="headerlink" title="第一步、登录 Github 打开自己的项目 username.github.io"></a><a href="#第一步、登录Github打开自己的项目-username-github-io" title="第一步、登录Github打开自己的项目 username.github.io"></a>第一步、登录 Github 打开自己的项目 username.github.io</h5><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_1.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_1.png" alt></a></p>
-<h5 id="第二步、打开之后，点击-HTTPS，选择-HTTPS-类型地址"><a href="#第二步、打开之后，点击-HTTPS，选择-HTTPS-类型地址" class="headerlink" title="第二步、打开之后，点击 HTTPS，选择 HTTPS 类型地址"></a><a href="#第二步、打开之后，点击HTTPS，选择HTTPS类型地址" title="第二步、打开之后，点击HTTPS，选择HTTPS类型地址"></a>第二步、打开之后，点击 HTTPS，选择 HTTPS 类型地址</h5><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_2.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_2.png" alt></a></p>
-<h5 id="第三步、复制地址"><a href="#第三步、复制地址" class="headerlink" title="第三步、复制地址"></a><a href="#第三步、复制地址" title="第三步、复制地址"></a>第三步、复制地址</h5><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_3.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_3.png" alt></a></p>
-<h5 id="第四步、打开你一开始创建的-Hexo-文件夹（如-F-Blog-Hexo），用记事本打开刚文件夹下的-config-yml-文件"><a href="#第四步、打开你一开始创建的-Hexo-文件夹（如-F-Blog-Hexo），用记事本打开刚文件夹下的-config-yml-文件" class="headerlink" title="第四步、打开你一开始创建的 Hexo 文件夹（如 F:\Blog\Hexo），用记事本打开刚文件夹下的_config.yml 文件"></a><a href="#第四步、打开你一开始创建的Hexo文件夹（如F-Blog-Hexo），用记事本打开刚文件夹下的-config-yml文件" title="第四步、打开你一开始创建的Hexo文件夹（如F:\Blog\Hexo），用记事本打开刚文件夹下的_config.yml文件"></a>第四步、打开你一开始创建的 Hexo 文件夹（如 F:\Blog\Hexo），用记事本打开刚文件夹下的_config.yml 文件</h5><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_4.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_4.png" alt></a></p>
-<h5 id="第五步、在配置文件里作如下修改，保存"><a href="#第五步、在配置文件里作如下修改，保存" class="headerlink" title="第五步、在配置文件里作如下修改，保存"></a><a href="#第五步、在配置文件里作如下修改，保存" title="第五步、在配置文件里作如下修改，保存"></a>第五步、在配置文件里作如下修改，保存</h5><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_5.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_5.png" alt></a></p>
+<h3 id="四、将本地的-Hexo-文件更新到-Github-的库中"><a href="#四、将本地的-Hexo-文件更新到-Github-的库中" class="headerlink" title="四、将本地的 Hexo 文件更新到 Github 的库中"></a>四、将本地的 Hexo 文件更新到 Github 的库中</h3><h5 id="第一步、登录-Github-打开自己的项目-username-github-io"><a href="#第一步、登录-Github-打开自己的项目-username-github-io" class="headerlink" title="第一步、登录 Github 打开自己的项目 username.github.io"></a><a href="#第一步、登录Github打开自己的项目-username-github-io" title="第一步、登录Github打开自己的项目 username.github.io"></a>第一步、登录 Github 打开自己的项目 username.github.io</h5><p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_1.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_1.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_1.png)</p>
+            </figure></p>
+<h5 id="第二步、打开之后，点击-HTTPS，选择-HTTPS-类型地址"><a href="#第二步、打开之后，点击-HTTPS，选择-HTTPS-类型地址" class="headerlink" title="第二步、打开之后，点击 HTTPS，选择 HTTPS 类型地址"></a><a href="#第二步、打开之后，点击HTTPS，选择HTTPS类型地址" title="第二步、打开之后，点击HTTPS，选择HTTPS类型地址"></a>第二步、打开之后，点击 HTTPS，选择 HTTPS 类型地址</h5><p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_2.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_2.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_2.png)</p>
+            </figure></p>
+<h5 id="第三步、复制地址"><a href="#第三步、复制地址" class="headerlink" title="第三步、复制地址"></a><a href="#第三步、复制地址" title="第三步、复制地址"></a>第三步、复制地址</h5><p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_3.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_3.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_3.png)</p>
+            </figure></p>
+<h5 id="第四步、打开你一开始创建的-Hexo-文件夹（如-F-Blog-Hexo），用记事本打开刚文件夹下的-config-yml-文件"><a href="#第四步、打开你一开始创建的-Hexo-文件夹（如-F-Blog-Hexo），用记事本打开刚文件夹下的-config-yml-文件" class="headerlink" title="第四步、打开你一开始创建的 Hexo 文件夹（如 F:\Blog\Hexo），用记事本打开刚文件夹下的_config.yml 文件"></a><a href="#第四步、打开你一开始创建的Hexo文件夹（如F-Blog-Hexo），用记事本打开刚文件夹下的-config-yml文件" title="第四步、打开你一开始创建的Hexo文件夹（如F:\Blog\Hexo），用记事本打开刚文件夹下的_config.yml文件"></a>第四步、打开你一开始创建的 Hexo 文件夹（如 F:\Blog\Hexo），用记事本打开刚文件夹下的_config.yml 文件</h5><p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_4.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_4.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_4.png)</p>
+            </figure></p>
+<h5 id="第五步、在配置文件里作如下修改，保存"><a href="#第五步、在配置文件里作如下修改，保存" class="headerlink" title="第五步、在配置文件里作如下修改，保存"></a><a href="#第五步、在配置文件里作如下修改，保存" title="第五步、在配置文件里作如下修改，保存"></a>第五步、在配置文件里作如下修改，保存</h5><p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_5.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_5.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/getHTTPS-teach_5.png)</p>
+            </figure></p>
 <h5 id="第六步、在-Hexo-文件夹下执行："><a href="#第六步、在-Hexo-文件夹下执行：" class="headerlink" title="第六步、在 Hexo 文件夹下执行："></a><a href="#第六步、在Hexo文件夹下执行：" title="第六步、在Hexo文件夹下执行："></a>第六步、在 Hexo 文件夹下执行：</h5><p>hexo g<br>hexo d</p>
 <p>或者直接执行</p>
 <p>hexo g -d</p>
 <p>执行完之后会让你输入 github 的账号和密码，输入完后就可以登录我们自己的部署在 Github Pages 服务器上的博客了。对应的地址是 username.github.io(我的是：ryanlijianchang.github.io)。</p>
-<h5 id="第七步、在浏览器上输入自己的主页地址"><a href="#第七步、在浏览器上输入自己的主页地址" class="headerlink" title="第七步、在浏览器上输入自己的主页地址"></a><a href="#第七步、在浏览器上输入自己的主页地址" title="第七步、在浏览器上输入自己的主页地址"></a>第七步、在浏览器上输入自己的主页地址</h5><p>在浏览器上输入即可看到我们自己的博客，别人电脑输入也可以哦。<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/blog-main.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/blog-main.png" alt></a></p>
+<h5 id="第七步、在浏览器上输入自己的主页地址"><a href="#第七步、在浏览器上输入自己的主页地址" class="headerlink" title="第七步、在浏览器上输入自己的主页地址"></a><a href="#第七步、在浏览器上输入自己的主页地址" title="第七步、在浏览器上输入自己的主页地址"></a>第七步、在浏览器上输入自己的主页地址</h5><p>在浏览器上输入即可看到我们自己的博客，别人电脑输入也可以哦。<br>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/blog-main.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/blog-main.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/blog-main.png)</p>
+            </figure></p>
 <h2 id="美化自己博客"><a href="#美化自己博客" class="headerlink" title="美化自己博客"></a>美化自己博客</h2><p>那么现在我们的博客已经挂在了服务器上面，别人已经可以通过网址来登陆我们的博客了，但是我们这时就有了新的需求，就是自己的博客并不好看，那怎么办的？这很简单，要知道很多前端开发者在 Hexo 框架下开发了很多的主题给我们使用，我们只需要把他们的主题克隆过来，然后通过修改配置文件即可达到我们所需要的效果。</p>
 <p>那么我们应该怎么修改呢？</p>
-<h3 id="一、进入-Hexo-的官网主题专栏"><a href="#一、进入-Hexo-的官网主题专栏" class="headerlink" title="一、进入 Hexo 的官网主题专栏"></a><a href="#一、进入Hexo的官网主题专栏" title="一、进入Hexo的官网主题专栏"></a>一、进入 <a href="https://hexo.io/themes/" target="_blank" rel="noopener">Hexo 的官网主题专栏</a></h3><p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/themes.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/themes.png" alt></a></p>
+<h3 id="一、进入-Hexo-的官网主题专栏"><a href="#一、进入-Hexo-的官网主题专栏" class="headerlink" title="一、进入 Hexo 的官网主题专栏"></a><a href="#一、进入Hexo的官网主题专栏" title="一、进入Hexo的官网主题专栏"></a>一、进入 <a href="https://hexo.io/themes/" target="_blank" rel="noopener">Hexo 的官网主题专栏</a></h3><p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/themes.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/themes.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/themes.png)</p>
+            </figure></p>
 <h3 id="二、挑选我们喜欢的主题"><a href="#二、挑选我们喜欢的主题" class="headerlink" title="二、挑选我们喜欢的主题"></a>二、挑选我们喜欢的主题</h3><p>可以看到有很多主题给我们选，我们只要选择喜欢的主题点击进去，然后进入到它的 github 地址，我们只要把这个地址复制下来 (例如我是选择：hexo-theme-next 这个主题)</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/address.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/address.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/address.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/address.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/address.png)</p>
+            </figure></p>
 <h3 id="三、克隆主题"><a href="#三、克隆主题" class="headerlink" title="三、克隆主题"></a>三、克隆主题</h3><p>再打开 Hexo 文件夹下的 themes 目录（F:\Blog\hexo\themes），右键 Git Bash，在命令行输入:</p>
 <p>git clone <a href="https://github.com/iissnan/hexo-theme-next(此处地址替换成你需要使用的主题的地址" target="_blank" rel="noopener">https://github.com/iissnan/hexo-theme-next(此处地址替换成你需要使用的主题的地址)</a>)</p>
 <p>下载中，等待下载完成：</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/downloading.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/downloading.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/downloading.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/downloading.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/downloading.png)</p>
+            </figure></p>
 <h3 id="四、修改-Hexo-配置文件"><a href="#四、修改-Hexo-配置文件" class="headerlink" title="四、修改 Hexo 配置文件"></a>四、修改 Hexo 配置文件</h3><p>下载完成后，打开 Hexo 文件夹下的配置文件<code>_config.yml</code></p>
 <p>修改参数为：<code>theme: hexo-theme-next</code></p>
 <h3 id="五、部署主题，本地查看效果"><a href="#五、部署主题，本地查看效果" class="headerlink" title="五、部署主题，本地查看效果"></a><a href="#五、部署主题，本地查看效果" title="五、部署主题，本地查看效果"></a>五、部署主题，本地查看效果</h3><p>返回 Hexo 目录，右键 Git Bash，输入</p>
 <p>hexo g<br>hexo s</p>
 <p>打开浏览器，输入 <code>http://localhost:4000/</code> 即可看见我们的主题已经更换了。</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/new-theme.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/new-theme.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/new-theme.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/new-theme.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/new-theme.png)</p>
+            </figure></p>
 <h3 id="六、如果效果满意，将它部署到-Github-上"><a href="#六、如果效果满意，将它部署到-Github-上" class="headerlink" title="六、如果效果满意，将它部署到 Github 上"></a>六、如果效果满意，将它部署到 Github 上</h3><p>打开 Hexo 文件夹，右键 Git Bash，输入</p>
 <p>hexo clean (必须要，不然有时因为缓存问题，服务器更新不了主题)<br>hexo g -d</p>
 <h3 id="七、打开自己的主页，即可看到修改后的效果"><a href="#七、打开自己的主页，即可看到修改后的效果" class="headerlink" title="七、打开自己的主页，即可看到修改后的效果"></a>七、打开自己的主页，即可看到修改后的效果</h3><p>更多修改效果请查看对应主题的说明文档，<a href="http://theme-next.iissnan.com/" target="_blank" rel="noopener">点击此</a>查看本主题 (Next) 对应的说明文档。</p>
@@ -853,7 +1016,10 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 <p>当然，也可以直接在 \ Hexo\source_posts 中新建一个 md 文件，我就是这么做的。<br>写完后，推送到服务器上，执行以下命令即可在我们的站点看到新的文章。</p>
 <p>hexo g #生成<br>hexo d #部署 # 可与 hexo g 合并为 hexo d -g</p>
 <h3 id="二、用-Markdown-写文章"><a href="#二、用-Markdown-写文章" class="headerlink" title="二、用 Markdown 写文章"></a>二、用 Markdown 写文章</h3><p>我们注意到在 \Hexo\source_posts 文件夹下存放着我们的文章，它们的格式都是以<code>.md</code>格式结尾的，没错，Hexo 也是支持 Markdown 语法的，所以当我们需要写具有格式化的文章时，我们可以使用支持 Markdown 语法的编辑器进行文章编译，然后保存文件到 \Hexo\source_posts 文件夹下即可。</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/markdown.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/markdown.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/markdown.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/markdown.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/markdown.png)</p>
+            </figure></p>
 <p>复制进去之后，只要执行</p>
 <p>hexo d -g</p>
 <p>推送到我们的 Github 仓库即可。</p>
@@ -877,27 +1043,51 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 <h2 id="将自己的域名关联到-Github-Pages-上"><a href="#将自己的域名关联到-Github-Pages-上" class="headerlink" title="将自己的域名关联到 Github Pages 上"></a><a href="#将自己的域名关联到Github-Pages上" title="将自己的域名关联到Github Pages上"></a>将自己的域名关联到 Github Pages 上</h2><p>很多朋友创建了自己的博客之后会选择买一个属于自己的域名，然后将自己域名绑定到自己的 Github Pages 博客上，其实这也并不难，只要你有个域名。</p>
 <h3 id="一、购买域名"><a href="#一、购买域名" class="headerlink" title="一、购买域名"></a><a href="#一、购买域名" title="一、购买域名"></a>一、购买域名</h3><p>如果你不是很有钱，在<a href="https://wanwang.aliyun.com/domain/?spm=5176.383338.1907008.1.LWIFhw" target="_blank" rel="noopener">阿里云</a>上，你只要几块钱就可以买到一个域名。</p>
 <p>选择你喜欢的域名，然后购买即可。</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/yuming.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/yuming.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/yuming.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/yuming.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/yuming.png)</p>
+            </figure></p>
 <h3 id="二、配置-CNAME-文件"><a href="#二、配置-CNAME-文件" class="headerlink" title="二、配置 CNAME 文件"></a>二、配置 CNAME 文件</h3><p>在 \hexo\source 文件夹下创建文件 CNAME （新建记事本文件命名 CNAME，然后打开）</p>
 <p>内容为你的域名，例如我的域名是：lijianchang.xyz</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/cname2.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/cname2.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/cname2.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/cname2.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/cname2.png)</p>
+            </figure></p>
 <p>在 Hexo 文件夹提交</p>
 <p>hexo g -d</p>
 <h3 id="三、修改-DNS-的-DNS"><a href="#三、修改-DNS-的-DNS" class="headerlink" title="三、修改 DNS 的 DNS"></a><a href="#三、修改DNS的DNS" title="三、修改DNS的DNS"></a>三、修改 DNS 的 DNS</h3><p>1. 如果你是在阿里云购买域名的话，请登录阿里云网站。打开个人中心，点击域名</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/domain_1.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_1.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_1.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/domain_1.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/domain_1.png)</p>
+            </figure></p>
 <p>2. 选择管理</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/domain_2.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_2.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_2.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/domain_2.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/domain_2.png)</p>
+            </figure></p>
 <p>3. 修改 DNS 为</p>
 <p>f1g1ns2.dnspod.net<br>f1g1ns1.dnspod.net</p>
-<p><a href="http://7xrwkh.com1.z0.glb.clouddn.com/domain_3.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_3.png" alt></a></p>
+<p>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_3.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/domain_3.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/domain_3.png)</p>
+            </figure></p>
 <h3 id="四、域名解析"><a href="#四、域名解析" class="headerlink" title="四、域名解析"></a><a href="#四、域名解析" title="四、域名解析"></a>四、域名解析</h3><ol>
 <li><p>打开 <a href="https://www.dnspod.cn/" target="_blank" rel="noopener">DNSPOD</a>，注册一个账户</p>
 </li>
-<li><p>点击添加域名，把你的域名添加进去，如无意外，添加完之后就是以下这个状态<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/domain_4.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_4.png" alt></a></p>
+<li><p>点击添加域名，把你的域名添加进去，如无意外，添加完之后就是以下这个状态<br>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/domain_4.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/domain_4.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/domain_4.png)</p>
+            </figure></p>
 </li>
-<li><p>此时点击添加记录，添加两个记录，一个主机记录为<code>@</code>， 一个为<code>www</code>，而记录值都是填同一个，填你的博客主页对应的 ip，添加完后如下。<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/ip2.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/ip2.png" alt></a></p>
+<li><p>此时点击添加记录，添加两个记录，一个主机记录为<code>@</code>， 一个为<code>www</code>，而记录值都是填同一个，填你的博客主页对应的 ip，添加完后如下。<br>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/ip2.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/ip2.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/ip2.png)</p>
+            </figure></p>
 </li>
-<li><p>但是如何获取 ip 值呢？打开运行，输入 cmd，打开命令窗口输入 <code>ping 主页地址</code> ， 红色部分即为你的 ip 值<br><a href="http://7xrwkh.com1.z0.glb.clouddn.com/ip.png" target="_blank" rel="noopener"><img src="http://7xrwkh.com1.z0.glb.clouddn.com/ip.png" alt></a></p>
+<li><p>但是如何获取 ip 值呢？打开运行，输入 cmd，打开命令窗口输入 <code>ping 主页地址</code> ， 红色部分即为你的 ip 值<br>[<figure class="image-box">
+                <img src="http://7xrwkh.com1.z0.glb.clouddn.com/ip.png" alt="](http://7xrwkh.com1.z0.glb.clouddn.com/ip.png)" title class>
+                <p>](http://7xrwkh.com1.z0.glb.clouddn.com/ip.png)</p>
+            </figure></p>
 </li>
 <li><p>将 IP 输入过去即可。等待生效，最迟 72 小时生效。即可通过你的域名浏览你的博客主页。</p>
 </li>
@@ -931,7 +1121,7 @@ Capturing指**获取匹配** ，是指系统会在幕后将所有的子模式匹
 <div id="decryptionError" style="display: none;">Incorrect Password!</div>
 <div id="noContentError" style="display: none;">No content to display!</div>
 <div id="encrypt-blog" style="display:none">
-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
+U2FsdGVkX1+9GHoqW4WJ1xa+TutwSUgT69oB4Kt9jEHW42Yk1EVZwpuuVGtRIVluwOhDeCYkxaLjYk9EACo0/WCJCLLGvQsCb/eVXDAZVxjEQ8/WeN+J1vAUOPM4HF6eJjA1n41aDJ0mbaRZVAhkv1KjKmLwJaJNWm1HR0ltZ1ek/aZs0RrbP4KpudoPiGZRhFA2ETvfbvcynCQYs8KG17Ozrwf2a0ic1/AWg2zCu0SjQkOyjkB70xJFezf9hMQtpMT/Y88Vf2FEGvSD5ZixUmGGJym6Mu9nQmlpnY54z1YSS2VfO+1/0xbD4OZbzT85KWOipePzoTUIYu+1zkFh0/yWpsSa67KJBtgvjSjfOVVd//dBPPKlY7mnTTlAFngZeIaBhwIoRCER4cELJ+GOE+Ly9IGEslHCrB44DP8Oxv4MGYsEuad0i+M/LhsyJwQcq8I1F6ENls5IaVFxQurK2DOHIxNIijDBYKJt7E+pwEstn3GMXvm/AwWUmn1NrhHhI7eqr0rW8jNzNdo5MzmEdZY4tNhtiKeg8lGKivyNRNVuey3sCTxbpWefwYnqwbOlPfQ5/ADVVMsxfO5USarxYPyUBIkgPYd+cVa1M+rUvrClhegFFAOfVnYOJBAAcAAtHE9/gQGQ4f9zMqu2SkQ0fG80eB9LBVhV2a4n3w4Cp/dt8LDO3aAOuj6Rku1bjgVeEKcY2Q91xHC8uiWS2OU+oBSNDfDBNCghbUEKclVCW4HGWzcoDdfJNFfI/TOQt/XEHyWa8d5Qwo/PfHYXx3x5vumm3J+kucX7LbXMeimfk06M+A0tXUJEG18bnuZt07hFWwrioTy4UaD1JVB/ZWIF8OCUFlYT63OZyQnMqr1X/2Oo7hGDk+wZ0rq/pkuk4geZDYOXV90gUdyB9WLTMEVQ5oBjGxstHzA0KfVr+ESEOHzfHZOIikl2BdNCj6/4w9x4ZhdjWR7fGIQwnB1MW8NxgIip5G+Pq6Zwn+hqgnx/7T/ozlj8r/Nnj0iQTXl9d/YOKSxcF/dG+000zX7WYf1PXEiBHqeDVfAg0yCOdJF2dhzTmCHLkiEYJ5YzhrIALCW5Ong4beadEEKpmROASfFMizJbgQTOMx/VhO4mdYW98tfpnKAMMLDxlPLaEG//Cud65rG36Uu4gHvjHQ0WOvx8uYACD6YB5V2wxdl9VCrUw2ELGKiHUZHwFFyhd35KoZueV0xkc7VzxkFxohEaDnYWxKXhiB0zojn2ZIK8qwJfVJ72R+RwtSFLOHeyldZdrqe2whUpZWt3La6BBq76PW9qoR4LMm8re5vfnjjFN1/vxVmCAbRcjOn6acNy3pvfChilzC5M+6nN1lDiB8r3HuJzPboOOMfO94/FwpVUIdSolPGV77w55G3j65wMkaleaxSB/pfp1IYb/CBNBk9/Wh5ApkEGGeU1QTM078kJHvO88yXHCPdzlXQOzISiV3hx3TiNanmRmkTKCyVtiLMpPw70piZzg5nK9IiDxn7fJKtWAhGrxSDrL2n/vntthBMsyu1ARiTbr+FyFppiBwTmVDejmgPqtF3d5cGW0RuyydsTWba9wCPdhU4tXGtsh0Uqf5d7DpRU9ZON4HJNuPCTiL1JbPvzr8Llgwov1I8xret8Fko5okhT1uxR1+GMO+nr0Fb2gi7jALeHHOwvIbGwilgGbcQIGHGRYYTOu5Hukcw9efsIJRsk6VGwe+6+NmKMXgWOi1ezU7FggIUpAQ1Ge5zD/ZhTc6TkdYucXCkQ0kZuoppiMWhSxL5hsJKP6ATBBetNNuvDHU+RNYFQZs0QOugBdRLON4lK+nf8MPC4mG24yienD/hp+hIXjwaVfiSnh7+BchwSYN2rIrjUsRVGHrdo6V/jq+4G5xpW+gG/IFJX25vb2jH9AMPbwZ0W00UYADeViZQAoSpZJoUUE20ZRU0W42jj02K36Uyuxu8WrrL/GL7pBb/aNNYB6ldXBqCjXXKvIjg2EQGnUqFg5M64GPaq08LznitnguCGI93nvYPb695/v3zUvxeId6r0eqACW1fvkNBGB3u2RiJOhRcUjxy7qqKDJDjToDOEzOyqm+X4yDvKgb8/D84x266ssDxvDEq3k8FSHmMW3QmJ0MdEFy1h+jNSnejBxi1rRh8Wzc5EDpCUbGj6v5rGx1J4JDol23mSH2F8PAuV3lzAkUI3wgzAewJeaVK9JyqyobPyHSuys9EQ5JYQW3qqDvyHHNDb38YVDUoazl4KEDv/GN/qlUNIL88Yn5MupJpcl/4JaBV4IXE7AYsDi899mqSeCNoi3EikjozHDwPgJ1Eyo8c+8zBWdCjZ2t+pkCEdBYRTkpwsH/GV3TJ9fl9+IaqVJjpPmV7vQuFVrGH/73mSJroLBjNTTqpF+YFmS0BSogJzuRMUoUb6YlB6vGZGIq8nYMA+p2ro3iYR4CtI50bXRL/It62HM8Wd68dshwnqil4VY6YZl35xTmJmUHGW8PAy6ZS+6mWOnFsowm4/72QdhQymuMMKvHEZZsdnA26WiCkVe1JSZ9oYdF4dtZM3o0naOjCaSp/Kkq22E4DTs5Dq/+uU6W5NAvFO4P4RNtWM4VHx6GaQSQIj6boPFu5fduKMfD9J/k17LhN0XHIME/tHIhPdku403/AJgzqsKtI3F0fLvnBNyi4QftZKm0TOcg+UQHCBnSZnlNpfoSn9JOXW5X9Il98mM20hh5y7RVFkrqbbZ6+kJ+tM44/0Om93SJmc3iyo+ihgLga8LLA44+MD9SZSdP/MemcWDiKFrc/Lvfmvlt4IEJiD/ARw3lbCbsGNXjQW0xCz1ECEtO/ytvqBeLp8j1vnhCvx9u3puelrszjDIgqurJ46PsfEEA8So5N88SQynyanIb8d9/dfJRWNXT1t5GAKSAbtx42GsvuE1Omfq9mCn67Ccwkt5uyWvKWd4EJTOI7Kui9UFrJYWYSSNm59nhT2nV19YfJJOuwAXL0wg+opH4eufWj6msQThs8UMDlhY8aCU8nElajpRb1PFoIRTmFCt9ZhXZ51/VocRTiAk74wHQnkkMlp3wMWfcupAVN4QjVjBHzrPxpQQiucXQQpJTgbskVzIIW5kCA2pSHutnFJDAZ8RbrIffY0Rv6WO7UwYlFojbiAUjiAg18kHR5JJEqVBILQ72AoTdd+UnHtX6fneDkStaJN680o98VQhln+91uKYQGfMVPU5SHNWxd0aQLr9VeHpkpaDpyOEDXnP3ma3DEHVEVAey0hqg6GI/r0xsV9EzZ7S0WiWl8vsMrQzG6ravFCwue2zG51cVXq971UAK0ytsqrEb+8x3V9r5KJigNSMKOhMsQvqV4WrkhTw4XFhsRAceZNXi5yx1fqjsgf9AIPdR7tj35ZNiFcYi5puyRu/bfwHn/dLcpS+PY8xhxWR4lXUipa2/INc0a+eknwlwm1bT+M/8Z6ExujQDp73Fms6pm6yN7tJzURXZ1PuZmyyytsR11N8tgNVEyl+367rJGp/HEpjo1AB9vD/Fo0b6dIK75rhlqoJEgc1AJFtwV9js1SPRYn2rexA6w3XjiP72FkEquyoCvulSf4yFPUA/fMES/20beDKPbvbYg7LXtj83jJcMAn2b8/wxAeElNGAFw=
 </div>
 <script src="/lib/crypto-js.js"></script><script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">]]></content>
       
@@ -941,7 +1131,10 @@ U2FsdGVkX1/OfbMRxHAq+Ssa6hnWZtpCBzD6rcqbBpaRYE7zBiR7631EjfaIzvQSahbYyhlOaJ/QVULo
     <entry>
       <title><![CDATA[英语竞赛]]></title>
       <url>/2019/04/14/%E8%8B%B1%E8%AF%AD%E7%AB%9E%E8%B5%9B/</url>
-      <content type="html"><![CDATA[<p><img src="/2019/04/14/英语竞赛/images/参赛证书.jpg" alt="参赛证书"></p>
+      <content type="html"><![CDATA[<figure class="image-box">
+                <img src="/2019/04/14/英语竞赛/images/参赛证书.jpg" alt="参赛证书" title class>
+                <p>参赛证书</p>
+            </figure>
 ]]></content>
       
         
